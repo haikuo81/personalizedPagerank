@@ -148,6 +148,8 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     @Override
     public Map<V, Double> getMap(V origin)
     {
+        if(!g.containsVertex(origin))
+            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         return Collections.unmodifiableMap(scores.get(origin));
     }
     
@@ -160,6 +162,10 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     @Override
     public Double getRank(V origin, V target)
     {
+        if(!g.containsVertex(origin))
+            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
+        if(!g.containsVertex(origin))
+            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
         return scores.get(origin).get(target);
     }
     
