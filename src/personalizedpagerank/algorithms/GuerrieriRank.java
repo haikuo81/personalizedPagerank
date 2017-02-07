@@ -14,12 +14,20 @@ import personalizedpagerank.PersonalizedPageRankAlgorithm;
  */
 public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Double>
 {
+    //Default number of max scores to keep for each node if it's not specified in the constructor, if
+    //scores[V].size() > max scores the lowest ones gets removed, keeping only the first max scores.
+    public static final int DEFAULT_TOP = 10;
+
     //Default number of maximum iterations to be used if it's not specified in the constructor.
     public static final int DEFAULT_ITERATIONS = 100;
     
     //Default number of maximum iterations to be used if it's not specified in the constructor.
     public static final double DEFAULT_DAMPING_FACTOR = 0.85d;
-
+    
+    //Default number of tolerance, if the highest difference of scores between 2 iterations is lower
+    //than this the algorithm will stop.
+    public static final double DEFAULT_TOLERANCE = 0.0001;
+    
     private final DirectedGraph<V, E> g;
     private Map<V, Map<V, Double>> scores;
     
@@ -35,7 +43,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.g = g;
         this.scores = new HashMap<>();
-        run(DEFAULT_DAMPING_FACTOR, DEFAULT_ITERATIONS);
+        run(DEFAULT_TOP, DEFAULT_ITERATIONS, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
     }
     
     /**
@@ -43,19 +51,69 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      * are stored in the object.
      * 
      * @param g the input graph
+     * @param top How many max entries to keep for each vertex (the rest gets removed).
+     *       
+     */
+    public GuerrieriRank(final DirectedGraph<V, E> g, final int top)
+    {
+        this.g = g;
+        this.scores = new HashMap<>();
+
+        if(top <= 0) 
+            throw new IllegalArgumentException("Top k entries to keep must be positive");
+                
+        run(top, DEFAULT_ITERATIONS, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
+    }
+    
+    /**
+     * Create object and run the algorithm, results of the personalized pagerank
+     * are stored in the object.
+     * 
+     * @param g the input graph
+     * @param top How many max entries to keep for each vertex (the rest gets removed).
      * @param iterations the number of iterations to perform
      *       
      */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final int iterations)
+    public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations)
     {
         this.g = g;
         this.scores = new HashMap<>();
 
-        if (iterations <= 0) {
+        if(top <= 0) 
+            throw new IllegalArgumentException("Top k entries to keep must be positive");
+                
+        if(iterations <= 0) 
             throw new IllegalArgumentException("Maximum iterations must be positive");
-        }
+                
+        run(top, iterations, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
+    }
+    
+    
+    
+    /**
+     * Create object and run the algorithm, results of the personalized pagerank
+     * are stored in the object.
+     * 
+     * @param g the input graph
+     * @param top How many max entries to keep for each vertex (the rest gets removed).
+     * @param iterations the number of iterations to perform
+     * @param dampingFactor the damping factor
+     */
+    public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations, final double dampingFactor)
+    {
+        this.g = g;
+        this.scores = new HashMap<>();
+
+        if(top <= 0) 
+            throw new IllegalArgumentException("Top k entries to keep must be positive");
         
-        run(DEFAULT_DAMPING_FACTOR, iterations);
+        if(iterations <= 0) 
+            throw new IllegalArgumentException("Maximum iterations must be positive");
+        
+        if(dampingFactor < 0 || dampingFactor > 1)
+            throw new IllegalArgumentException("Damping factor must be [0,1]");
+            
+        run(top, iterations, dampingFactor, DEFAULT_TOLERANCE);
     }
     
     /**
@@ -63,40 +121,29 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      * are stored in the object.
      * 
      * @param g the input graph
+     * @param top How many max entries to keep for each vertex (the rest gets removed).
+     * @param iterations the number of iterations to perform
      * @param dampingFactor the damping factor
+     * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
+     * Negative values are allowed to specify that tolerance must be ignored.
      */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final double dampingFactor)
+    public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations, final double dampingFactor, final double tolerance)
     {
         this.g = g;
         this.scores = new HashMap<>();
 
-        run(dampingFactor, DEFAULT_ITERATIONS);
-    }
-    
-    /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
-     * 
-     * @param g the input graph
-     * @param dampingFactor the damping factor
-     * @param iterations the maximum number of iterations to perform
-     *       
-     */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final double dampingFactor, final int iterations)
-    {
-        this.g = g;
-        this.scores = new HashMap<>();
-
-        if (iterations <= 0) {
-            throw new IllegalArgumentException("Maximum iterations must be positive");
-        }
-
-        if (dampingFactor < 0.0 || dampingFactor > 1.0) {
-            throw new IllegalArgumentException("Damping factor not valid");
-        }
+        if(top <= 0) 
+            throw new IllegalArgumentException("Top k entries to keep must be positive");
         
-        run(dampingFactor, iterations);
+        if(iterations <= 0) 
+            throw new IllegalArgumentException("Maximum iterations must be positive");
+        
+        if(dampingFactor < 0 || dampingFactor > 1)
+            throw new IllegalArgumentException("Damping factor must be [0,1]");
+        
+        run(top, iterations, dampingFactor, tolerance);
     }
+
     
     @Override
     public Map<V, Double> getMap(V origin)
@@ -116,9 +163,8 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         return scores.get(origin).get(target);
     }
     
-    private void run(double dampingFactor, int iterations)
+    private void run(final int topL, int iterations, final double dampingFactor, final double tolerance)
     {
-        int L = 10;
         //init scores
         for(V v: g.vertexSet())
         {
@@ -128,7 +174,8 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         }
         Map<V, Map<V, Double>> nextScores = new HashMap<>();
         
-        while(iterations > 0)
+        double maxDiff = tolerance;
+        while(iterations > 0 && maxDiff >= tolerance)
         {
             for(V v: g.vertexSet())
             {
@@ -156,11 +203,18 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                         //if there was a previously stored value put the sum of that value and the contribution
                         if( (oldRes = nextScores.get(v).putIfAbsent(key, contribution)) != null)
                             nextScores.get(v).put(key, oldRes + contribution);
+                        
+                        //update maxDiff
+                        if(scores.get(v).get(key) != null)
+                            maxDiff = Math.max(maxDiff, Math.abs(scores.get(v).get(key) - nextScores.get(v).get(key)));
+                        else
+                            maxDiff = Math.max(maxDiff, nextScores.get(v).get(key));
                     }
                 }
                 //keep the top L values only (!values = to the 49th place are pruned aswell)
-                if(nextScores.get(v).size() > L)
-                    nextScores.put(v, pruneLowestLValues(nextScores.get(v),L));
+                if(nextScores.get(v).size() > topL)
+                    nextScores.put(v, pruneLowestLValues(nextScores.get(v),topL));
+                
             }
             
             // swap scores
