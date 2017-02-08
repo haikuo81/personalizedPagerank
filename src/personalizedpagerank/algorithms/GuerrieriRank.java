@@ -164,9 +164,9 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(origin))
+        if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
+        return (scores.get(origin).get(target) != null)? scores.get(origin).get(target) : 0d;
     }
     
     private void run(final int topL, int iterations, final double dampingFactor, final double tolerance)
