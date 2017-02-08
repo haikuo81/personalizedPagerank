@@ -150,8 +150,61 @@ public class GuerrieriRankTest extends TestCase
         assertEquals(res.getMap(2).size(), 2, 0);
         
         assertTrue(res.getRank(1, 1) >= res.getRank(1, 2)); 
-        assertTrue(res.getRank(2, 2) >= res.getRank(2,1));
+        assertTrue(res.getRank(2, 2) >= res.getRank(2, 1));
     }
     
-    
+    public void testLineGraph()
+    {
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        
+        for(int i = 0; i < 6; i++)
+            g.addVertex(i);
+        
+        g.addEdge(0, 1);
+        g.addEdge(1, 2);
+        g.addEdge(2, 3);
+        g.addEdge(3, 4);
+        g.addEdge(4, 5);
+        g.addEdge(5, 0);
+        
+        PersonalizedPageRankAlgorithm<Integer, Double> res = new GuerrieriRank(g, 10, 100);
+
+        //for each node check that the PPR of a node after is always lower
+        for(int i = 0; i <= 5; i++)
+            for(int u = i; u < 5; u++)
+                assertTrue(res.getRank(i, u) > res.getRank(i, u + 1));
+    }
+
+    public void testStarGraph()
+    {
+        //0 is the center which every node points/is connected to
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        for(int i = 0; i < 6; i++)
+            g.addVertex(i);
+          
+        for(int i = 1; i < 6; i++)
+            g.addEdge(i, 0);
+       
+        PersonalizedPageRankAlgorithm<Integer, Double> res = new GuerrieriRank(g, 10, 10, 0.8);
+
+        assertEquals(res.getRank(0, 0), 0.2, 0.01);
+        for(int i = 1; i < 6; i++)
+        {
+            assertEquals(res.getRank(0, i), 0d, 0d);
+            //0.2 because 0 has no edges, 0.2 * 0.8 because dampingfactor is taken into consideration
+            //when doing contribution from one node to another
+            assertEquals(res.getRank(i, 0), 0.2 * 0.8, 0.01);
+        }
+
+        //connect the center to itself
+        g.addEdge(0, 0);
+        res = new GuerrieriRank(g, 10, 10, 0.8);
+        
+        assertEquals(res.getRank(0, 0), 1, 0.01);
+        for(int i = 1; i < 6; i++)
+        {
+            assertEquals(res.getRank(0, i), 0d, 0d);
+            assertEquals(res.getRank(i, 0), 0.8, 0.01);
+        }
+    }
 }
