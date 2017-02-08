@@ -214,7 +214,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                         Double stored = currentMap.get(key);
                         stored = stored == null? contribution : (contribution + stored);
                         currentMap.put(key, stored);
-                        contribution = scores.get(v).get(key);
                         
                         //using contribution to store scores.get(v).get(key) (the old value) to call it only once
                         contribution = scores.get(v).get(key);
