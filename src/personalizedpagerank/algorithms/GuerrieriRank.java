@@ -185,10 +185,13 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         {
             for(V v: g.vertexSet())
             {
+                //to avoid calculating it for each successor
+                double factor = dampingFactor / g.outDegreeOf(v);
+                                
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
-                HashMap<V, Double> tmp = new HashMap<>();
-                tmp.put(v, 1 - dampingFactor);
-                nextScores.put(v, tmp);
+                HashMap<V, Double> currentMap = new HashMap<>();
+                currentMap.put(v, 1 - dampingFactor);
+                nextScores.put(v, currentMap);
                 
                 //for each successor of v
                 for(E e: g.outgoingEdgesOf(v))
@@ -203,23 +206,31 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                      */
                     for(V key: successorMap.keySet())
                     {
-                        Double contribution = 
-                                dampingFactor * scores.get(successor).get(key) / g.outDegreeOf(v);
-                        Double oldRes;
+                        Double contribution = factor * successorMap.get(key);
                         //if there was a previously stored value put the sum of that value and the contribution
-                        if( (oldRes = nextScores.get(v).putIfAbsent(key, contribution)) != null)
-                            nextScores.get(v).put(key, oldRes + contribution);
+                        //stored will be used to store the new value
+                        Double stored = currentMap.get(key);
+                        stored = stored == null? contribution : (contribution + stored);
+                        currentMap.put(key, stored);
                         
+                        //using contribution to store scores.get(v).get(key) (the old value) to call it only once
+                        contribution = scores.get(v).get(key);
+                        contribution = contribution == null? 0 : contribution;
+                        //update maxDiff
+                        maxDiff = Math.max(maxDiff, contribution - stored);
+                        
+                        /* oldversion
                         //update maxDiff
                         if(scores.get(v).get(key) != null)
-                            maxDiff = Math.max(maxDiff, Math.abs(scores.get(v).get(key) - nextScores.get(v).get(key)));
+                            maxDiff = Math.max(maxDiff, Math.abs(scores.get(v).get(key) - stored));
                         else
-                            maxDiff = Math.max(maxDiff, nextScores.get(v).get(key));
+                            maxDiff = Math.max(maxDiff, stored);
+                        */
                     }
                 }
                 //keep the top L values only (!values = to the 49th place are pruned aswell)
-                if(nextScores.get(v).size() > topL)
-                    nextScores.put(v, pruneLowestLValues(nextScores.get(v),topL));
+                if(currentMap.size() > topL)
+                    nextScores.put(v, pruneLowestLValues(currentMap,topL));
                 
             }
             
@@ -228,7 +239,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
             scores = nextScores;
             nextScores = tmp;
             nextScores.clear();
-            
             iterations--;            
         }
         
