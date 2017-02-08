@@ -25,11 +25,14 @@ public class PersonalizedPagerank {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        for(int i = 0; i < 10; i++)
+        {
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
         
         importGraphFromCsv(g, "/home/jacopo/Desktop/tesi/grafi/p2p-Gnutella04.csv");
         System.out.println("finished importing");
         PersonalizedPageRankAlgorithm res = new GuerrieriRank(g);
+        }
     }
     
     
