@@ -191,15 +191,9 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                 double factor = dampingFactor / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
-<<<<<<< HEAD
-                HashMap<V, Double> currentMap = new HashMap<>();
-                currentMap.put(v, 1 - dampingFactor);
-                nextScores.put(v, currentMap);
-=======
                 Map<V, Double> currentMap = nextScores.get(v);
                 currentMap.clear();
                 currentMap.put(v, 1 - dampingFactor);
->>>>>>> dev
                 
                 //for each successor of v
                 for(E e: g.outgoingEdgesOf(v))
@@ -220,7 +214,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                         Double stored = currentMap.get(key);
                         stored = stored == null? contribution : (contribution + stored);
                         currentMap.put(key, stored);
-<<<<<<< HEAD
+                        contribution = scores.get(v).get(key);
                         
                         //using contribution to store scores.get(v).get(key) (the old value) to call it only once
                         contribution = scores.get(v).get(key);
@@ -228,15 +222,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                         //update maxDiff
                         maxDiff = Math.max(maxDiff, contribution - stored);
                         
-=======
-                        
-                        //using contribution to store scores.get(v).get(key) (the old value) to call it only once
-                        contribution = scores.get(v).get(key);
-                        contribution = contribution == null? 0 : contribution;
-                        //update maxDiff
-                        maxDiff = Math.max(maxDiff, contribution - stored);
-                        
->>>>>>> dev
                         /* oldversion
                         //update maxDiff
                         if(scores.get(v).get(key) != null)
@@ -256,10 +241,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
             Map<V, Map<V,Double>> tmp = scores;
             scores = nextScores;
             nextScores = tmp;
-<<<<<<< HEAD
-            nextScores.clear();
-=======
->>>>>>> dev
             iterations--;            
         }
         
