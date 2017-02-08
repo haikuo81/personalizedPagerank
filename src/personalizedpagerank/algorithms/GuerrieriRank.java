@@ -220,15 +220,8 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                         contribution = scores.get(v).get(key);
                         contribution = contribution == null? 0 : contribution;
                         //update maxDiff
-                        maxDiff = Math.max(maxDiff, contribution - stored);
+                        maxDiff = Math.max(maxDiff, Math.abs(contribution - stored));
                         
-                        /* oldversion
-                        //update maxDiff
-                        if(scores.get(v).get(key) != null)
-                            maxDiff = Math.max(maxDiff, Math.abs(scores.get(v).get(key) - stored));
-                        else
-                            maxDiff = Math.max(maxDiff, stored);
-                        */
                     }
                 }
                 //keep the top L values only (!values = to the 49th place are pruned aswell)
