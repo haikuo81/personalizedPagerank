@@ -21,7 +21,7 @@
  * 
  * 
  */
-package algorithmsTesting;
+package AlgorithmsTesting;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import org.jgrapht.alg.interfaces.*;
 import org.jgrapht.graph.*;
-import personalizedpagerank.algorithms.*;
+import personalizedpagerank.Algorithms.*;
 
 import junit.framework.*;
 import org.jgrapht.DirectedGraph;
