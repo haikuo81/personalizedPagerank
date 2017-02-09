@@ -22,7 +22,7 @@
  * Some comments from the original authors might be removed, while I might
  * add some new comments to help myself in understanding the code.
  */
-package personalizedpagerank.algorithms;
+package personalizedpagerank.Algorithms;
 
 import java.util.*;
 

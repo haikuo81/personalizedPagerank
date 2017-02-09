@@ -13,7 +13,7 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.algorithms.GuerrieriRank;
+import personalizedpagerank.Algorithms.GuerrieriRank;
 
     /**
      *
