@@ -1,11 +1,16 @@
 package personalizedpagerank.algorithms;
 
 import static java.lang.Integer.min;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
 import org.jgrapht.*;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
 /**
@@ -204,31 +209,25 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                     /**
                      * for each value of personalized pagerank (max L values) saved 
                      * in the map  of a successor increment the personalized pagerank of v
-                     * of a fraction of it
+                     * of a fraction of it.
                      */
                     for(V key: successorMap.keySet())
                     {
                         Double contribution = factor * successorMap.get(key);
                         //if there was a previously stored value put the sum of that value and the contribution
                         //stored will be used to store the new value
-                        Double stored = currentMap.get(key);
-                        stored = stored == null? contribution : (contribution + stored);
+                        Double stored = (stored = currentMap.get(key)) != null? (contribution + stored) : contribution;
                         currentMap.put(key, stored);
-                        
                         //using contribution to store scores.get(v).get(key) (the old value) to call it only once
-                        contribution = scores.get(v).get(key);
-                        contribution = contribution == null? 0 : contribution;
+                        contribution = (contribution = scores.get(v).get(key)) != null? contribution : 0;
                         //update maxDiff
                         maxDiff = Math.max(maxDiff, Math.abs(contribution - stored));
-                        
                     }
                 }
-                //keep the top L values only (!values = to the 49th place are pruned aswell)
+                //keep the top L values only
                 if(currentMap.size() > topL)
-                    nextScores.put(v, pruneLowestLValues(currentMap,topL));
-                
+                    keepTopL3(currentMap, topL);
             }
-            
             // swap scores
             Map<V, Map<V,Double>> tmp = scores;
             scores = nextScores;
@@ -239,33 +238,99 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     }
     
      /**
-     * Returns a map where every pair (key, value) that isn't part of the 
-     * topL when ordered by value descending is removed.
-     * @param unsortMap Starting map.
+     * Keeps the topL entries of the map, descending order based on values.
+     * @param input Input map.
      * @param topL How many elements to keep from the top.
-     * @return The pruned map.
      */
-    private Map<V, Double> pruneLowestLValues(final Map<V, Double> unsortMap, final int topL)
+    private void keepTopL1(Map<V, Double> input, final int topL)
     {
         //trasform the map in a list of entries
-        List<Map.Entry<V, Double>> list = new LinkedList<>(unsortMap.entrySet());
+        ArrayList<Map.Entry<V, Double>> list = new ArrayList<>(input.entrySet());
 
         //order the entries with the comparator, descending order
         Collections.sort(list, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
         {
             return e2.getValue().compareTo(e1.getValue());
         });
+        input.clear();
+        for(int i = 0; i < topL; i++)
+            input.put(list.get(i).getKey(), list.get(i).getValue());
+    }
+    
+    /**
+     * Keeps the topL entries of the map, after finding the value of the Lth 
+     * element if they were ordered by values (descending). First pass is inclusive
+     * of entries with values = lth, if the size of the result exceeds L 
+     * then a second pass is done to remove entries with values = lth.
+     * @param input Input map.
+     * @param topL How many elements to keep from the top.
+     */
+    private void keepTopL2(Map<V, Double> input, final int topL)
+    {
+        Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
+        partialSort(values, topL);
+        Double lth = values[topL].getValue();
+        input.entrySet().removeIf(e-> e.getValue() < lth );
+        if(input.size() > topL)
+            input.entrySet().removeIf(e-> e.getValue().equals(lth) && input.size() > topL );
+    }
+    
+    /**
+     * Keeps the topL entries of the map, based on a partial order on the Lth element.
+     * @param input Input map.
+     * @param topL How many elements to keep from the top.
+     */
+    private void keepTopL3(Map<V, Double> input, final int topL)
+    {
+        Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
+        partialSort(values, topL);
+        input.clear();
+        for(int i = 0; i < topL; i++)
+            input.put(values[i].getKey(), values[i].getValue());
+    }
+    
+    /**
+     * Partially sorts the array using selection sort.
+     * Values greater than the nth value (the value that would be on the nth
+     * position if the array was sorted by entry.value in descending order) will
+     * be on the left, and the lower values on the right.
+     * @param input Input array of entries.
+     * @param n 
+     */
+    private void partialSort(Map.Entry<V, Double>[] input, int n) 
+    {
+        if (n >= input.length)
+            throw new IllegalArgumentException("N must be lower than the length of the input");
+        int from = 0, to = input.length - 1;
 
-        //remove elements that aren't part of the top L
-        list.subList(min(topL,list.size()), list.size()).clear();
-        
-        //insert ordered entries (and keep order) thanks to linked hash map
-        Map<V, Double> prunedMap = new HashMap<>();
-        for (Map.Entry<V, Double> entry : list)
+        while (from < to) 
         {
-            prunedMap.put(entry.getKey(), entry.getValue());
+            int leftIndex = from, rightIndex = to;
+            Map.Entry<V, Double> mid = input[(leftIndex + rightIndex) / 2];
+            
+            while (leftIndex < rightIndex) 
+            {
+                /*
+                if the value is greater than the pivot move it on the right 
+                side by swapping it with the value at rightIndex, else move on
+                */
+                if (input[leftIndex].getValue() <= mid.getValue()) 
+                { 
+                    Map.Entry<V, Double> tmp = input[rightIndex];
+                    input[rightIndex] = input[leftIndex];
+                    input[leftIndex] = tmp;
+                    rightIndex--;
+                } 
+                else
+                    leftIndex++;
+            }
+            if (input[leftIndex].getValue() < mid.getValue())
+                leftIndex--;
+            //change to or from depending if what we are looking for is on the left or right part
+            if (n <= leftIndex) 
+                to = leftIndex;
+            else 
+                from = leftIndex + 1;
         }
-        
-        return prunedMap;
     }
 }

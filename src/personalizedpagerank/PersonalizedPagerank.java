@@ -15,27 +15,27 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.algorithms.GuerrieriRank;
 
-/**
- *
- * @author jacopo
- */
-public class PersonalizedPagerank {
-
     /**
-     * @param args the command line arguments
+     *
+     * @author jacopo
      */
-    public static void main(String[] args) {
-        for(int i = 0; i < 10; i++)
-        {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
-        
-        importGraphFromCsv(g, "/home/jacopo/Desktop/tesi/grafi/p2p-Gnutella04.csv");
-        System.out.println("finished importing");
-        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g);
+    public class PersonalizedPagerank {
+
+        /**
+         * @param args the command line arguments
+         */
+        public static void main(String[] args) {
+            int n = 10;
+            for(int i = 0; i < n; i++)
+            {
+                DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+                importGraphFromCsv(g, "/home/jacopo/Desktop/tesi/grafi/p2p-Gnutella04.csv");
+                System.out.println("finished importing " + i);
+                PersonalizedPageRankAlgorithm res = new GuerrieriRank(g);
+            }
+           
         }
-    }
-    
-    
+
     /**
      * Sorts a map keys based on values, returning a new map.
      * @param unsortMap Map to sort based on values.
