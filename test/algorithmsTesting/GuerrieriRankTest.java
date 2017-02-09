@@ -107,6 +107,23 @@ public class GuerrieriRankTest extends TestCase
         assertEquals(res.getMaps().size(), 0, 0);
     }
     
+    public void testL()
+    {
+        //adds 30 nodes and <= 30 random edges, then checks if the returned top 
+        //for each node is always <= topL
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        PersonalizedPageRankAlgorithm res;
+        for(int i = 0; i < 30; i++)
+            g.addVertex(i);
+        for(int i = 0; i < 30; i++)
+            g.addEdge((int)(Math.random() * 30), (int)(Math.random() * 30));
+        for(int i = 1; i < 30; i++)
+        {
+            res = new GuerrieriRank(g, i);
+            for(int u = 0; u < 30; u++)
+                assertTrue(res.getMap(u).size() <= i);
+        }
+    }
     public void testSingleNodeGraph()
     {
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
