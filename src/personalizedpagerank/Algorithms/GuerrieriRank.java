@@ -1,18 +1,12 @@
-package personalizedpagerank.algorithms;
+package personalizedpagerank.Algorithms;
 
-import static java.lang.Integer.min;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
 import org.jgrapht.*;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Utility.PartialSorter;
 /**
  *
  * @author jacopo
@@ -35,7 +29,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     
     private final DirectedGraph<V, E> g;
     private Map<V, Map<V, Double>> scores;
-    
+    private PartialSorter<V> sorter;
     
     
     /**
@@ -46,6 +40,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      */
     public GuerrieriRank(final DirectedGraph<V, E> g)
     {
+        this.sorter = new PartialSorter<>();
         this.g = g;
         this.scores = new HashMap<>();
         run(DEFAULT_TOP, DEFAULT_ITERATIONS, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
@@ -61,6 +56,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      */
     public GuerrieriRank(final DirectedGraph<V, E> g, final int top)
     {
+        this.sorter = new PartialSorter<>();
         this.g = g;
         this.scores = new HashMap<>();
 
@@ -81,6 +77,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      */
     public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations)
     {
+        this.sorter = new PartialSorter<>();
         this.g = g;
         this.scores = new HashMap<>();
 
@@ -106,6 +103,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      */
     public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations, final double dampingFactor)
     {
+        this.sorter = new PartialSorter<>();
         this.g = g;
         this.scores = new HashMap<>();
 
@@ -134,6 +132,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      */
     public GuerrieriRank(final DirectedGraph<V, E> g, final int top, final int iterations, final double dampingFactor, final double tolerance)
     {
+        this.sorter = new PartialSorter<>();
         this.g = g;
         this.scores = new HashMap<>();
 
@@ -268,7 +267,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     private void keepTopL2(Map<V, Double> input, final int topL)
     {
         Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
-        partialSort(values, topL);
+        sorter.partialSort(values, topL);
         Double lth = values[topL].getValue();
         input.entrySet().removeIf(e-> e.getValue() < lth );
         if(input.size() > topL)
@@ -283,54 +282,10 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     private void keepTopL3(Map<V, Double> input, final int topL)
     {
         Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
-        partialSort(values, topL);
+        sorter.partialSort(values, topL);
         input.clear();
         for(int i = 0; i < topL; i++)
             input.put(values[i].getKey(), values[i].getValue());
     }
-    
-    /**
-     * Partially sorts the array using selection sort.
-     * Values greater than the nth value (the value that would be on the nth
-     * position if the array was sorted by entry.value in descending order) will
-     * be on the left, and the lower values on the right.
-     * @param input Input array of entries.
-     * @param n 
-     */
-    private void partialSort(Map.Entry<V, Double>[] input, int n) 
-    {
-        if (n >= input.length)
-            throw new IllegalArgumentException("N must be lower than the length of the input");
-        int from = 0, to = input.length - 1;
-
-        while (from < to) 
-        {
-            int leftIndex = from, rightIndex = to;
-            Map.Entry<V, Double> mid = input[(leftIndex + rightIndex) / 2];
-            
-            while (leftIndex < rightIndex) 
-            {
-                /*
-                if the value is greater than the pivot move it on the right 
-                side by swapping it with the value at rightIndex, else move on
-                */
-                if (input[leftIndex].getValue() <= mid.getValue()) 
-                { 
-                    Map.Entry<V, Double> tmp = input[rightIndex];
-                    input[rightIndex] = input[leftIndex];
-                    input[leftIndex] = tmp;
-                    rightIndex--;
-                } 
-                else
-                    leftIndex++;
-            }
-            if (input[leftIndex].getValue() < mid.getValue())
-                leftIndex--;
-            //change to or from depending if what we are looking for is on the left or right part
-            if (n <= leftIndex) 
-                to = leftIndex;
-            else 
-                from = leftIndex + 1;
-        }
-    }
+   
 }
