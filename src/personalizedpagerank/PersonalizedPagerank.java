@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,9 +12,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
+import personalizedpagerank.Algorithms.PageRank;
+import personalizedpagerank.Utility.ResultComparator;
 
     /**
      *
@@ -25,15 +29,22 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
          * @param args the command line arguments
          */
         public static void main(String[] args) {
-            int n = 10;
-            for(int i = 0; i < n; i++)
-            {
-                DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
-                importGraphFromCsv(g, "/home/jacopo/Desktop/tesi/grafi/p2p-Gnutella04.csv");
-                System.out.println("finished importing " + i);
-                PersonalizedPageRankAlgorithm res = new GuerrieriRank(g);
-            }
-           
+            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+            ResultComparator<Integer, Double> comp = new ResultComparator();
+            importGraphFromCsv(g, "../data/graphs/directed/p2p-Gnutella04.csv");
+            System.out.println("finished importing ");
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 100, 0.85);
+            //do for 0 e and 1
+            Map<Integer, Map<Integer, Double>> maps = new HashMap<>();
+            VertexScoringAlgorithm res2 = new PageRank(g, 0.85, 100, 0.0001,0);
+            maps.put(0, res2.getScores());
+            res2 = new PageRank(g, 0.85, 100, 0.0001, 1);
+            maps.put(1, res2.getScores());
+            double[] res = comp.jaccard(res1, maps);
+            System.out.println(res[0]);
+            System.out.println(res[1]);
+            System.out.println(res[2]);
+            System.out.println(res[3]);
         }
 
     /**
@@ -62,6 +73,7 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
             }
         });
 
+        
         //insert ordered entries (and keep order) thanks to linked hash map
         Map<String, Double> sortedMap = new LinkedHashMap<>();
         for (Entry<String, Double> entry : list)
