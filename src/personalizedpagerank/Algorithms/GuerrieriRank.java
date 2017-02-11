@@ -4,12 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.jgrapht.*;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Utility.PartialSorter;
+
 /**
- *
- * @author jacopo
+ * Runs an instance of GuerrieriRank, which runs an approximation of pagerank
+ * for each node in the graph, obtaining personalized pagerank scores for each node.
+ * For I iterations (or until convergence) for each edge pagerank score is passed
+ * from a child node to an ancestor. For each node only the top L scores of 
+ * personalized pagerank (as if that node was the origin and only node of the
+ * teleport set) are kept, while the rest is pruned.
+ * The complexity is O(I *|Edges| * L).
+ * @param <V> Object representing the nodes of the graph for which scores will be computed.
+ * @param <E> Object representing the edges of the graph for which scores will be computed.
  */
 public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Double>
 {
@@ -29,7 +38,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     
     private final DirectedGraph<V, E> g;
     private Map<V, Map<V, Double>> scores;
-    private PartialSorter<V> sorter;
+    private final PartialSorter<V> sorter;
     
     
     /**
@@ -90,8 +99,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         run(top, iterations, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
     }
     
-    
-    
     /**
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
@@ -122,7 +129,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     /**
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
-     * 
      * @param g the input graph
      * @param top How many max entries to keep for each vertex (the rest gets removed).
      * @param iterations the number of iterations to perform
@@ -147,9 +153,10 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         
         run(top, iterations, dampingFactor, tolerance);
     }
-
     
-    @Override
+    /**
+     * @inheritDoc
+     */
     public Map<V, Double> getMap(V origin)
     {
         if(!g.containsVertex(origin))
@@ -157,13 +164,17 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         return Collections.unmodifiableMap(scores.get(origin));
     }
     
-    @Override
+    /**
+     * @inheritDoc
+     */
     public Map<V, Map<V, Double>> getMaps()
     {
         return Collections.unmodifiableMap(scores);
     }
-
-    @Override
+        
+    /**
+     * @inheritDoc
+     */
     public Double getRank(V origin, V target)
     {
         if(!g.containsVertex(origin))
