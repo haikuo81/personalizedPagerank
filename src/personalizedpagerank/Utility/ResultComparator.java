@@ -1,6 +1,8 @@
 package personalizedpagerank.Utility;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -19,17 +21,52 @@ public class ResultComparator<V, D>
      * @param alg1 The first object containing computed personalized pageranks.
      * @param alg2 The second object containing computed personalized pageranks.
      * @param selected For which node results gets compared.
-     * @return 
+     * @return Jaccard similarity of results for the selected node
      */
     public double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
     {
-       PartialSorter<V> sorter = new PartialSorter<>();
-       
        //for the selected node get entries for both algos as arrays
        Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
        Map.Entry<V, Double>[] m2 = alg2.getMap(selected).entrySet().toArray(new Map.Entry[0]);
        
-       //in case alg1 stores topK results and alg2 stores topL results with K!=L
+       return jaccardWrapped(m1, m2);
+    }
+    
+    /**
+     * Given 1 object implementing the PersonalizedPagerankAlgorithm interface 
+     * and a Map<Nodes, Values> related to the same graph(it's assumed, not checked)
+     * calculate the jaccard similarity between the sets of the nodes that would 
+     * be the topK scorers for both the algorithm and the map starting from the 
+     * same "selected" node (see the param selected),
+     * If the algorithm stores topK scores while the map stores topL scores
+     * with K!=L only the top min(K,L) scoring nodes are considered.
+     * @param alg1 Object containing computed personalized pageranks.
+     * @param alg2 Map containing personalized pagerank scores as if "selected"
+     * was the origin.
+     * @param selected For which node results gets compared.
+     * @return Jaccard similarity of results for the selected node
+     */
+    public double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final Map<V, D> alg2, final V selected)
+    {
+       //for the selected node get entries for both algos as arrays
+       Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
+       Map.Entry<V, Double>[] m2 = alg2.entrySet().toArray(new Map.Entry[0]);
+       
+       return jaccardWrapped(m1, m2);
+    }
+    
+    /**
+     * Computes the jaccard similarity between two Map.Entry arrays.
+     * If an array stores topK entries while the other one stores topL entries
+     * with K!=L only the top min(K,L) entries are considered.
+     * @param m1 First map.
+     * @param m2 Second map.
+     * @return Jaccard similarity between the min(m1.length, m2.length) sorted entries.
+     */
+    private double jaccardWrapped(Map.Entry<V, Double>[] m1, Map.Entry<V, Double>[] m2)
+    {
+       PartialSorter<V> sorter = new PartialSorter<>();
+        //in case the first array stores topK results and the second stores topL results with K!=L
        int min = Math.min(m1.length, m2.length);
        sorter.partialSort(m1, min - 1);
        sorter.partialSort(m2, min - 1);
@@ -51,50 +88,7 @@ public class ResultComparator<V, D>
        return ((double) entries1.size()) / union.size();
     }
     
-    /**
-     * Given 1 object implementing the PersonalizedPagerankAlgorithm interface 
-     * and a Map<Nodes, Values> related to the same graph(it's assumed, not checked)
-     * calculate the jaccard similarity between the sets of the nodes that would 
-     * be the topK scorers for both the algorithm and the map starting from the 
-     * same "selected" node (see the param selected),
-     * If the algorithm stores topK scores while the map stores topL scores
-     * with K!=L only the top min(K,L) scoring nodes are considered.
-     * @param alg1 Object containing computed personalized pageranks.
-     * @param alg2 Map containing personalized pagerank scores as if "selected"
-     * was the origin.
-     * @param selected For which node results gets compared.
-     * @return 
-     */
-    public double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final Map<V, D> alg2, final V selected)
-    {
-       PartialSorter<V> sorter = new PartialSorter<>();
-       
-       //for the selected node get entries for both algos as arrays
-       Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-       Map.Entry<V, Double>[] m2 = alg2.entrySet().toArray(new Map.Entry[0]);
-       
-       
-       //in case alg1 stores topK results and alg2 stores topL results with K!=L
-       int min = Math.min(m1.length, m2.length);
-       sorter.partialSort(m1, min - 1);
-       sorter.partialSort(m2, min - 1);
-       
-       //create sets to to intersection and union
-       Set<V> entries1 = new HashSet<>(min);
-       Set<V> entries2 = new HashSet<>(min);
-       Set<V> union = new HashSet<>();
-       for(int i = 0; i < min; i++)
-       {
-           entries1.add(m1[i].getKey());
-           entries2.add(m2[i].getKey());
-       }
-       union.addAll(entries1);
-       union.addAll(entries2);
-       //entries 1 becomes the intersection
-       entries1.retainAll(entries2);
-       
-       return ((double) entries1.size()) / union.size();
-    }
+    
     
     /**
      * Given a set of nodes, for each node the jaccard similarity between 
@@ -175,4 +169,51 @@ public class ResultComparator<V, D>
         res[1] /= maps.size();
         return res;
     }
+    
+    private int levensteinWrapped(Map.Entry<V, Double>[] m1, Map.Entry<V, Double>[] m2)
+    {
+        //in case the first array stores topK results and the second stores topL results with K!=L
+        int min = Math.min(m1.length, m2.length);
+        Arrays.sort(m1, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
+        {
+                return e2.getValue().compareTo(e1.getValue());
+        });
+        Arrays.sort(m2, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
+        {
+                return e2.getValue().compareTo(e1.getValue());
+        });
+        //do levenstein but consider only a string formed by the top values
+        int [][] matrix = new int[min+1][min+1];
+        
+        //if the string is empty the distance is the length of the non empty string
+        for (int i = 0; i <= min; i++)
+            matrix[i][0] = i;
+        for (int u = 0; u <= min; u++)
+            matrix[0][u] = u;
+
+        //filling from top-left to bottom-right 
+        for (int i = 1; i < matrix.length; i++)
+        {
+            for (int u = 1; u < matrix[i].length; u++)
+            {
+                //if values are equals this step is free
+                if (m1[i-1].getKey().equals(m2[u-1].getKey()))
+                    matrix[i][u] = matrix[i-1][u-1];
+                else
+                {
+                    //if values aren't equals we need to modify a string
+                    //pick the sequence that can lead you here with min moves
+                    matrix[i][u] = Math.min(matrix[i-1][u], matrix[i][u-1]);
+                    matrix[i][u] = Math.min(matrix[i][u], matrix[i-1][u-1]);
+                    matrix[i][u]++;
+                }
+            }
+        }
+       int res = Integer.MAX_VALUE;
+       int[] handle = matrix[matrix.length - 1];
+       for(int i = 0; i < handle.length; i++)
+           res = Math.min(res, handle[i]);
+       return res;
+    }
+               
 }
