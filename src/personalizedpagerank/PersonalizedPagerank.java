@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
@@ -36,10 +37,15 @@ import personalizedpagerank.Utility.ResultComparator;
             PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 100, 0.85);
             //do for 0 e and 1
             Map<Integer, Map<Integer, Double>> maps = new HashMap<>();
-            VertexScoringAlgorithm res2 = new PageRank(g, 0.85, 100, 0.0001,0);
-            maps.put(0, res2.getScores());
-            res2 = new PageRank(g, 0.85, 100, 0.0001, 1);
-            maps.put(1, res2.getScores());
+            int samples = 800;
+            Random random = new Random();
+            Integer[] nodes = g.vertexSet().toArray(new Integer[0]);
+            for(int i = 0; i < samples; i++)
+            {
+                Integer pick = nodes[random.nextInt(nodes.length)];
+                VertexScoringAlgorithm res2 = new PageRank(g, 0.85, 100, 0.0001, pick);
+                maps.put(pick, res2.getScores());
+            }
             double[] res = comp.jaccard(res1, maps);
             System.out.println(res[0]);
             System.out.println(res[1]);
