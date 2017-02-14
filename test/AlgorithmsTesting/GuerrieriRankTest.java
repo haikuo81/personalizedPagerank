@@ -16,10 +16,18 @@ public class GuerrieriRankTest extends TestCase
     {
         DirectedPseudograph<String, DefaultEdge> g = new DirectedPseudograph<>(DefaultEdge.class);
         
-        //top L with L = 0
+        //smallTop = 0
         try 
         {
-            new GuerrieriRank<>(g, 0);
+            new GuerrieriRank<>(g, 0, 10);
+            fail("this line shouldn't be reached");
+        } 
+        catch (IllegalArgumentException e) {}
+        
+        //smallTop > largeTop
+        try 
+        {
+            new GuerrieriRank<>(g, 11, 10);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -27,7 +35,7 @@ public class GuerrieriRankTest extends TestCase
         //0 iterations
         try 
         {
-            new GuerrieriRank<>(g, 10, 0);
+            new GuerrieriRank<>(g, 10, 10, 0);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -35,7 +43,7 @@ public class GuerrieriRankTest extends TestCase
         //negative dampingfactor
         try 
         {
-            new GuerrieriRank<>(g, 10, 10, -0.1);
+            new GuerrieriRank<>(g, 10, 10, 10, -0.1);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -43,7 +51,7 @@ public class GuerrieriRankTest extends TestCase
         //dampingfactor over 1
         try 
         {
-            new GuerrieriRank<>(g, 10, 10, 1.1);
+            new GuerrieriRank<>(g, 10, 10, 10, 1.1);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -114,7 +122,7 @@ public class GuerrieriRankTest extends TestCase
             g.addEdge((int)(Math.random() * 30), (int)(Math.random() * 30));
         for(int i = 1; i < 30; i++)
         {
-            res = new GuerrieriRank(g, i);
+            res = new GuerrieriRank(g, i, i);
             for(int u = 0; u < 30; u++)
                 assertTrue(res.getMap(u).size() <= i);
         }
@@ -125,7 +133,7 @@ public class GuerrieriRankTest extends TestCase
         
         //1 node no edges
         g.addVertex(1);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 10, 10, 0.5);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 10, 10, 10, 0.5);
         assertEquals(res.getMaps().size(), 1, 0);
         assertEquals(res.getMap(1).size(), 1, 0);
         //expected is not 1 because as of now nodes without edges don't always teleport
@@ -197,7 +205,7 @@ public class GuerrieriRankTest extends TestCase
         for(int i = 1; i < 6; i++)
             g.addEdge(i, 0);
        
-        PersonalizedPageRankAlgorithm<Integer, Double> res = new GuerrieriRank(g, 10, 10, 0.8);
+        PersonalizedPageRankAlgorithm<Integer, Double> res = new GuerrieriRank(g, 10, 10, 10, 0.8);
 
         assertEquals(res.getRank(0, 0), 0.2, 0.01);
         for(int i = 1; i < 6; i++)
@@ -210,7 +218,7 @@ public class GuerrieriRankTest extends TestCase
 
         //connect the center to itself
         g.addEdge(0, 0);
-        res = new GuerrieriRank(g, 10, 10, 0.8);
+        res = new GuerrieriRank(g, 10, 10, 10, 0.8);
         
         assertEquals(res.getRank(0, 0), 1, 0.01);
         for(int i = 1; i < 6; i++)
