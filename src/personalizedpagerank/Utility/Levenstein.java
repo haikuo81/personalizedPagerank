@@ -17,7 +17,6 @@ public class Levenstein<V>
      */
     public int distance(V[] m1, V[] m2)
     {
-        int res = Integer.MAX_VALUE;
         //do levenstein but consider only a string formed by the top values
         int [][] matrix = new int[m1.length+1][m2.length+1];
         
@@ -45,10 +44,7 @@ public class Levenstein<V>
                 }
             }
         }
-       int[] handle = matrix[matrix.length - 1];
-       for(int i = 0; i < handle.length; i++)
-           res = Math.min(res, handle[i]);
-       return res;
+       return matrix[m1.length][m2.length];
     }
     
     /**
@@ -88,10 +84,6 @@ public class Levenstein<V>
                 }
             }
         }
-       int res = Integer.MAX_VALUE;
-       int[] handle = matrix[matrix.length - 1];
-       for(int i = 0; i < handle.length; i++)
-           res = Math.min(res, handle[i]);
-       return res;
+       return matrix[m1.length][m2.length];
     }
 }
