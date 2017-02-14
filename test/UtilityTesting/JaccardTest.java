@@ -8,8 +8,8 @@ import personalizedpagerank.Utility.Jaccard;
 
 public class JaccardTest extends TestCase
 {
-    Jaccard<Integer> jaccard = new Jaccard<>();
-    Random random = new Random();
+    final Jaccard<Integer> jaccard = new Jaccard<>();
+    final Random random = new Random();
     
     public void testEmpty()
     {
