@@ -91,7 +91,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new HashMap<>(g.vertexSet().size());
         
         parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
                 DEFAULT_SMALL_TOP, DEFAULT_LARGE_TOP, DEFAULT_ITERATIONS, 
@@ -113,7 +113,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new HashMap<>(g.vertexSet().size());
 
         if(largeTop <= 0) 
             throw new IllegalArgumentException("LargeTop k entries to keep must be positive");
@@ -138,7 +138,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new HashMap<>(g.vertexSet().size());
 
         if(smallTop <= 0)
             throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
@@ -172,7 +172,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new HashMap<>(g.vertexSet().size());
 
         if(smallTop <= 0)
             throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
@@ -210,7 +210,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     {
         this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new HashMap<>(g.vertexSet().size());
 
         if(smallTop <= 0)
             throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
@@ -290,7 +290,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         int iterations = this.parameters.getIterations();
         double maxDiff = this.parameters.getTolerance();
         //init scores
-        Map<V, Map<V, Double>> nextScores = new HashMap<>();
+        Map<V, Map<V, Double>> nextScores = new HashMap<>(g.vertexSet().size());
         for(V v: g.vertexSet())
         {
             HashMap<V, Double> tmp = new HashMap<>();
@@ -352,6 +352,9 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                 keepTopL3(scores.get(v), this.parameters.smallTop);
         }
     }
+    
+    
+    //keeping 3 versions of it for profiling and other purposes
     
      /**
      * Keeps the topL entries of the map, descending order based on values.

@@ -4,22 +4,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.PageRank;
 import personalizedpagerank.Algorithms.WrappedPageRank;
 import personalizedpagerank.Utility.ResultComparator;
 
@@ -32,31 +26,29 @@ import personalizedpagerank.Utility.ResultComparator;
         /**
          * @param args the command line arguments
          */
-        public static void main(String[] args) {
+        public static void main(String[] args) 
+        {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
             ResultComparator<Integer, Double> comp = new ResultComparator();
             importGraphFromCsv(g, "../data/graphs/directed/p2p-Gnutella04.csv");
             System.out.println("finished importing ");
             
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 30, 100, 0.85);
+            System.out.println("done grank");
+            
+            /*
             WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 100);
             System.out.println("done prank");
             
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 30, 100, 0.85);
-            System.out.println("done grank");
-            
-            System.out.println(comp.levenstein(res1, res2, (Integer) res2.getNodes().toArray()[0]));
-            
-            
-            /*
-            double[] res = comp.jaccard(res1, res2, res2.getNodes());
+            double[] res = comp.levenstein(res1, res2, res2.getNodes());
             System.out.println(res[0]);
             System.out.println(res[1]);
             System.out.println(res[2]);
             System.out.println(res[3]);
             
-            //
-            res1 = new GuerrieriRank(g, 30, 50, 100, 0.85);
-            res = comp.jaccard(res1, res2, res2.getNodes());
+            System.out.println("------------------");
+            res1 = new GuerrieriRank(g, 30, 500, 100, 0.85);
+            res = comp.levenstein(res1, res2, res2.getNodes());
             System.out.println(res[0]);
             System.out.println(res[1]);
             System.out.println(res[2]);
