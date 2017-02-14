@@ -4,20 +4,17 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.PageRank;
+import personalizedpagerank.Algorithms.WrappedPageRank;
 import personalizedpagerank.Utility.ResultComparator;
 
     /**
@@ -29,28 +26,34 @@ import personalizedpagerank.Utility.ResultComparator;
         /**
          * @param args the command line arguments
          */
-        public static void main(String[] args) {
+        public static void main(String[] args) 
+        {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
             ResultComparator<Integer, Double> comp = new ResultComparator();
             importGraphFromCsv(g, "../data/graphs/directed/p2p-Gnutella04.csv");
             System.out.println("finished importing ");
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 100, 0.85);
-            //do for 0 e and 1
-            Map<Integer, Map<Integer, Double>> maps = new HashMap<>();
-            int samples = 800;
-            Random random = new Random();
-            Integer[] nodes = g.vertexSet().toArray(new Integer[0]);
-            for(int i = 0; i < samples; i++)
-            {
-                Integer pick = nodes[random.nextInt(nodes.length)];
-                VertexScoringAlgorithm res2 = new PageRank(g, 0.85, 100, 0.0001, pick);
-                maps.put(pick, res2.getScores());
-            }
-            double[] res = comp.jaccard(res1, maps);
+            
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 30, 100, 0.85);
+            System.out.println("done grank");
+            
+            /*
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 100);
+            System.out.println("done prank");
+            
+            double[] res = comp.levenstein(res1, res2, res2.getNodes());
             System.out.println(res[0]);
             System.out.println(res[1]);
             System.out.println(res[2]);
             System.out.println(res[3]);
+            
+            System.out.println("------------------");
+            res1 = new GuerrieriRank(g, 30, 500, 100, 0.85);
+            res = comp.levenstein(res1, res2, res2.getNodes());
+            System.out.println(res[0]);
+            System.out.println(res[1]);
+            System.out.println(res[2]);
+            System.out.println(res[3]);
+            */
         }
 
     /**

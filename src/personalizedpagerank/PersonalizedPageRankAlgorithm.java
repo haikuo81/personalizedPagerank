@@ -41,4 +41,10 @@ public interface PersonalizedPageRankAlgorithm<V extends Object, D extends Objec
      * @return Personalized pagerank score of target node.
      */
     public D getRank(V origin, V target);
+    
+    /**
+     * Returns the parameters used to run the algorithm.
+     * @return An object containing the running parameters (may be a subclass).
+     */
+    public Parameters getParameters();
 }
