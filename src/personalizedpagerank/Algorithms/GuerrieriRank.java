@@ -115,8 +115,14 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         this.g = g;
         this.scores = new HashMap<>(g.vertexSet().size());
 
+        if(smallTop <= 0)
+            throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
+        
         if(largeTop <= 0) 
             throw new IllegalArgumentException("LargeTop k entries to keep must be positive");
+        
+        if(smallTop > largeTop)
+            throw new IllegalArgumentException("SmallTop can't be greater than largeTop");
         
         parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
                 smallTop, largeTop, DEFAULT_ITERATIONS, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);   
