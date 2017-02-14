@@ -2,10 +2,10 @@ package personalizedpagerank.Utility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import personalizedpagerank.Parameters;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
 
 //class to do result comparison of the different algorithms, it assumes that the passed object refer to the same graph
@@ -23,34 +23,11 @@ public class ResultComparator<V, D>
      * @param selected For which node results gets compared.
      * @return Jaccard similarity of results for the selected node
      */
-    public double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
+    private double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
     {
        //for the selected node get entries for both algos as arrays
        Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
        Map.Entry<V, Double>[] m2 = alg2.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-       
-       return jaccardWrapped(m1, m2);
-    }
-    
-    /**
-     * Given 1 object implementing the PersonalizedPagerankAlgorithm interface 
-     * and a Map<Nodes, Values> related to the same graph(it's assumed, not checked)
-     * calculate the jaccard similarity between the sets of the nodes that would 
-     * be the topK scorers for both the algorithm and the map starting from the 
-     * same "selected" node (see the param selected),
-     * If the algorithm stores topK scores while the map stores topL scores
-     * with K!=L only the top min(K,L) scoring nodes are considered.
-     * @param alg1 Object containing computed personalized pageranks.
-     * @param alg2 Map containing personalized pagerank scores as if "selected"
-     * was the origin.
-     * @param selected For which node results gets compared.
-     * @return Jaccard similarity of results for the selected node
-     */
-    public double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final Map<V, D> alg2, final V selected)
-    {
-       //for the selected node get entries for both algos as arrays
-       Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-       Map.Entry<V, Double>[] m2 = alg2.entrySet().toArray(new Map.Entry[0]);
        
        return jaccardWrapped(m1, m2);
     }
@@ -87,7 +64,6 @@ public class ResultComparator<V, D>
        
        return ((double) entries1.size()) / union.size();
     }
-    
     
     
     /**
@@ -132,44 +108,65 @@ public class ResultComparator<V, D>
     }
     
     /**
-     * Given an algorithm containing personalized pageranks and a map of
-     * maps where every map contains the result of personalized pagerank for the
-     * node used as a key, for each key in the map of maps computed the jaccard
-     * similarity between the two sets of top scorers (in terms of personalized
-     * pagerank) provided by the algorithm and the map of maps.
-     * The information is then used to compute the min, average, max and 
-     * standard deviation of the jaccard similarity values.
-     * Once again it's assumed that alg1 and the map of maps have been computed
-     * from the same graph.
-     * @param alg1 Algorithm containing personalized pagerank results.
-     * @param maps Map of maps containing nodes (keys) mapped to their personalized pagerank.
-     * @return An array of 4 elements, min, average, max, standard deviation of the 
-     * jaccard similarities.
+     * Class which stores the results of the comparison and the running
+     * parameters of the confronted algorithms.
      */
-    public double[] jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, Map<V, Map<V, D>> maps)
+    private class Results
     {
-        //min, average, max, std deviation
-        double[] res = {1, 0, 0, 0};
-        double squareSum = 0;
-        for(V v: maps.keySet())
+        private final double min;
+        private final double average;
+        private final double max;
+        private final double std;//standard deviation
+        private final Parameters param1;//parameters of the first algorithm
+        private final Parameters param2;//parameters of the second algorithm
+        
+        private Results(final double min, final double average, final double max, 
+                final double std, Parameters param1, Parameters param2)
         {
-            double tmp = jaccard(alg1, maps.get(v), v);
-            //update min and max
-            res[0] = Math.min(res[0], tmp);
-            res[2] = Math.max(res[2], tmp);
-            
-            res[1] += tmp;
-            squareSum += tmp * tmp;
+            this.min = min;
+            this.average= average;
+            this.max = max;
+            this.std = std;
+            this.param1 = param1;
+            this.param2 = param2;
         }
-        //compute std deviation as sqrt ( 1/n *(squaresum - sum^2/N) )
-        res[3] = Math.sqrt
-        (
-                (squareSum -(res[1] * res[1]) / maps.size()) / maps.size()
-        );
-        res[1] /= maps.size();
-        return res;
+
+        public double getMin() {
+            return min;
+        }
+
+        public double getAverage() {
+            return average;
+        }
+
+        public double getMax() {
+            return max;
+        }
+
+        public double getStd() {
+            return std;
+        }
+
+        public Parameters getParam1() {
+            return param1;
+        }
+
+        public Parameters getParam2() {
+            return param2;
+        }
     }
     
+
+    public double levenstein(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
+    {
+       //for the selected node get entries for both algos as arrays
+       Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
+       Map.Entry<V, Double>[] m2 = alg2.getMap(selected).entrySet().toArray(new Map.Entry[0]);
+       
+       return levensteinWrapped(m1, m2);
+    }
+    
+    //wip
     private int levensteinWrapped(Map.Entry<V, Double>[] m1, Map.Entry<V, Double>[] m2)
     {
         //in case the first array stores topK results and the second stores topL results with K!=L
