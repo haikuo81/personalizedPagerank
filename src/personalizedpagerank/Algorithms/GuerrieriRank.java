@@ -53,7 +53,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     
     
     //Private class to store running parameters
-    private class GuerrieriParameters extends Parameters
+    public class GuerrieriParameters extends Parameters
     {
         private final int smallTop;
         private final int largetTop;
@@ -66,6 +66,14 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
             this.largetTop = largeTop;
         }
 
+        private GuerrieriParameters(GuerrieriParameters input)
+        {
+            super(input.getVertices(), input.getEdges(), input.getIterations(), 
+                    input.getDamping(), input.getTolerance());
+            this.smallTop = input.smallTop;
+            this.largetTop = input.largetTop;
+        }
+                
         public int getSmallTop() {
             return smallTop;
         }
@@ -249,7 +257,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     @Override
     public Parameters getParameters() 
     {
-        return parameters;
+        return new GuerrieriParameters(this.parameters);
     }
     
     /**

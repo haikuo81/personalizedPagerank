@@ -17,10 +17,6 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.WrappedPageRank;
 import personalizedpagerank.Utility.ResultComparator;
 
-    /**
-     *
-     * @author jacopo
-     */
     public class PersonalizedPagerank {
 
         /**
@@ -30,30 +26,22 @@ import personalizedpagerank.Utility.ResultComparator;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
             ResultComparator<Integer, Double> comp = new ResultComparator();
-            importGraphFromCsv(g, "../data/graphs/directed/p2p-Gnutella04.csv");
+            importGraphFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.ElecBs3Undirected.csv");
             System.out.println("finished importing ");
             
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 30, 100, 0.85);
-            System.out.println("done grank");
-            
-            /*
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 100);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 700);
             System.out.println("done prank");
             
-            double[] res = comp.levenstein(res1, res2, res2.getNodes());
-            System.out.println(res[0]);
-            System.out.println(res[1]);
-            System.out.println(res[2]);
-            System.out.println(res[3]);
-            
-            System.out.println("------------------");
-            res1 = new GuerrieriRank(g, 30, 500, 100, 0.85);
-            res = comp.levenstein(res1, res2, res2.getNodes());
-            System.out.println(res[0]);
-            System.out.println(res[1]);
-            System.out.println(res[2]);
-            System.out.println(res[3]);
-            */
+            int iterations = 22;
+            ComparisonData[] data = new ComparisonData[iterations];
+            for(int i = 0; i < iterations; i++)
+            {
+                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 10 + 4 * i, 100, 0.85, 0.0001);
+                data[i] = comp.compare(res1, res2, res2.getNodes());
+                System.out.println(i);
+            }
+            System.out.println("done grank");
+            ComparisonData.writeCsv("data/wikiElec.ElecBs3Undirected.csv", data);
         }
 
     /**

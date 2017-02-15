@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import personalizedpagerank.ComparisonData;
 import personalizedpagerank.Parameters;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Result;
 
 //class to do result comparison of the different algorithms, it assumes that the passed object refer to the same graph
 public class ResultComparator<V, D>
@@ -15,52 +17,16 @@ public class ResultComparator<V, D>
     private final Levenstein<Map.Entry<V, Double>> levenstein = new Levenstein<>();
     
     /**
-     * Class which stores the results of the comparison and the running
-     * parameters of the confronted algorithms.
+     * Given 2 algorithms compares their personalized pagerank results of a 
+     * set of nodes.
+     * @param alg1 First algorithm.
+     * @param alg2 Second algorithm.
+     * @param nodes Set of nodes for which to do a comparison on the results.
+     * @return Class storing comparison results and running parameters for both algorithms.
      */
-    private class Results
+    public ComparisonData compare(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
     {
-        private final double min;
-        private final double average;
-        private final double max;
-        private final double std;//standard deviation
-        private final Parameters param1;//parameters of the first algorithm
-        private final Parameters param2;//parameters of the second algorithm
-        
-        private Results(final double min, final double average, final double max, 
-                final double std, Parameters param1, Parameters param2)
-        {
-            this.min = min;
-            this.average= average;
-            this.max = max;
-            this.std = std;
-            this.param1 = param1;
-            this.param2 = param2;
-        }
-
-        public double getMin() {
-            return min;
-        }
-
-        public double getAverage() {
-            return average;
-        }
-
-        public double getMax() {
-            return max;
-        }
-
-        public double getStd() {
-            return std;
-        }
-
-        public Parameters getParam1() {
-            return param1;
-        }
-
-        public Parameters getParam2() {
-            return param2;
-        }
+        return new ComparisonData(jaccard(alg1, alg2, nodes), levenstein(alg1, alg2, nodes), alg1.getParameters(), alg2.getParameters());
     }
     
     /**
@@ -80,7 +46,7 @@ public class ResultComparator<V, D>
      * @return An array of 4 elements, min, average, max, standard deviation of the
      * jaccard similarities.
      */
-    public double[] jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
+    private Result jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
     {
         //min, average, max, std deviation
         double[] res = {1, 0, 0, 0};
@@ -101,7 +67,7 @@ public class ResultComparator<V, D>
                 (squareSum -(res[1] * res[1]) / nodes.size()) / nodes.size()
         );
         res[1] /= nodes.size();
-        return res;
+        return new Result(res);
     }
     
     
@@ -158,7 +124,7 @@ public class ResultComparator<V, D>
      * @return An array of 4 elements, min, average, max, standard deviation of the
      * levenstein distances.
      */
-    public double[] levenstein(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
+    private Result levenstein(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
     {
         //min, average, max, std deviation
         double[] res = {1, 0, 0, 0};
@@ -179,7 +145,7 @@ public class ResultComparator<V, D>
                 (squareSum -(res[1] * res[1]) / nodes.size()) / nodes.size()
         );
         res[1] /= nodes.size();
-        return res;
+        return new Result(res);
     }
     
     /**
