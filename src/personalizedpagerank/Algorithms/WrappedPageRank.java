@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
@@ -13,7 +12,7 @@ import personalizedpagerank.Parameters;
 import personalizedpagerank.PersonalizedPageRankAlgorithm;
 
 /**
- * Wrapper of the PageRank class from jgraph library to store results from
+ * Wrapper of the PageRank class from jgrapht library to store results from
  * multiple runs of the algorithm from different origin nodes.
  */
 public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, Double>
@@ -28,13 +27,12 @@ public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, D
     
     /**
      * Create object and run the algorithm, results of the personalized pagerank
- are stored in the object.
+     * are stored in the object.
      * @param g the input graph
      * @param iterations the number of iterations to perform
      * @param dampingFactor the damping factor
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
- Negative values are allowed to specify that tolerance must be ignored.
-     * @param n Number of nodes for which to run the algorithm.
+     * @param samples Number of nodes for which to run the algorithm.
      */
     public WrappedPageRank(final DirectedGraph<V, E> g, final int iterations, final double dampingFactor, final double tolerance, int samples)
     {
@@ -42,11 +40,11 @@ public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, D
         this.scores = new HashMap<>();
         pickedNodes = new HashSet();
         
-        if(iterations <= 0) 
-            throw new IllegalArgumentException("Maximum iterations must be positive");
+        if(samples < 0) 
+            throw new IllegalArgumentException("Number of samples can't be negative");
         
-        if(dampingFactor < 0 || dampingFactor > 1)
-            throw new IllegalArgumentException("Damping factor must be [0,1]");
+        if(samples > g.vertexSet().size()) 
+            throw new IllegalArgumentException("Number of samples can't be greater than total nodes in the graph");
         
         parameters = new Parameters(g.vertexSet().size(), g.edgeSet().size(), 
                 iterations, dampingFactor, tolerance);
