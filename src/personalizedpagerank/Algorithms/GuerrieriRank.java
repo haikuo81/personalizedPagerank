@@ -313,12 +313,13 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
             nextScores.put(v, new HashMap<>());
         }
         
+        double factor, contribution, stored;
         while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
         {
             for(V v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
-                double factor = this.parameters.getDamping() / g.outDegreeOf(v);
+                factor = this.parameters.getDamping() / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
                 Map<V, Double> currentMap = nextScores.get(v);
@@ -338,13 +339,15 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                      */
                     for(V key: successorMap.keySet())
                     {
-                        Double contribution = factor * successorMap.get(key);
+                        contribution = factor * successorMap.get(key);
                         //if there was a previously stored value put the sum of that value and the contribution
                         //stored will be used to store the new value
-                        Double stored = (stored = currentMap.get(key)) != null? (contribution + stored) : contribution;
+                        stored = (currentMap.get(key) != null)? (currentMap.get(key) + contribution) : contribution;
+                        //stored = (stored = currentMap.get(key)) != null? (contribution + stored) : contribution;
                         currentMap.put(key, stored);
                         //using contribution to store scores.get(v).get(key) (the old value) to call it only once
-                        contribution = (contribution = scores.get(v).get(key)) != null? contribution : 0;
+                        //contribution = (contribution = scores.get(v).get(key)) != null? contribution : 0;
+                        contribution = (scores.get(v).get(key)) != null? scores.get(v).get(key) : 0;
                         //update maxDiff
                         maxDiff = Math.max(maxDiff, Math.abs(contribution - stored));
                     }
