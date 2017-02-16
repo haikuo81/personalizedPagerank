@@ -19,14 +19,11 @@ import personalizedpagerank.Utility.ResultComparator;
 
     public class PersonalizedPagerank {
 
-        /**
-         * @param args the command line arguments
-         */
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
             ResultComparator<Integer, Double> comp = new ResultComparator();
-            importGraphFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.ElecBs3Undirected.csv");
+            importGraphFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
             System.out.println("finished importing ");
             
             WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 700);
@@ -36,12 +33,12 @@ import personalizedpagerank.Utility.ResultComparator;
             ComparisonData[] data = new ComparisonData[iterations];
             for(int i = 0; i < iterations; i++)
             {
-                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 10 + 4 * i, 100, 0.85, 0.0001);
+                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 30 + i * 10, 100, 0.85, 0.0001);
                 data[i] = comp.compare(res1, res2, res2.getNodes());
                 System.out.println(i);
             }
             System.out.println("done grank");
-            ComparisonData.writeCsv("data/wikiElec.ElecBs3Undirected.csv", data);
+            ComparisonData.writeCsv("data/collabK30i20_22ite_fine.csv", data);
         }
 
     /**
