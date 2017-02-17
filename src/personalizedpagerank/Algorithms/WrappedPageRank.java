@@ -4,14 +4,13 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Parameters;
+import personalizedpagerank.Utility.Parameters;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to store results from
@@ -21,8 +20,8 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
 {
     private final DirectedGraph<Integer, DefaultEdge> g;
     private final Parameters parameters;
-    private Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
-    private Set<Integer> pickedNodes;
+    private final Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
+    private final Set<Integer> pickedNodes;
 
     //CONSTRUCTORS
     ////////////////////
@@ -110,6 +109,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     /**
      * @inheritDoc
      */
+    @Override
     public double getRank(final int origin,final int target)
     {
         if(!g.containsVertex(origin))

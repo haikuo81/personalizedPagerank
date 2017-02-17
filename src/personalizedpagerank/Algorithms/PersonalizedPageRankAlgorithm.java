@@ -2,7 +2,7 @@ package personalizedpagerank.Algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import personalizedpagerank.Parameters;
+import personalizedpagerank.Utility.Parameters;
 
 /**
  * Interface for classes that will contain scores related to personalized

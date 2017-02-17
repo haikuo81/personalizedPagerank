@@ -2,14 +2,16 @@ package personalizedpagerank.Algorithms;
 
 import personalizedpagerank.Utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap.Entry;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.Comparator;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.PartialSorter;
 
-public class GuerrieriRank
+public class GuerrieriRank implements PersonalizedPageRankAlgorithm
 {
     //Default number of scores to return for each node, after doing calculations with
     //the LARGE_TOP only the small top will be kept as a valid result.
@@ -32,18 +34,18 @@ public class GuerrieriRank
     
     private final DirectedGraph<Integer, DefaultEdge> g;
     private Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
-    private final UntemplatedGuerrieriParameters parameters;
-    private final PartialSorter<Int2DoubleOpenHashMap.BasicEntry> sorter = new PartialSorter();
+    private final GuerrieriParameters parameters;
+    private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
 
     
     
     //Private class to store running parameters
-    public class UntemplatedGuerrieriParameters extends Parameters
+    public class GuerrieriParameters extends Parameters
     {
         private final int smallTop;
         private final int largetTop;
         
-        private UntemplatedGuerrieriParameters(final int vertices, final int edges, final int smallTop, 
+        private GuerrieriParameters(final int vertices, final int edges, final int smallTop, 
                 final int largeTop, final int iterations, final double damping, final double tolerance)
         {
             super(vertices, edges, iterations, damping, tolerance);
@@ -51,7 +53,7 @@ public class GuerrieriRank
             this.largetTop = largeTop;
         }
 
-        private UntemplatedGuerrieriParameters(UntemplatedGuerrieriParameters input)
+        private GuerrieriParameters(GuerrieriParameters input)
         {
             super(input.getVertices(), input.getEdges(), input.getIterations(), 
                     input.getDamping(), input.getTolerance());
@@ -104,7 +106,7 @@ public class GuerrieriRank
         if(dampingFactor < 0 || dampingFactor > 1)
             throw new IllegalArgumentException("Damping factor must be [0,1]");
         
-        parameters = new UntemplatedGuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
+        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
                 smallTop, largeTop, iterations, dampingFactor, tolerance);
         
         run();
@@ -119,7 +121,7 @@ public class GuerrieriRank
      */
     public Parameters getParameters() 
     {
-        return new UntemplatedGuerrieriParameters(this.parameters);
+        return new GuerrieriParameters(this.parameters);
     }
     
     /**
@@ -249,6 +251,23 @@ public class GuerrieriRank
             input.entrySet().removeIf(e-> e.getValue().equals(lth) && input.size() > topL );
     }
     
+    
+    private class EntryComparator implements Comparator
+    {
+
+        @Override
+        public int compare(Object o1, Object o2) 
+        {
+            Int2DoubleMap.Entry e1 = (Int2DoubleMap.Entry) o1;
+            Int2DoubleMap.Entry e2 = (Int2DoubleMap.Entry) o2;
+            if(e1.getDoubleValue() < e2.getDoubleValue())
+                return -1;
+            else if(e1.getDoubleValue() == e2.getDoubleValue())
+                return 0;
+            else
+                return 1;
+        }
+    }
     /**
      * Keeps the topL entries of the map, based on a partial order on the Lth element.
      * @param input Input map.
@@ -256,11 +275,8 @@ public class GuerrieriRank
      */
     private void keepTopL3(Int2DoubleOpenHashMap input, final int topL)
     {
-        Int2DoubleOpenHashMap.BasicEntry[] values = input.entrySet().toArray(new Int2DoubleOpenHashMap.BasicEntry[0]);
-        sorter.partialSort(values, topL, 
-                (Int2DoubleOpenHashMap.BasicEntry e1, Int2DoubleOpenHashMap.BasicEntry e2)
-                -> {return e1.getDoubleValue() - e2.getDoubleValue();});
-        partialSort(values, topL);
+        Int2DoubleMap.Entry[] values = input.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        sorter.partialSort(values, topL, new EntryComparator());
         input.clear();
         for(int i = 0; i < topL; i++)
             input.put(values[i].getKey(), values[i].getValue());
