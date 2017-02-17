@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -25,7 +27,13 @@ import personalizedpagerank.Utility.ResultComparator;
             ResultComparator<Integer, Double> comp = new ResultComparator();
             importGraphFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
             System.out.println("finished importing ");
-            
+            Scanner reader = new Scanner(System.in);
+            int n;
+            UntemplatedGuerrieriRank a = new UntemplatedGuerrieriRank(g, 30, 200, 100, 0.85, 0.0001);
+            //PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 200, 100, 0.85, 0.0001);
+            System.out.println("finished untemplated");
+            System.out.println("finished generic");
+            /*
             WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 700);
             System.out.println("done prank");
             
@@ -39,6 +47,7 @@ import personalizedpagerank.Utility.ResultComparator;
             }
             System.out.println("done grank");
             ComparisonData.writeCsv("data/collabK30i20_22ite_fine.csv", data);
+            */
         }
 
     /**
