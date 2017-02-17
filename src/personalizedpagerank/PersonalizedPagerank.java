@@ -28,6 +28,7 @@ import personalizedpagerank.Utility.ResultComparator;
             importGraphFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
             System.out.println("finished importing ");
             Scanner reader = new Scanner(System.in);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 700);
             int n;
             UntemplatedGuerrieriRank a = new UntemplatedGuerrieriRank(g, 30, 200, 100, 0.85, 0.0001);
             //PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 200, 100, 0.85, 0.0001);

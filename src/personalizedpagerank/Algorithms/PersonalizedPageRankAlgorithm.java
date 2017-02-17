@@ -1,12 +1,14 @@
-package personalizedpagerank;
+package personalizedpagerank.Algorithms;
 
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import personalizedpagerank.Parameters;
 
 /**
- * @param <V> Type of nodes of the graph for which the algorithm has been run.
- * @param <D> An object representing the values/scores.
+ * Interface for classes that will contain scores related to personalized
+ * pagerank.
  */
-public interface PersonalizedPageRankAlgorithm<V extends Object, D extends Object>
+public interface PersonalizedPageRankAlgorithm
 {
     /**
      * Retrieves a map containing the personalized pagerank scores for a node.
@@ -18,7 +20,7 @@ public interface PersonalizedPageRankAlgorithm<V extends Object, D extends Objec
      * @return A map where key values are nodes from the graph and are mapped
      * to personalized pagerank scores.
      */
-    public Map<V, D> getMap(V origin);
+    public Int2DoubleOpenHashMap getMap(final int origin);
     
     /**
      * Retrieves a map where keys are nodes of the graph used to run the algorithm,
@@ -30,7 +32,7 @@ public interface PersonalizedPageRankAlgorithm<V extends Object, D extends Objec
      * The map returned could be unmodifiable.
      * @return Map of maps containing personalized pagerank scores.
      */
-    public Map<V, Map<V, D>> getMaps();
+    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps();
     
     /**
      * Given an origin node and a target node get the personalized pagerank score
@@ -40,7 +42,7 @@ public interface PersonalizedPageRankAlgorithm<V extends Object, D extends Objec
      * @param target Node for which the pagerank score is returned.
      * @return Personalized pagerank score of target node.
      */
-    public D getRank(V origin, V target);
+    public double getRank(final int origin,final int target);
     
     /**
      * Returns the parameters used to run the algorithm.

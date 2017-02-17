@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import personalizedpagerank.ComparisonData;
 import personalizedpagerank.Parameters;
-import personalizedpagerank.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Result;
 
 //class to do result comparison of the different algorithms, it assumes that the passed object refer to the same graph

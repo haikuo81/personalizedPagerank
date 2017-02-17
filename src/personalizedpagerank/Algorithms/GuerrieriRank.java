@@ -7,7 +7,6 @@ import java.util.Map;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import personalizedpagerank.Parameters;
-import personalizedpagerank.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Utility.PartialSorter;
 
 /**
