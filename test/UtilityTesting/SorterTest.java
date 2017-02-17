@@ -1,7 +1,7 @@
 package UtilityTesting;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.util.Random;
 import junit.framework.TestCase;
 import personalizedpagerank.Utility.PartialSorter;
@@ -9,16 +9,24 @@ import personalizedpagerank.Utility.PartialSorter;
 public class SorterTest extends TestCase
 {
     
-    PartialSorter<Integer> sorter = new PartialSorter();
+    PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
     
     public void testEmpty()
     {
         
-        HashMap<Integer, Double> map = new HashMap<>();
-        Map.Entry<Integer, Double>[] values = map.entrySet().toArray(new Map.Entry[0]);
+        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
+        Int2DoubleMap.Entry[] values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
         try
         {
-            sorter.partialSort(values, 0);
+            sorter.partialSort(values, 0, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                return 1;
+            });
             fail("this line shouldn't be reached");
         }
         catch(Exception e){}
@@ -26,14 +34,22 @@ public class SorterTest extends TestCase
     
     public void testLTooLarge()
     {
-        HashMap<Integer, Double> map = new HashMap<>();
+        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
         map.put(0, 0d);
         map.put(1, 0d);
         map.put(2, 0d);
-        Map.Entry<Integer, Double>[] values = map.entrySet().toArray(new Map.Entry[0]);
+        Int2DoubleMap.Entry[] values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
         try
         {
-            sorter.partialSort(values, map.size());
+            sorter.partialSort(values, map.size(), (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                return 1;
+            });
             fail("this line shouldn't be reached");
         }
         catch(Exception e){}
@@ -41,9 +57,9 @@ public class SorterTest extends TestCase
     
     public void testShuffleAndCheckPartialOrder()
     {
-        HashMap<Integer, Double> map = new HashMap<>();
+        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
         int n = 200;
-        Map.Entry<Integer, Double>[] values;
+        Int2DoubleMap.Entry[] values;
         
         //for each number (position) shuffle the array, partially sort it and check if result is correct
         for(int number = 0; number < n; number++)
@@ -52,17 +68,24 @@ public class SorterTest extends TestCase
             map.clear();
             for(int i = 0; i < n; i++)
                  map.put(i, i + 0d);
-            values = map.entrySet().toArray(new Map.Entry[0]);
+            values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
             shuffleArray(values);
-            
-            sorter.partialSort(values, number);
-            Double val = values[number].getValue();
+            sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                return 1;
+            });
+            double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
             for(int left = 0; left < number; left++)
-                assertTrue(values[left].getValue() >= val);
+                assertTrue(values[left].getDoubleValue() >= val);
             //check that values on the right are lower or equal by moving from nth to the end
             for(int right = number; right < map.size(); right++)
-                assertTrue(values[right].getValue() <= val);
+                assertTrue(values[right].getDoubleValue() <= val);
         }
     }
     
@@ -70,9 +93,9 @@ public class SorterTest extends TestCase
     {
         //testing with random "ints" to have some chance of equal values
         Random random = new Random();
-        HashMap<Integer, Double> map = new HashMap<>();
+        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
         int n = 200;
-        Map.Entry<Integer, Double>[] values;
+        Int2DoubleMap.Entry[] values;
         
         //for each number (position) shuffle the array, partially sort it and check if result is correct
         for(int number = 0; number < n; number++)
@@ -81,17 +104,26 @@ public class SorterTest extends TestCase
             map.clear();
             for(int i = 0; i < n; i++)
                 map.put(i, random.nextInt(n/200) + 0d);
-            values = map.entrySet().toArray(new Map.Entry[0]);
+            values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
             shuffleArray(values);
             
-            sorter.partialSort(values, number);
-            Double val = values[number].getValue();
+            sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                return 1;
+            });
+            
+            double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
             for(int left = 0; left < number; left++)
-                assertTrue(values[left].getValue() >= val);
+                assertTrue(values[left].getDoubleValue() >= val);
             //check that values on the right are lower or equal by moving from nth to the end
             for(int right = number; right < map.size(); right++)
-                assertTrue(values[right].getValue() <= val);
+                assertTrue(values[right].getDoubleValue() <= val);
             
         }
     }
@@ -99,9 +131,9 @@ public class SorterTest extends TestCase
     public void testShuffleAndCheckPartialOrderWithRandomDoubles()
     {
         Random random = new Random();
-        HashMap<Integer, Double> map = new HashMap<>();
+        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
         int n = 200;
-        Map.Entry<Integer, Double>[] values;
+        Int2DoubleMap.Entry[] values;
         
         //for each number (position) shuffle the array, partially sort it and check if result is correct
         for(int number = 0; number < n; number++)
@@ -110,25 +142,33 @@ public class SorterTest extends TestCase
             map.clear();
             for(int i = 0; i < n; i++)
                 map.put(i, random.nextDouble());
-            values = map.entrySet().toArray(new Map.Entry[0]);
+            values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
             shuffleArray(values);
             
-            sorter.partialSort(values, number);
-            Double val = values[number].getValue();
+            sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                return 1;
+            });
+            double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
             for(int left = 0; left < number; left++)
-                assertTrue(values[left].getValue() >= val);
+                assertTrue(values[left].getDoubleValue() >= val);
             //check that values on the right are lower or equal by moving from nth to the end
             for(int right = number; right < map.size(); right++)
-                assertTrue(values[right].getValue() <= val);
+                assertTrue(values[right].getDoubleValue() <= val);
         }
     }
     
     
-    private static void shuffleArray(Map.Entry<Integer, Double>[] array)
+    private static void shuffleArray(Int2DoubleMap.Entry[] array)
     {   
         int index;
-        Map.Entry<Integer, Double> temp;
+        Int2DoubleMap.Entry temp;
         Random random = new Random();
         for (int i = array.length - 1; i > 0; i--)
         {
