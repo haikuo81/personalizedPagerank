@@ -1,20 +1,18 @@
 package personalizedpagerank.Utility;
 
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import personalizedpagerank.ComparisonData;
-import personalizedpagerank.Parameters;
-import personalizedpagerank.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Result;
+import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 
 //class to do result comparison of the different algorithms, it assumes that the passed object refer to the same graph
-public class ResultComparator<V, D>
+public class ResultComparator
 {
     //for jaccard similarity
     private final Jaccard jaccard = new Jaccard<>();
-    private final Levenstein<Map.Entry<V, Double>> levenstein = new Levenstein<>();
+    private final Levenstein<Int2DoubleMap.Entry> levenstein = new Levenstein<>();
     
     /**
      * Given 2 algorithms compares their personalized pagerank results of a 
@@ -24,7 +22,7 @@ public class ResultComparator<V, D>
      * @param nodes Set of nodes for which to do a comparison on the results.
      * @return Class storing comparison results and running parameters for both algorithms.
      */
-    public ComparisonData compare(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
+    public ComparisonData compare(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes)
     {
         return new ComparisonData(jaccard(alg1, alg2, nodes), levenstein(alg1, alg2, nodes), alg1.getParameters(), alg2.getParameters());
     }
@@ -46,12 +44,12 @@ public class ResultComparator<V, D>
      * @return An array of 4 elements, min, average, max, standard deviation of the
      * jaccard similarities.
      */
-    private Result jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
+    private Result jaccard(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes)
     {
         //min, average, max, std deviation
         double[] res = {1, 0, 0, 0};
         double squareSum = 0;
-        for(V v: nodes)
+        for(Integer v: nodes)
         {
             double tmp = jaccard(alg1, alg2, v);
             //update min and max
@@ -83,20 +81,36 @@ public class ResultComparator<V, D>
      * @param selected For which node results gets compared.
      * @return Jaccard similarity of results for the selected node
      */
-    private double jaccard(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
+    private double jaccard(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2, final int selected)
     {
-       PartialSorter<V> sorter = new PartialSorter<>();
+       PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter<>();
        //for the selected node get entries for both algos as arrays
-       Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-       Map.Entry<V, Double>[] m2 = alg2.getMap(selected).entrySet().toArray(new Map.Entry[0]);
+       Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+       Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
        
        //in case the first array stores topK results and the second stores topL results with K!=L
        int min = Math.min(m1.length, m2.length);
-       sorter.partialSort(m1, min - 1);
-       sorter.partialSort(m2, min - 1);
+       sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
+        {
+            if(e1.getDoubleValue() < e2.getDoubleValue())
+                return -1;
+            else if(e1.getDoubleValue() == e2.getDoubleValue())
+                return 0;
+            else
+               return 1;
+       } );
+       sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
+        {
+            if(e1.getDoubleValue() < e2.getDoubleValue())
+                return -1;
+            else if(e1.getDoubleValue() == e2.getDoubleValue())
+                return 0;
+            else
+               return 1;
+       } );
        //create sets and do jaccard
-       Set<V> entries1 = new HashSet<>(min);
-       Set<V> entries2 = new HashSet<>(min);
+       Set<Integer> entries1 = new HashSet<>(min);
+       Set<Integer> entries2 = new HashSet<>(min);
        for(int i = 0; i < min; i++)
        {
            entries1.add(m1[i].getKey());
@@ -124,12 +138,12 @@ public class ResultComparator<V, D>
      * @return An array of 4 elements, min, average, max, standard deviation of the
      * levenstein distances.
      */
-    private Result levenstein(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, Set<V> nodes)
+    private Result levenstein(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes)
     {
         //min, average, max, std deviation
         double[] res = {1, 0, 0, 0};
         double squareSum = 0;
-        for(V v: nodes)
+        for(Integer v: nodes)
         {
             double tmp = levenstein(alg1, alg2, v);
             //update min and max
@@ -160,21 +174,31 @@ public class ResultComparator<V, D>
      * @param selected For which node results gets compared.
      * @return Leveinstein distance of results for the selected node.
      */
-    private double levenstein(final PersonalizedPageRankAlgorithm<V, D> alg1, final PersonalizedPageRankAlgorithm<V, D> alg2, final V selected)
+    private double levenstein(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2, final int selected)
     {
         //for the selected node get entries for both algos as arrays
-        Map.Entry<V, Double>[] m1 = alg1.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-        Map.Entry<V, Double>[] m2 = alg2.getMap(selected).entrySet().toArray(new Map.Entry[0]);
-
-        //sort entries by values
-        Arrays.sort(m1, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
+        Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        //sort entries by values, descending
+        Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
-                 return e2.getValue().compareTo(e1.getValue());
+             if(e1.getDoubleValue() < e2.getDoubleValue())
+                 return 1;
+             else if(e1.getDoubleValue() == e2.getDoubleValue())
+                 return 0;
+             else 
+                 return -1;
          });
-        Arrays.sort(m2, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
+        Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
-                 return e2.getValue().compareTo(e1.getValue());
+             if(e1.getDoubleValue() < e2.getDoubleValue())
+                 return 1;
+             else if(e1.getDoubleValue() == e2.getDoubleValue())
+                 return 0;
+             else 
+                 return -1;
          });
+        
         //in case the first array stores topK results and the second stores topL results with K!=L
         if(m1.length != m2.length)
         {
@@ -182,7 +206,7 @@ public class ResultComparator<V, D>
             m2 = Arrays.copyOf(m2, Math.min(m1.length, m2.length));
         }
        
-       return levenstein.distance(m1, m2, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
+       return levenstein.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
         {
             return (e1.getKey().equals(e2.getKey()))? 0 : -1;
         });

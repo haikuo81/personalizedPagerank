@@ -1,26 +1,27 @@
 package personalizedpagerank.Algorithms;
 
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
-import personalizedpagerank.Parameters;
-import personalizedpagerank.PersonalizedPageRankAlgorithm;
+import org.jgrapht.graph.DefaultEdge;
+import personalizedpagerank.Utility.Parameters;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to store results from
  * multiple runs of the algorithm from different origin nodes.
  */
-public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, Double>
+public class WrappedPageRank implements PersonalizedPageRankAlgorithm
 {
-    private final DirectedGraph<V, E> g;
+    private final DirectedGraph<Integer, DefaultEdge> g;
     private final Parameters parameters;
-    private Map<V, Map<V, Double>> scores;
-    private Set<V> pickedNodes;
+    private final Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
+    private final Set<Integer> pickedNodes;
 
     //CONSTRUCTORS
     ////////////////////
@@ -34,10 +35,11 @@ public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, D
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * @param samples Number of nodes for which to run the algorithm.
      */
-    public WrappedPageRank(final DirectedGraph<V, E> g, final int iterations, final double dampingFactor, final double tolerance, int samples)
+    public WrappedPageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
+            final double dampingFactor, final double tolerance, int samples)
     {
         this.g = g;
-        this.scores = new HashMap<>();
+        this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
         pickedNodes = new HashSet();
         
         if(samples < 0) 
@@ -50,21 +52,28 @@ public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, D
                 iterations, dampingFactor, tolerance);
         
         //pick nodes
-        ArrayList<V> nodes = new ArrayList<>(g.vertexSet());
+        ArrayList<Integer> nodes = new ArrayList<>(g.vertexSet());
         Collections.shuffle(nodes);
         for(int i = 0; i < samples; i++)
             pickedNodes.add(nodes.get(i));
-        for(V pick: pickedNodes)
+        for(Integer pick: pickedNodes)
             {
-                VertexScoringAlgorithm res2 = new PageRank(g, 0.85, 100, 0.0001, pick);
-                scores.put(pick, res2.getScores());
+                VertexScoringAlgorithm pr = new PageRank(g, parameters.getDamping(), 
+                        parameters.getIterations(), parameters.getTolerance(), pick);
+                Map<Integer, Double> pprScores = pr.getScores();
+                Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
+                map.defaultReturnValue(-1);
+                //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
+                for(Integer score: pprScores.keySet())
+                    map.put(score, pprScores.get(score));
+                scores.put(pick, map);
             }
     }
     
     //GETTERS
     ////////////////////
 
-    public Set<V> getNodes() {
+    public Set<Integer> getNodes() {
         return pickedNodes;
     }
     
@@ -81,33 +90,33 @@ public class WrappedPageRank<V, E> implements PersonalizedPageRankAlgorithm<V, D
      * @inheritDoc
      */
     @Override
-    public Map<V, Double> getMap(V origin)
+    public Int2DoubleOpenHashMap getMap(final int origin)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return Collections.unmodifiableMap(scores.get(origin));
+        return scores.get(origin);
     }
     
     /**
      * @inheritDoc
      */
     @Override
-    public Map<V, Map<V, Double>> getMaps()
+    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps()
     {
-        return Collections.unmodifiableMap(scores);
+        return scores;
     }
         
     /**
      * @inheritDoc
      */
     @Override
-    public Double getRank(V origin, V target)
+    public double getRank(final int origin,final int target)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return (scores.get(origin).get(target) != null)? scores.get(origin).get(target) : 0d;
+        return (scores.get(origin).get(target) != -1)? scores.get(origin).get(target) : 0d;
     }
     
 }
