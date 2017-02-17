@@ -1,29 +1,15 @@
 package personalizedpagerank.Algorithms;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import personalizedpagerank.Utility.Parameters;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
-import personalizedpagerank.Parameters;
+import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.PartialSorter;
 
-/**
- * Runs an instance of GuerrieriRank, which runs an approximation of pagerank
- * for each node in the graph, obtaining personalized pagerank scores for each node.
- * For I iterations (or until convergence) for each edge pagerank score is passed
- * from a child node to an ancestor. For each node only the top "largeTop" scores of 
- * personalized pagerank (as if that node was the origin and only node of the
- * teleport set) are kept, while the rest is pruned.
- * After calculations another round of pruning is executed, for each node 
- * only the "smallTop" scores are kept.
- * Note that the returned results may not be ordered.
- * The complexity is O(I *|Edges| * L).
- * @param <V> Object representing the nodes of the graph for which scores will be computed.
- * @param <E> Object representing the edges of the graph for which scores will be computed.
- */
-public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Double>
+public class GuerrieriRank
 {
     //Default number of scores to return for each node, after doing calculations with
     //the LARGE_TOP only the small top will be kept as a valid result.
@@ -44,20 +30,20 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     //than this the algorithm will stop.
     public static final double DEFAULT_TOLERANCE = 0.0001;
     
-    private final DirectedGraph<V, E> g;
-    private Map<V, Map<V, Double>> scores;
-    private final PartialSorter<V> sorter;
-    private final GuerrieriParameters parameters;
+    private final DirectedGraph<Integer, DefaultEdge> g;
+    private Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
+    private final UntemplatedGuerrieriParameters parameters;
+    private final PartialSorter<Int2DoubleOpenHashMap.BasicEntry> sorter = new PartialSorter();
 
     
     
     //Private class to store running parameters
-    public class GuerrieriParameters extends Parameters
+    public class UntemplatedGuerrieriParameters extends Parameters
     {
         private final int smallTop;
         private final int largetTop;
         
-        private GuerrieriParameters(final int vertices, final int edges, final int smallTop, 
+        private UntemplatedGuerrieriParameters(final int vertices, final int edges, final int smallTop, 
                 final int largeTop, final int iterations, final double damping, final double tolerance)
         {
             super(vertices, edges, iterations, damping, tolerance);
@@ -65,7 +51,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
             this.largetTop = largeTop;
         }
 
-        private GuerrieriParameters(GuerrieriParameters input)
+        private UntemplatedGuerrieriParameters(UntemplatedGuerrieriParameters input)
         {
             super(input.getVertices(), input.getEdges(), input.getIterations(), 
                     input.getDamping(), input.getTolerance());
@@ -87,127 +73,6 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     //CONSTRUCTORS
     ////////////////////
     
-    
-    /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
-     * 
-     * @param g the input graph
-     */
-    public GuerrieriRank(final DirectedGraph<V, E> g)
-    {
-        this.sorter = new PartialSorter<>();
-        this.g = g;
-        this.scores = new HashMap<>(g.vertexSet().size());
-        
-        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
-                DEFAULT_SMALL_TOP, DEFAULT_LARGE_TOP, DEFAULT_ITERATIONS, 
-                DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);
-        
-        run();
-    }
-    
-    /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
-     * 
-     * @param g the input graph
-     * @param smallTop How many max entries to keep in the final results.
-     * @param largeTop How many max entries to keep for each vertex during computation.
-     *       
-     */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final int smallTop, final int largeTop)
-    {
-        this.sorter = new PartialSorter<>();
-        this.g = g;
-        this.scores = new HashMap<>(g.vertexSet().size());
-
-        if(smallTop <= 0)
-            throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
-        
-        if(largeTop <= 0) 
-            throw new IllegalArgumentException("LargeTop k entries to keep must be positive");
-        
-        if(smallTop > largeTop)
-            throw new IllegalArgumentException("SmallTop can't be greater than largeTop");
-        
-        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
-                smallTop, largeTop, DEFAULT_ITERATIONS, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);   
-        
-        run();
-    }
-    
-    /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
-     * 
-     * @param g the input graph
-     * @param smallTop How many max entries to keep in the final results.
-     * @param largeTop How many max entries to keep for each vertex during computation.
-     * @param iterations the number of iterations to perform
-     *       
-     */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final int smallTop, final int largeTop, final int iterations)
-    {
-        this.sorter = new PartialSorter<>();
-        this.g = g;
-        this.scores = new HashMap<>(g.vertexSet().size());
-
-        if(smallTop <= 0)
-            throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
-        
-        if(largeTop <= 0) 
-            throw new IllegalArgumentException("LargeTop k entries to keep must be positive");
-        
-        if(smallTop > largeTop)
-            throw new IllegalArgumentException("SmallTop can't be greater than largeTop");
-                
-        if(iterations <= 0) 
-            throw new IllegalArgumentException("Maximum iterations must be positive");
-        
-        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
-                smallTop, largeTop, iterations, DEFAULT_DAMPING_FACTOR, DEFAULT_TOLERANCE);  
-        
-        run();
-    }
-    
-    /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
-     * 
-     * @param g the input graph
-     * @param smallTop How many max entries to keep in the final results.
-     * @param largeTop How many max entries to keep for each vertex during computation.
-     * @param iterations the number of iterations to perform
-     * @param dampingFactor the damping factor
-     */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final int smallTop, final int largeTop, final int iterations, final double dampingFactor)
-    {
-        this.sorter = new PartialSorter<>();
-        this.g = g;
-        this.scores = new HashMap<>(g.vertexSet().size());
-
-        if(smallTop <= 0)
-            throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
-        
-        if(largeTop <= 0) 
-            throw new IllegalArgumentException("LargeTop k entries to keep must be positive");
-        
-        if(smallTop > largeTop)
-            throw new IllegalArgumentException("SmallTop can't be greater than largeTop");
-                
-        if(iterations <= 0) 
-            throw new IllegalArgumentException("Maximum iterations must be positive");
-        
-        if(dampingFactor < 0 || dampingFactor > 1)
-            throw new IllegalArgumentException("Damping factor must be [0,1]");
-            
-        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
-                smallTop, largeTop, iterations, dampingFactor, DEFAULT_TOLERANCE);  
-        
-        run();
-    }
-    
     /**
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
@@ -219,12 +84,11 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * Negative values are allowed to specify that tolerance must be ignored.
      */
-    public GuerrieriRank(final DirectedGraph<V, E> g, final int smallTop, final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
+    public GuerrieriRank(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
     {
-        this.sorter = new PartialSorter<>();
         this.g = g;
-        this.scores = new HashMap<>(g.vertexSet().size());
-
+        this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
+        scores.defaultReturnValue(null);
         if(smallTop <= 0)
             throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
         
@@ -240,7 +104,7 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         if(dampingFactor < 0 || dampingFactor > 1)
             throw new IllegalArgumentException("Damping factor must be [0,1]");
         
-        parameters = new GuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
+        parameters = new UntemplatedGuerrieriParameters(g.vertexSet().size(), g.edgeSet().size(), 
                 smallTop, largeTop, iterations, dampingFactor, tolerance);
         
         run();
@@ -253,43 +117,39 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
     /**
      * @inheritDoc
      */
-    @Override
     public Parameters getParameters() 
     {
-        return new GuerrieriParameters(this.parameters);
+        return new UntemplatedGuerrieriParameters(this.parameters);
     }
     
     /**
      * @inheritDoc
      */
-    @Override
-    public Map<V, Double> getMap(V origin)
+    public Int2DoubleOpenHashMap getMap(final int origin)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return Collections.unmodifiableMap(scores.get(origin));
+        return scores.get(origin);
     }
     
     /**
      * @inheritDoc
      */
-    @Override
-    public Map<V, Map<V, Double>> getMaps()
+    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps()
     {
-        return Collections.unmodifiableMap(scores);
+        return scores;
     }
         
     /**
      * @inheritDoc
      */
-    @Override
-    public Double getRank(V origin, V target)
+    public double getRank(final int origin,final int target)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return (scores.get(origin).get(target) != null)? scores.get(origin).get(target) : 0d;
+        return (scores.get(origin).get(target) != -1)? scores.get(origin).get(target) : 0d;
     }
     
     //methods (no getters)
@@ -303,50 +163,51 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
         int iterations = this.parameters.getIterations();
         double maxDiff = this.parameters.getTolerance();
         //init scores
-        Map<V, Map<V, Double>> nextScores = new HashMap<>(g.vertexSet().size());
-        for(V v: g.vertexSet())
+        Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> nextScores = new Int2ObjectOpenHashMap(g.vertexSet().size());
+        for(Integer v: g.vertexSet())
         {
-            HashMap<V, Double> tmp = new HashMap<>();
-            tmp.put(v, 1d);
+            Int2DoubleOpenHashMap tmp = new Int2DoubleOpenHashMap();
+            tmp.put(v.intValue(), 1d);
             scores.put(v, tmp);
-            nextScores.put(v, new HashMap<>());
+            nextScores.put(v, new Int2DoubleOpenHashMap());
         }
         
         double factor, contribution, stored;
         while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
         {
-            for(V v: g.vertexSet())
+            for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
                 factor = this.parameters.getDamping() / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
-                Map<V, Double> currentMap = nextScores.get(v);
+                Int2DoubleOpenHashMap currentMap = nextScores.get(v);
                 currentMap.clear();
+                currentMap.defaultReturnValue(-1);
                 currentMap.put(v, 1 - this.parameters.getDamping());
                 
                 //for each successor of v
-                for(E e: g.outgoingEdgesOf(v))
+                for(DefaultEdge e: g.outgoingEdgesOf(v))
                 {
-                    V successor = Graphs.getOppositeVertex(g, e, v);
-                    Map<V, Double> successorMap = scores.get(successor);
+                    Integer successor = Graphs.getOppositeVertex(g, e, v);
+                    Int2DoubleOpenHashMap successorMap = scores.get(successor);
                     
                     /**
                      * for each value of personalized pagerank (max L values) saved 
                      * in the map  of a successor increment the personalized pagerank of v
                      * of a fraction of it.
                      */
-                    for(V key: successorMap.keySet())
+                    for(int key: successorMap.keySet())
                     {
                         contribution = factor * successorMap.get(key);
                         //if there was a previously stored value put the sum of that value and the contribution
                         //stored will be used to store the new value
-                        stored = (currentMap.get(key) != null)? (currentMap.get(key) + contribution) : contribution;
+                        stored = (currentMap.get(key) != -1)? (currentMap.get(key) + contribution) : contribution;
                         //stored = (stored = currentMap.get(key)) != null? (contribution + stored) : contribution;
                         currentMap.put(key, stored);
                         //using contribution to store scores.get(v).get(key) (the old value) to call it only once
                         //contribution = (contribution = scores.get(v).get(key)) != null? contribution : 0;
-                        contribution = (scores.get(v).get(key)) != null? scores.get(v).get(key) : 0;
+                        contribution = (scores.get(v).get(key)) != -1? scores.get(v).get(key) : 0;
                         //update maxDiff
                         maxDiff = Math.max(maxDiff, Math.abs(contribution - stored));
                     }
@@ -356,41 +217,19 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
                     keepTopL3(currentMap, this.parameters.largetTop);
             }
             // swap scores
-            Map<V, Map<V,Double>> tmp = scores;
+            Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> tmp = scores;
             scores = nextScores;
             nextScores = tmp;
             iterations--;            
         }
         //keep smalltop only
-        for(V v: scores.keySet())
+        for(int v: scores.keySet())
         {
             if(scores.get(v).size() > this.parameters.smallTop)
                 keepTopL3(scores.get(v), this.parameters.smallTop);
         }
     }
     
-    
-    //keeping 3 versions of it for profiling and other purposes
-    
-     /**
-     * Keeps the topL entries of the map, descending order based on values.
-     * @param input Input map.
-     * @param topL How many elements to keep from the top.
-     */
-    private void keepTopL1(Map<V, Double> input, final int topL)
-    {
-        //trasform the map in a list of entries
-        ArrayList<Map.Entry<V, Double>> list = new ArrayList<>(input.entrySet());
-
-        //order the entries with the comparator, descending order
-        Collections.sort(list, (Map.Entry<V, Double> e1, Map.Entry<V, Double> e2) ->
-        {
-            return e2.getValue().compareTo(e1.getValue());
-        });
-        input.clear();
-        for(int i = 0; i < topL; i++)
-            input.put(list.get(i).getKey(), list.get(i).getValue());
-    }
     
     /**
      * Keeps the topL entries of the map, after finding the value of the Lth 
@@ -400,10 +239,10 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      * @param input Input map.
      * @param topL How many elements to keep from the top.
      */
-    private void keepTopL2(Map<V, Double> input, final int topL)
+    private void keepTopL2(Int2DoubleOpenHashMap input, final int topL)
     {
-        Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
-        sorter.partialSort(values, topL);
+        Int2DoubleMap.Entry[] values = (Int2DoubleOpenHashMap.Entry[]) input.entrySet().toArray();
+        partialSort(values, topL);
         Double lth = values[topL].getValue();
         input.entrySet().removeIf(e-> e.getValue() < lth );
         if(input.size() > topL)
@@ -415,13 +254,52 @@ public class GuerrieriRank<V, E> implements PersonalizedPageRankAlgorithm<V, Dou
      * @param input Input map.
      * @param topL How many elements to keep from the top.
      */
-    private void keepTopL3(Map<V, Double> input, final int topL)
+    private void keepTopL3(Int2DoubleOpenHashMap input, final int topL)
     {
-        Map.Entry<V, Double>[] values = input.entrySet().toArray(new Map.Entry[0]);
-        sorter.partialSort(values, topL);
+        Int2DoubleOpenHashMap.BasicEntry[] values = input.entrySet().toArray(new Int2DoubleOpenHashMap.BasicEntry[0]);
+        sorter.partialSort(values, topL, 
+                (Int2DoubleOpenHashMap.BasicEntry e1, Int2DoubleOpenHashMap.BasicEntry e2)
+                -> {return e1.getDoubleValue() - e2.getDoubleValue();});
+        partialSort(values, topL);
         input.clear();
         for(int i = 0; i < topL; i++)
             input.put(values[i].getKey(), values[i].getValue());
     }
    
+    public void partialSort(Int2DoubleMap.Entry[] input, int n) 
+    {
+        if (n >= input.length)
+            throw new IllegalArgumentException("N must be lower than the length of the input");
+        int from = 0, to = input.length - 1;
+
+        while (from < to) 
+        {
+            int leftIndex = from, rightIndex = to;
+            Int2DoubleMap.Entry mid = input[(leftIndex + rightIndex) / 2];
+            
+            while (leftIndex < rightIndex) 
+            {
+                /*
+                if the value is greater than the pivot move it on the right 
+                side by swapping it with the value at rightIndex, else move on
+                */
+                if (input[leftIndex].getValue() <= mid.getValue()) 
+                { 
+                    Int2DoubleMap.Entry tmp = input[rightIndex];
+                    input[rightIndex] = input[leftIndex];
+                    input[leftIndex] = tmp;
+                    rightIndex--;
+                } 
+                else
+                    leftIndex++;
+            }
+            if (input[leftIndex].getValue() < mid.getValue())
+                leftIndex--;
+            //change to or from depending if what we are looking for is on the left or right part
+            if (n <= leftIndex) 
+                to = leftIndex;
+            else 
+                from = leftIndex + 1;
+        }
+    }
 }
