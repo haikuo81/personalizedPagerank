@@ -1,6 +1,5 @@
 package personalizedpagerank.Utility;
 
-import personalizedpagerank.Utility.Result;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -45,6 +44,12 @@ public class ComparisonData
         return param2;
     }
     
+    /**
+     * Writes the comparison results in a csv file.
+     * @param path File to write results in (not appending).
+     * @param data Comparisons, each comparison will be an entry (a line) in the
+     * resulting csv.
+     */
     public static void writeCsv(final String path, final ComparisonData[] data)
     {
         PrintWriter writer = null;
@@ -56,6 +61,7 @@ public class ComparisonData
         {
             e.printStackTrace();
         }
+        
         StringBuilder builder = new StringBuilder();
         String header = "nodes,edges,jaccard min,jaccard average,jaccard max,jaccard std,"
                 + "levenstein min,levenstein average,levenstein max,levenstein std";

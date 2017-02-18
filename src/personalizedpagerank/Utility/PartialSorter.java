@@ -3,15 +3,16 @@ package personalizedpagerank.Utility;
 import java.util.Comparator;
 
 /**
- * Partial sorter that uses selection sort.
+ * Partial sorter that uses selection sort to partially sort in a descending
+ * manner (keeps the greatest values, not the smallest).
  * @param <V> Class of elements to partially sort.
  */
 public class PartialSorter<V>
 {
     /**
-     * Partially sorts the array using selection sort.
+     * Partially sorts the array using selection sort in descending order.
      * Values greater than the nth value (the value that would be on the nth
-     * position if the array was sorted by entry.value in descending order) will
+     * position if the array was sorted in descending order) will
      * be on the left, and the lower values on the right.
      * @param input Input array of objects to partially sort.
      * @param n The nth element used to sort.
