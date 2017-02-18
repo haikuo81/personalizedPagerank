@@ -15,7 +15,6 @@ public interface PersonalizedPageRankAlgorithm
      * Given a node "origin" the map contains pagerank scores for (a number)
      * of nodes  in the graph as if pagerank was run having the origin node
      * as the only starting node and the only node in the teleport set.
-     * The map returned could be unmodifiable.
      * @param origin Origin node for the pagerank scores in the map.
      * @return A map where key values are nodes from the graph and are mapped
      * to personalized pagerank scores.
@@ -29,7 +28,6 @@ public interface PersonalizedPageRankAlgorithm
      * Each map returned associated with a node is a map containing personalized 
      * pagerank scores of a number of nodes, with the key used to retrieve the map
      * being the origin node (the only node in the starting and the teleport set).
-     * The map returned could be unmodifiable.
      * @return Map of maps containing personalized pagerank scores.
      */
     public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps();

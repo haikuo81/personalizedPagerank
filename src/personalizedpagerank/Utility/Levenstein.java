@@ -17,7 +17,6 @@ public class Levenstein<V>
      */
     public int distance(V[] m1, V[] m2)
     {
-        //do levenstein but consider only a string formed by the top values
         int [][] matrix = new int[m1.length+1][m2.length+1];
         
         //if the string is empty the distance is the length of the non empty string
@@ -57,7 +56,6 @@ public class Levenstein<V>
      */
     public int distance(V[] m1, V[] m2, Comparator< ? super V> comp)
     {
-        //do levenstein but consider only a string formed by the top values
         int [][] matrix = new int[m1.length + 1][m2.length + 1];
         
         //if the string is empty the distance is the length of the non empty string

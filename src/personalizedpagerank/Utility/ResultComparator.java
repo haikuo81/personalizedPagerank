@@ -11,7 +11,7 @@ import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 public class ResultComparator
 {
     //for jaccard similarity
-    private final Jaccard jaccard = new Jaccard<>();
+    private final Jaccard<Integer> jaccard = new Jaccard<>();
     private final Levenstein<Int2DoubleMap.Entry> levenstein = new Levenstein<>();
     
     /**
@@ -87,34 +87,47 @@ public class ResultComparator
        //for the selected node get entries for both algos as arrays
        Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
        Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+       Set<Integer> entries1;
+       Set<Integer> entries2;
        
        //in case the first array stores topK results and the second stores topL results with K!=L
-       int min = Math.min(m1.length, m2.length);
-       sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
-        {
-            if(e1.getDoubleValue() < e2.getDoubleValue())
-                return -1;
-            else if(e1.getDoubleValue() == e2.getDoubleValue())
-                return 0;
-            else
-               return 1;
-       } );
-       sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
-        {
-            if(e1.getDoubleValue() < e2.getDoubleValue())
-                return -1;
-            else if(e1.getDoubleValue() == e2.getDoubleValue())
-                return 0;
-            else
-               return 1;
-       } );
-       //create sets and do jaccard
-       Set<Integer> entries1 = new HashSet<>(min);
-       Set<Integer> entries2 = new HashSet<>(min);
-       for(int i = 0; i < min; i++)
+       if(m1.length != m2.length)
        {
-           entries1.add(m1[i].getKey());
-           entries2.add(m2[i].getKey());
+           int min = Math.min(m1.length, m2.length);
+           
+           sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                   return 1;
+           } );
+           
+           sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
+            {
+                if(e1.getDoubleValue() < e2.getDoubleValue())
+                    return -1;
+                else if(e1.getDoubleValue() == e2.getDoubleValue())
+                    return 0;
+                else
+                   return 1;
+           } );
+           
+           //create sets and do jaccard
+           entries1 = new HashSet<>(min);
+           entries2 = new HashSet<>(min);
+           for(int i = 0; i < min; i++)
+           {
+               entries1.add(m1[i].getKey());
+               entries2.add(m2[i].getKey());
+           }
+       }
+       else
+       {
+           entries1 = alg1.getMap(selected).keySet();
+           entries2 = alg2.getMap(selected).keySet();
        }
        
        return jaccard.similarity(entries1, entries2);
@@ -179,6 +192,7 @@ public class ResultComparator
         //for the selected node get entries for both algos as arrays
         Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
         Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        
         //sort entries by values, descending
         Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
@@ -189,6 +203,7 @@ public class ResultComparator
              else 
                  return -1;
          });
+        
         Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
              if(e1.getDoubleValue() < e2.getDoubleValue())

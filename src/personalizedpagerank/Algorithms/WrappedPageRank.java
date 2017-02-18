@@ -29,9 +29,9 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     /**
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
-     * @param g the input graph
-     * @param iterations the number of iterations to perform
-     * @param dampingFactor the damping factor
+     * @param g The input graph.
+     * @param iterations The number of iterations to perform.
+     * @param dampingFactor The damping factor.
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * @param samples Number of nodes for which to run the algorithm.
      */
@@ -52,20 +52,19 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 iterations, dampingFactor, tolerance);
         
         //pick nodes
-        ArrayList<Integer> nodes = new ArrayList<>(g.vertexSet());
+        ArrayList<Integer> nodes = new ArrayList<>(samples);
         Collections.shuffle(nodes);
-        for(int i = 0; i < samples; i++)
-            pickedNodes.add(nodes.get(i));
-        for(Integer pick: pickedNodes)
+        for(Integer pick: nodes)
             {
+                pickedNodes.add(pick);
                 VertexScoringAlgorithm pr = new PageRank(g, parameters.getDamping(), 
                         parameters.getIterations(), parameters.getTolerance(), pick);
                 Map<Integer, Double> pprScores = pr.getScores();
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
                 map.defaultReturnValue(-1);
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
-                for(Integer score: pprScores.keySet())
-                    map.put(score, pprScores.get(score));
+                for(Integer v: pprScores.keySet())
+                    map.put(v, pprScores.get(v));
                 scores.put(pick, map);
             }
     }
