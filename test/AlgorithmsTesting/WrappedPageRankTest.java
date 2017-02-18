@@ -118,8 +118,10 @@ public class WrappedPageRankTest extends TestCase
         PersonalizedPageRankAlgorithm res = new WrappedPageRank(g, 10, 0.5, 0.0001, 1);
         assertEquals(res.getMaps().size(), 1, 0);
         assertEquals(res.getMap(1).size(), 1, 0);
-        //expected is 1 because as of now nodes without edges always teleport
-        assertEquals((Double) res.getRank(1, 1), 1, 0);
+        //expected 0.5 because as of now nodes with no edges have a teleport chance equal
+        //to 1 - damping factor in PageRank.java when the algorithm is run for
+        //a origin node (personalized)
+        assertEquals((Double) res.getRank(1, 1), 0.5, 0.001);
         
         //1 node 1 edge to himself
         g.addEdge(1, 1);
@@ -189,8 +191,10 @@ public class WrappedPageRankTest extends TestCase
        
         PersonalizedPageRankAlgorithm res = new WrappedPageRank(g, 50, 0.8, 0.0001, 6);
 
-        //expected 1 because as of now nodes with no edges always teleport in Algorithms.PageRank
-        assertEquals(res.getRank(0, 0), 1, 0.01);
+        //expected 0.2 because as of now nodes with no edges have a teleport chance equal
+        //to 1 - damping factor in PageRank.java when the algorithm is run for
+        //a origin node (personalized)
+        assertEquals(res.getRank(0, 0), 0.2, 0.01);
         for(int i = 1; i < 6; i++)
             assertEquals(res.getRank(0, i), 0d, 0d);
 
