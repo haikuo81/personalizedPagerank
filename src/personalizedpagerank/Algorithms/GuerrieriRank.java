@@ -193,6 +193,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         double factor, contribution, summation;
         while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
         {
+            //reset the highest difference to 0 at the start of the run
+            maxDiff = 0;
             for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
