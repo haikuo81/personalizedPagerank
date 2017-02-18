@@ -317,7 +317,7 @@ public class PageRankTest
         g.addVertex("a");
 
         VertexScoringAlgorithm<String, Double> pr = new PageRank<>(g, 0.85, 100, 0.0001,"a");
-        assertEquals(pr.getVertexScore("a"),1,0);
+        assertEquals(pr.getVertexScore("a"), 0.15, 0.0001);
     }
     
     public void testNoEdgesGraphPPR()
@@ -331,7 +331,7 @@ public class PageRankTest
         
 
         VertexScoringAlgorithm<String, Double> pr = new PageRank<>(g, 0.85, 100, 0.0001,"a");
-        assertEquals(pr.getVertexScore("a"),1,0);
+        assertEquals(pr.getVertexScore("a"), 0.15, 0.0001);
     }
     
     public void testOriginShouldBeHighestScore1PPR()
@@ -351,8 +351,8 @@ public class PageRankTest
         g.addEdge("d","b");
         g.addEdge("d","c");
         
-        VertexScoringAlgorithm<String, Double> pr = new PageRank<>(g, 0.85, 100, 0.0001,"a");
-        assertEquals(pr.getVertexScore("a"),1,0);
+        VertexScoringAlgorithm<String, Double> pr = new PageRank<>(g, 0.85d, 100, 0.0001,"a");
+        assertEquals(pr.getVertexScore("a"), 0.15, 0.0001);
         assertEquals(pr.getVertexScore("b"),0,0);
         assertEquals(pr.getVertexScore("c"),0,0);
         assertEquals(pr.getVertexScore("d"),0,0);
