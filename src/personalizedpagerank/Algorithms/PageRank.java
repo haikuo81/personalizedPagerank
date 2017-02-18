@@ -286,57 +286,23 @@ public final class PageRank<V, E>
             specifics = new UndirectedSpecifics(g);
         }
         
-        Map<V, Double> weights = Collections.emptyMap();
-
         //init every non origin score to 0 and origin to 1
         for (V v : g.vertexSet()) 
             scores.put(v, 0d);
         scores.put(origin, 1d);
             
-
-        // run PageRank
+        //run PageRank
         Map<V, Double> nextScores = new HashMap<>();
         double maxChange = tolerance;
         
         while (maxIterations > 0 && maxChange >= tolerance) 
         {
-            //compute score to add to origin from teleport
-            double teleportContribution = 0d;
-            for (V v : g.vertexSet()) 
-            {
-                /*
-                if there are outgoing edges send to teleport only a fraction of the score
-                if no outgoing edges the entire score is sent to teleport
-                */
-                if (specifics.outgoingEdgesOf(v).size() > 0)
-                {
-                    teleportContribution += (1d - dampingFactor) * scores.get(v);
-                }
-                else 
-                {
-                    teleportContribution += scores.get(v);
-                }
-            }
-
             //compute score for every node
             maxChange = 0d;
             for (V v : g.vertexSet()) 
             {
-                /*
-                prolem: the current vNewValue for the origin must be updated to have
-                a proper maxChange check
+                double vNewValue = v.equals(origin)? (1 - dampingFactor) : 0d;
                 
-                )we could either ignore this and have a
-                more inaccurate maxChange check and a faster loop by adding the
-                teleportContribution to origin after this for cycle
-                
-                )or have another map  wich is initialized only once where only the value
-                paired with the origin node is updated while the rest is always 0
-                
-                )will need profiling and more ideas, low priority since personalized pagerank
-                for each node isn't what we are looking after
-                */
-                double vNewValue = v.equals(origin)? teleportContribution : 0d;
                 //for every incoming edge accumulate pagerank from the parent
                 for (E e : specifics.incomingEdgesOf(v)) 
                 {
@@ -369,7 +335,7 @@ public final class PageRank<V, E>
     class DirectedSpecifics
         extends Specifics
     {
-        private DirectedGraph<V, E> graph;
+        private final DirectedGraph<V, E> graph;
 
         public DirectedSpecifics(DirectedGraph<V, E> g)
         {
@@ -392,7 +358,7 @@ public final class PageRank<V, E>
     class UndirectedSpecifics
         extends Specifics
     {
-        private Graph<V, E> graph;
+        private final Graph<V, E> graph;
 
         public UndirectedSpecifics(Graph<V, E> g)
         {
