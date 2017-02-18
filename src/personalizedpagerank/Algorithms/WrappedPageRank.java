@@ -52,20 +52,20 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 iterations, dampingFactor, tolerance);
         
         //pick nodes
-        ArrayList<Integer> nodes = new ArrayList<>(samples);
+        ArrayList<Integer> nodes = new ArrayList<>(g.vertexSet());
         Collections.shuffle(nodes);
-        for(Integer pick: nodes)
+        for(int i = 0; i < samples; i++)
             {
-                pickedNodes.add(pick);
+                pickedNodes.add(nodes.get(i));
                 VertexScoringAlgorithm pr = new PageRank(g, parameters.getDamping(), 
-                        parameters.getIterations(), parameters.getTolerance(), pick);
+                        parameters.getIterations(), parameters.getTolerance(), nodes.get(i));
                 Map<Integer, Double> pprScores = pr.getScores();
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
                 map.defaultReturnValue(-1);
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
                 for(Integer v: pprScores.keySet())
                     map.put(v, pprScores.get(v));
-                scores.put(pick, map);
+                scores.put(nodes.get(i), map);
             }
     }
     
