@@ -60,11 +60,11 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 VertexScoringAlgorithm pr = new PageRank(g, parameters.getDamping(), 
                         parameters.getIterations(), parameters.getTolerance(), nodes.get(i));
                 Map<Integer, Double> pprScores = pr.getScores();
-                Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
-                map.defaultReturnValue(-1);
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
-                for(Integer v: pprScores.keySet())
-                    map.put(v, pprScores.get(v));
+                Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
+                for(Integer node: pprScores.keySet())
+                    map.put(node, pprScores.get(node));
+                map.defaultReturnValue(-1);
                 scores.put(nodes.get(i), map);
             }
     }

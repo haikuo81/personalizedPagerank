@@ -98,21 +98,21 @@ public class ResultComparator
            sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
             {
                 if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
+                    return 1;
                 else if(e1.getDoubleValue() == e2.getDoubleValue())
                     return 0;
                 else
-                   return 1;
+                   return -1;
            } );
            
            sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
             {
                 if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
+                    return 1;
                 else if(e1.getDoubleValue() == e2.getDoubleValue())
                     return 0;
                 else
-                   return 1;
+                   return -1;
            } );
            
            //create sets and do jaccard
