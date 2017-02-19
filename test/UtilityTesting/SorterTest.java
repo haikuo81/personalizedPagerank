@@ -73,11 +73,11 @@ public class SorterTest extends TestCase
             sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
                 if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
+                    return 1;
                 else if(e1.getDoubleValue() == e2.getDoubleValue())
                     return 0;
                 else
-                return 1;
+                    return -1;
             });
             double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
@@ -148,11 +148,11 @@ public class SorterTest extends TestCase
             sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
                 if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
+                    return 1;
                 else if(e1.getDoubleValue() == e2.getDoubleValue())
                     return 0;
                 else
-                return 1;
+                return -1;
             });
             double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
