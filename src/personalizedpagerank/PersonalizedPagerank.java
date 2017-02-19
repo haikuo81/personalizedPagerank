@@ -27,19 +27,20 @@ import personalizedpagerank.Utility.ResultComparator;
             ResultComparator comp = new ResultComparator();
             importGraphFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
             System.out.println("finished importing ");
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 7);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 700);
             System.out.println("done prank");
             
-            int iterations = 3;
+            int iterations = 100;
             ComparisonData[] data = new ComparisonData[iterations];
             for(int i = 0; i < iterations; i++)
             {
-                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 10, 10 + i * 10, 100, 0.85, 0.0001);
+                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 30 + i, 100, 0.85, 0.0001);
                 data[i] = comp.compare(res1, res2, res2.getNodes());
                 System.out.println(i);
+                System.gc();
             }
             System.out.println("done grank");
-            ComparisonData.writeCsv("data/test.csv", data);
+            ComparisonData.writeCsv("data/collabK30.csv", data);
         }
 
     /**

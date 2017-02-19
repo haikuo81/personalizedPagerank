@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Comparator;
+import java.util.Stack;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -48,7 +49,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     
     
     //Private class to store running parameters
-    public class GuerrieriParameters extends Parameters
+    public static class GuerrieriParameters extends Parameters
     {
         private final int smallTop;
         private final int largetTop;
@@ -180,8 +181,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> nextScores = new Int2ObjectOpenHashMap(g.vertexSet().size());
         for(Integer v: g.vertexSet())
         {
-            Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap();
-            Int2DoubleOpenHashMap nextScoresMap = new Int2DoubleOpenHashMap();
+            Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap(this.parameters.largetTop);
+            Int2DoubleOpenHashMap nextScoresMap = new Int2DoubleOpenHashMap(this.parameters.largetTop);
             //return values for when a key has no mapped value
             scoresMap.defaultReturnValue(-1);
             nextScoresMap.defaultReturnValue(-1);
@@ -253,6 +254,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         {
             if(scores.get(v).size() > this.parameters.smallTop)
                 keepTopL(scores.get(v), this.parameters.smallTop);
+            scores.get(v).trim();
         }
     }
     
@@ -264,6 +266,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     private void keepTopL(Int2DoubleOpenHashMap input, final int topL)
     {
         Int2DoubleMap.Entry[] values = input.int2DoubleEntrySet().toArray(new Int2DoubleMap.Entry[0]);
+        
         sorter.partialSort(values, topL, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
         {
             if(e1.getDoubleValue() < e2.getDoubleValue())
@@ -273,9 +276,28 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             else
                 return -1;
         });
-        input.clear();
-        for(int i = 0; i < topL; i++)
-            input.put(values[i].getKey(), values[i].getValue());
+        //if too many to remove just clear and add the first topL
+        //else just remove the non topL
+        if(values.length > topL * 2)
+        {
+            //res is needed as a temporary holder since doing input.clear() will remove keys from values
+            Int2DoubleOpenHashMap res = new Int2DoubleOpenHashMap(topL);
+            for(int i = 0; i < topL; i++)
+                res.put(values[i].getIntKey(), values[i].getDoubleValue());
+            input.clear();
+            input.putAll(res);
+        }
+        else
+        {
+            //needs a temporary holder since changes in the map are reflected in the Map.Entry[]
+            int[] toRemove = new int[values.length - topL];
+            for(int i = topL, index = 0; i < values.length; i++)
+            {
+                toRemove[index]= values[i].getIntKey();
+                index++;
+            }
+            for(int i = 0; i < toRemove.length; i++)
+                input.remove(toRemove[i]);
+        }
     }
-   
 }

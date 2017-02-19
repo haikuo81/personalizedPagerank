@@ -129,7 +129,6 @@ public class ResultComparator
            entries1 = alg1.getMap(selected).keySet();
            entries2 = alg2.getMap(selected).keySet();
        }
-       
        return jaccard.similarity(entries1, entries2);
     }
     
