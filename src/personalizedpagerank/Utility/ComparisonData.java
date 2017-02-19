@@ -63,19 +63,15 @@ public class ComparisonData
         }
         
         StringBuilder builder = new StringBuilder();
-        String header = "nodes,edges,jaccard min,jaccard average,jaccard max,jaccard std,"
-                + "levenstein min,levenstein average,levenstein max,levenstein std";
+        builder.append("nodes,edges,");
+                      
+        //add headers for first and second algorithm parameters
+        getHeaderNames(builder, data[0].param1,",");
+        getHeaderNames(builder, data[0].param2,",");
         
-        //add header for first algorithm parameters
-        header += ",iterations alg1,damping alg1,tolerance alg1";
-        if(data[0].param1 instanceof GuerrieriRank.GuerrieriParameters)
-            header += ",smallTop alg1,largeTop alg1,topRatio alg1";
-        //add header for second algorithm parameters
-        header += ",iterations alg2,damping alg2,tolerance alg2";
-        if(data[0].param2 instanceof GuerrieriRank.GuerrieriParameters)
-            header += ",smallTop alg2,largeTop alg2,topRatio alg2";
+        builder.append("jaccard min,jaccard average,jaccard max,jaccard std,"
+                + "levenstein min,levenstein average,levenstein max,levenstein std");
         
-        builder.append(header);
         builder.append(System.getProperty("line.separator"));
         
         //write each instance of the ComparisonData[] as a line 
@@ -83,6 +79,9 @@ public class ComparisonData
         {
             builder.append(data[i].param1.getVertices()).append(",");
             builder.append(data[i].param1.getEdges()).append(",");
+            
+            getParametersData(builder, data[i].param1, ",");
+            getParametersData(builder, data[i].param2, ",");
             
             builder.append(data[i].jaccard.getMin()).append(",");
             builder.append(data[i].jaccard.getAverage()).append(",");
@@ -94,34 +93,47 @@ public class ComparisonData
             builder.append(data[i].levenstein.getMax()).append(",");
             builder.append(data[i].levenstein.getStd()).append(",");
             
-            builder.append(data[i].param1.getIterations()).append(",");
-            builder.append(data[i].param1.getDamping()).append(",");
-            builder.append(data[i].param1.getTolerance()).append(",");
-            
-            if(data[i].param1 instanceof GuerrieriRank.GuerrieriParameters)
-            {
-                GuerrieriRank.GuerrieriParameters p = (GuerrieriRank.GuerrieriParameters) data[i].param1;
-                builder.append(p.getSmallTop()).append(",");
-                builder.append(p.getLargetTop()).append(",");
-                builder.append( ((double)p.getLargetTop()) / p.getSmallTop()).append(",");
-            }
-            
-            builder.append(data[i].param2.getIterations()).append(",");
-            builder.append(data[i].param2.getDamping()).append(",");
-            builder.append(data[i].param2.getTolerance());
-            
-            if(data[i].param2 instanceof GuerrieriRank.GuerrieriParameters)
-            {
-                builder.append(",");
-                GuerrieriRank.GuerrieriParameters p = (GuerrieriRank.GuerrieriParameters) data[i].param2;
-                builder.append(p.getSmallTop()).append(",");
-                builder.append(p.getLargetTop()).append(",");
-                //do not append "," since it's the last element
-                builder.append( ((double)p.getLargetTop()) / p.getSmallTop());
-            }
             builder.append(System.getProperty("line.separator"));
         }
         writer.write(builder.toString());
         writer.close();
+    }
+    
+    /**
+     * Add to the header builder parameters names based on parameters class.
+     * @param header Builder that will contain the parameter names.
+     * @param parameters Class to decide what to add to the header.
+     * @param append Last thing to append to the builder.
+     */
+    private static void getHeaderNames(final StringBuilder header, final Parameters parameters, final String append)
+    {
+        header.append("iterations,damping,tolerance");
+        if(parameters instanceof GuerrieriRank.GuerrieriParameters)
+            header.append(",smallTop,largeTop,topRatio");
+        header.append(append);
+    }
+    
+    /**
+     * Get data from parameters to add to the content builder based on parameters
+     * class.
+     * @param content Builder that data will be appended to.
+     * @param parameters Class which fields will be added to the builder. 
+     * @param append Last thing to append to the builder.
+     */
+    private static void getParametersData(final StringBuilder content, 
+            final Parameters parameters, final String append)
+    {
+        content.append(parameters.getIterations()).append(",");
+        content.append(parameters.getDamping()).append(",");
+        content.append(parameters.getTolerance());
+        if(parameters instanceof GuerrieriRank.GuerrieriParameters)
+        {
+            GuerrieriRank.GuerrieriParameters p = (GuerrieriRank.GuerrieriParameters) parameters;
+            content.append(",");
+            content.append(p.getSmallTop()).append(",");
+            content.append(p.getLargetTop()).append(",");
+            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+        }
+        content.append(append);
     }
 }

@@ -3,22 +3,19 @@ package personalizedpagerank.Utility;
 import java.util.Comparator;
 
 /**
- * Partial sorter that uses selection sort to partially sort in a descending
- * manner (keeps the greatest values, not the smallest).
+ * Partial sorter that uses selection sort to partially sort, relations between
+ * values are decided by a comparator passed as an argument.
  * @param <V> Class of elements to partially sort.
  */
 public class PartialSorter<V>
 {
     /**
-     * Partially sorts the array using selection sort in descending order.
-     * Values greater than the nth value (the value that would be on the nth
-     * position if the array was sorted in descending order) will
-     * be on the left, and the lower values on the right.
+     * Partially sorts the array using selection sort.
      * @param input Input array of objects to partially sort.
      * @param n The nth element used to sort.
-     * @param comp Comparator that returns 0 if the first argument is equal to
-     * the second, a negative number if the first is lower than the second and
-     * a positive number if the first is greater than the second.
+     * @param comp Comparator that returns 0 if 2 values are equal, a negative or 
+     * a positive value when they are not depending on which order you want
+     * to partially sort.
      */
     public void partialSort(V[] input, int n, Comparator< ? super V> comp) 
     {
@@ -37,7 +34,7 @@ public class PartialSorter<V>
                 if the value is greater than the pivot move it on the right 
                 side by swapping it with the value at rightIndex, else move on
                 */
-                if (comp.compare(input[leftIndex], mid) <= 0) 
+                if (comp.compare(input[leftIndex], mid) >= 0) 
                 { 
                     V tmp = input[rightIndex];
                     input[rightIndex] = input[leftIndex];
@@ -47,7 +44,7 @@ public class PartialSorter<V>
                 else
                     leftIndex++;
             }
-            if (comp.compare(input[leftIndex], mid) < 0)
+            if (comp.compare(input[leftIndex], mid) > 0)
                 leftIndex--;
             //change to or from depending if what we are looking for is on the left or right part
             if (n <= leftIndex) 

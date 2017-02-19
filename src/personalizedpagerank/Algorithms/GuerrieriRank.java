@@ -240,7 +240,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
                 }
                 //keep the top L values only
                 if(currentMap.size() > this.parameters.largetTop)
-                    keepTopL3(currentMap, this.parameters.largetTop);
+                    keepTopL(currentMap, this.parameters.largetTop);
             }
             // swap scores
             Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> tmp = scores;
@@ -252,44 +252,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         for(int v: scores.keySet())
         {
             if(scores.get(v).size() > this.parameters.smallTop)
-                keepTopL3(scores.get(v), this.parameters.smallTop);
-        }
-    }
-    
-    
-    /**
-     * Keeps the topL entries of the map, after finding the value of the Lth 
-     * element if they were ordered by values (descending). First pass is inclusive
-     * of entries with values = lth, if the size of the result exceeds L 
-     * then a second pass is done to remove entries with values = lth.
-     * @param input Input map.
-     * @param topL How many elements to keep from the top.
-     */
-    private void keepTopL2(Int2DoubleOpenHashMap input, final int topL)
-    {
-        Int2DoubleMap.Entry[] values = (Int2DoubleOpenHashMap.Entry[]) input.entrySet().toArray();
-        sorter.partialSort(values, topL, new EntryComparator());
-        Double lth = values[topL].getValue();
-        input.entrySet().removeIf(e-> e.getValue() < lth );
-        if(input.size() > topL)
-            input.entrySet().removeIf(e-> e.getValue().equals(lth) && input.size() > topL );
-    }
-    
-    
-    private class EntryComparator implements Comparator
-    {
-
-        @Override
-        public int compare(Object o1, Object o2) 
-        {
-            Int2DoubleMap.Entry e1 = (Int2DoubleMap.Entry) o1;
-            Int2DoubleMap.Entry e2 = (Int2DoubleMap.Entry) o2;
-            if(e1.getDoubleValue() < e2.getDoubleValue())
-                return -1;
-            else if(e1.getDoubleValue() == e2.getDoubleValue())
-                return 0;
-            else
-                return 1;
+                keepTopL(scores.get(v), this.parameters.smallTop);
         }
     }
     
@@ -298,10 +261,18 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
      * @param input Input map.
      * @param topL How many elements to keep from the top.
      */
-    private void keepTopL3(Int2DoubleOpenHashMap input, final int topL)
+    private void keepTopL(Int2DoubleOpenHashMap input, final int topL)
     {
-        Int2DoubleMap.Entry[] values = input.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-        sorter.partialSort(values, topL, new EntryComparator());
+        Int2DoubleMap.Entry[] values = input.int2DoubleEntrySet().toArray(new Int2DoubleMap.Entry[0]);
+        sorter.partialSort(values, topL, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
+        {
+            if(e1.getDoubleValue() < e2.getDoubleValue())
+                return 1;
+            else if(e1.getDoubleValue() == e2.getDoubleValue())
+                return 0;
+            else
+                return -1;
+        });
         input.clear();
         for(int i = 0; i < topL; i++)
             input.put(values[i].getKey(), values[i].getValue());
