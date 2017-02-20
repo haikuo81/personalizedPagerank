@@ -30,17 +30,17 @@ import personalizedpagerank.Utility.ResultComparator;
             WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 800);
             System.out.println("done prank");
             
-            int iterations = 100;
+            int iterations = 90;
             ComparisonData[] data = new ComparisonData[iterations];
             for(int i = 0; i < iterations; i++)
             {
-                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 50, 50 + i, 100, 0.85, 0.0001);
+                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 30 + i * 3, 100, 0.85, 0.0001);
                 data[i] = comp.compare(res1, res2, res2.getNodes());
                 System.out.println(i);
                 System.gc();
             }
             System.out.println("done grank");
-            ComparisonData.writeCsv("data/collabK50.csv", data);
+            ComparisonData.writeCsv("data/collabK30.csv", data);
         }
 
     /**

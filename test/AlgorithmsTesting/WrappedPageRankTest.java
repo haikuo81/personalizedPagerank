@@ -2,7 +2,6 @@ package AlgorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Map;
 import junit.framework.TestCase;
 import static junit.framework.TestCase.fail;
 import org.jgrapht.DirectedGraph;

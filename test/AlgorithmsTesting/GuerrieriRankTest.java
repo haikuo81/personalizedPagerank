@@ -3,7 +3,6 @@ package AlgorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Map;
 import org.jgrapht.graph.*;
 import personalizedpagerank.Algorithms.*;
 
@@ -229,5 +228,114 @@ public class GuerrieriRankTest extends TestCase
             assertEquals(res.getRank(0, i), 0d, 0d);
             assertEquals(res.getRank(i, 0), 0.8, 0.01);
         }
+    }
+    
+    public void testNodesGreaterThanK1()
+    {
+        //make a graph thats a line
+        final int K = 10;
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        for(int i = 0; i < 100; i++)
+            g.addVertex(i);
+        for(int i = 0; i < 99; i++)
+            g.addEdge(i, i + 1);
+        g.addEdge(99, 0);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, K, 10, 100, 0.8, 0.0001);
+        
+        for(int i = 0; i < 100; i++)
+            assertTrue( res.getMap(i).size() == K);
+        
+        //for each node check that the PPR of a node after that is always lower,
+        //and the first K-1 nodes in the line are the ones in the top K
+        for(int i = 0; i < 100; i++)
+            for(int u = i; u < (i + K - 1); u++)
+            {
+                assertTrue(res.getRank(i, u%100) != 0d);
+                assertTrue(res.getRank(i, (u +1)%100) != 0d);
+                assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
+            }
+    }
+    
+    public void testNodesGreaterThanK2()
+    {
+        //same test as before but L is now greater than K
+        //make a graph thats a line
+        final int K = 10;
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        for(int i = 0; i < 100; i++)
+            g.addVertex(i);
+        for(int i = 0; i < 99; i++)
+            g.addEdge(i, i + 1);
+        g.addEdge(99, 0);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, K, 50, 100, 0.8, 0.0001);
+        
+        for(int i = 0; i < 100; i++)
+            assertTrue( res.getMap(i).size() == K);
+        
+        //for each node check that the PPR of a node after that is always lower,
+        //and the first K-1 nodes in the line are the ones in the top K
+        for(int i = 0; i < 100; i++)
+            for(int u = i; u < (i + K - 1); u++)
+            {
+                assertTrue(res.getRank(i, u%100) != 0d);
+                assertTrue(res.getRank(i, (u +1)%100) != 0d);
+                assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
+            }
+    }
+    
+    public void testNodesGreaterThanK3()
+    {
+        //same test as before but L is now equal to the number of nodes
+        //make a graph thats a line
+        final int K = 10;
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        for(int i = 0; i < 100; i++)
+            g.addVertex(i);
+        for(int i = 0; i < 99; i++)
+            g.addEdge(i, i + 1);
+        g.addEdge(99, 0);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, K, g.vertexSet().size()
+                , 100, 0.8, 0.0001);
+        
+        for(int i = 0; i < 100; i++)
+            assertTrue( res.getMap(i).size() == K);
+        
+        //for each node check that the PPR of a node after that is always lower,
+        //and the first K-1 nodes in the line are the ones in the top K
+        for(int i = 0; i < 100; i++)
+            for(int u = i; u < (i + K - 1); u++)
+            {
+                assertTrue(res.getRank(i, u%100) != 0d);
+                assertTrue(res.getRank(i, (u +1)%100) != 0d);
+                assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
+            }
+    }
+    
+    public void testNodesGreaterThanK4()
+    {
+        //same test as before but L is greater than the number of nodes
+        //make a graph thats a line
+        final int K = 10;
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        for(int i = 0; i < 100; i++)
+            g.addVertex(i);
+        for(int i = 0; i < 99; i++)
+            g.addEdge(i, i + 1);
+        g.addEdge(99, 0);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, K, g.vertexSet().size() * 2
+                , 100, 0.8, 0.0001);
+        
+        for(int i = 0; i < 100; i++)
+            assertTrue( res.getMap(i).size() == K);
+        
+        //for each node check that the PPR of a node after that is always lower,
+        //and the first K-1 nodes in the line are the ones in the top K
+        for(int i = 0; i < 100; i++)
+            for(int u = i; u < (i + K - 1); u++)
+            {
+                assertTrue(res.getRank(i, u%100) != 0d);
+                assertTrue(res.getRank(i, (u +1)%100) != 0d);
+                assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
+            }
     }
 }

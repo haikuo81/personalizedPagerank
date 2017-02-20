@@ -21,6 +21,37 @@ public class Parameters
         this.tolerance = tolerance;
     }
 
+    //generated automatically
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Parameters other = (Parameters) obj;
+        if (this.edges != other.edges) {
+            return false;
+        }
+        if (this.vertices != other.vertices) {
+            return false;
+        }
+        if (this.iterations != other.iterations) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.damping) != Double.doubleToLongBits(other.damping)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.tolerance) != Double.doubleToLongBits(other.tolerance)) {
+            return false;
+        }
+        return true;
+    }
+
     public int getIterations() {
         return iterations;
     }
