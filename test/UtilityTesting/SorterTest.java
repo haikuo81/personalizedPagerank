@@ -20,12 +20,8 @@ public class SorterTest extends TestCase
         {
             sorter.partialSort(values, 0, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                return 1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? -1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : 1;
             });
             fail("this line shouldn't be reached");
         }
@@ -43,12 +39,8 @@ public class SorterTest extends TestCase
         {
             sorter.partialSort(values, map.size(), (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                return 1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? -1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : 1;
             });
             fail("this line shouldn't be reached");
         }
@@ -72,12 +64,8 @@ public class SorterTest extends TestCase
             shuffleArray(values);
             sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return 1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                    return -1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
             });
             double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
@@ -103,18 +91,14 @@ public class SorterTest extends TestCase
             //populate and shuffle
             map.clear();
             for(int i = 0; i < n; i++)
-                map.put(i, random.nextInt(n/200) + 0d);
+                map.put(i, random.nextInt(n) + 0d);
             values = map.entrySet().toArray(new Int2DoubleMap.Entry[0]);
             shuffleArray(values);
             
             sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return -1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                return 1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
             });
             
             double val = values[number].getDoubleValue();
@@ -147,12 +131,8 @@ public class SorterTest extends TestCase
             
             sorter.partialSort(values, number, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return 1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                return -1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
             });
             double val = values[number].getDoubleValue();
             //check that values on left are greater or equal by moving from 0 to nth
