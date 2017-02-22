@@ -4,8 +4,6 @@ import personalizedpagerank.Utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Comparator;
-import java.util.Stack;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -269,12 +267,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         
         sorter.partialSort(values, topL, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
         {
-            if(e1.getDoubleValue() < e2.getDoubleValue())
-                return 1;
-            else if(e1.getDoubleValue() == e2.getDoubleValue())
-                return 0;
-            else
-                return -1;
+            return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
         });
         //if too many to remove just clear and add the first topL
         //else just remove the non topL

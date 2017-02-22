@@ -97,22 +97,14 @@ public class ResultComparator
            
            sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return 1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                   return -1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
            } );
            
            sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
             {
-                if(e1.getDoubleValue() < e2.getDoubleValue())
-                    return 1;
-                else if(e1.getDoubleValue() == e2.getDoubleValue())
-                    return 0;
-                else
-                   return -1;
+                return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
            } );
            
            //create sets and do jaccard
@@ -195,22 +187,14 @@ public class ResultComparator
         //sort entries by values, descending
         Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
-             if(e1.getDoubleValue() < e2.getDoubleValue())
-                 return 1;
-             else if(e1.getDoubleValue() == e2.getDoubleValue())
-                 return 0;
-             else 
-                 return -1;
+             return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
          });
         
         Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
          {
-             if(e1.getDoubleValue() < e2.getDoubleValue())
-                 return 1;
-             else if(e1.getDoubleValue() == e2.getDoubleValue())
-                 return 0;
-             else 
-                 return -1;
+             return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
+                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
          });
         
         //in case the first array stores topK results and the second stores topL results with K!=L
