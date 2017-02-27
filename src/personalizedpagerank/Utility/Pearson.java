@@ -15,10 +15,12 @@ public class Pearson
      * @param y Second array.
      * @return The pearson correlation coefficient.
      */
-    public double correlation(double[] x, double[] y)
+    public static double correlation(double[] x, double[] y)
     {
         if(x.length != y.length)
             throw new IllegalArgumentException("arrays must have same length");
+        if(x.length == 0 || y.length == 0)
+            throw new IllegalArgumentException("arrays must have a length greater than 0");
         double res = 0;
         double averageX = 0;
         double averageY = 0;
@@ -45,6 +47,10 @@ public class Pearson
         (
                 (squareSumY -(averageY * averageY) / y.length) / y.length
         );
+        
+        if(stdX == 0d || stdY == 0d)
+            throw new IllegalArgumentException("pearson correlation is not defined"
+                    + " for variables that have a standard deviation of 0");
         
         //compute the averages
         averageX /= x.length;
