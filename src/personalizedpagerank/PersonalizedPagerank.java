@@ -1,19 +1,13 @@
 package personalizedpagerank;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -35,23 +29,24 @@ import personalizedpagerank.Utility.ResultComparator;
             generateUndirectedBipartite(g,500,3500,60000);
             ResultComparator comp = new ResultComparator();
             //importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
+           // importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
             
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 800);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 100);
             System.out.println("done prank");
             
-            int iterations = 90;
+            int iterations = 0;
             ComparisonData[] data = new ComparisonData[iterations + 1];
             for(int i = 0; i <= iterations; i++)
             {
-                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 50, 50 + i * 5, 100, 0.85, 0.0001);
+                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 160, 100, 0.85, 0.0001);
                 data[i] = comp.compare(res1, res2, res2.getNodes());
                 System.out.println(i);
                 System.gc();
             }
             System.out.println("done grank");
-            ComparisonData.writeCsv("genK50.csv", data);
+            ComparisonData.writeCsv("test.csv", data);
         }
 
         ////////////////
@@ -96,10 +91,8 @@ import personalizedpagerank.Utility.ResultComparator;
          * @param g Graph to insert nodes and edges into.
          * @param csvPath Path too file.
          */
-
         public static void importGraphFromCsv (Graph<Integer, DefaultEdge> g, String csvPath)
         {
-            int count = 0;
             try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) 
             {
                 String line;
@@ -114,22 +107,13 @@ import personalizedpagerank.Utility.ResultComparator;
                         g.addVertex(v1);
                     if(!g.containsVertex(v2))
                         g.addVertex(v2);
-                    if(g.containsEdge(v1, v2))
-                    {
-                       System.out.println(v1 + "," + v2);
-                        count ++;
-                    }
                     g.addEdge(v1,v2);
-                    //g.addEdge(v2,v1);
-
                 }
-
             } 
             catch (IOException e) 
             {
                 e.printStackTrace();
             }
-            System.out.println(count);
         }
 
         public static void importBipartiteUndirectedFromCsv(Graph<Integer, DefaultEdge> g, String csvPath)

@@ -13,13 +13,15 @@ public class ComparisonData
 {
     private final Result jaccard;
     private final Result levenstein;
+    private final Result spearman;
     private final Parameters param1;//parameters of the first algorithm
     private final Parameters param2;//parameters of the second algorithm
 
-    public ComparisonData(final Result jaccard, final Result levenstein, Parameters param1, Parameters param2)
+    public ComparisonData(final Result jaccard, final Result levenstein, final Result spearman, Parameters param1, Parameters param2)
     {
         this.jaccard = jaccard;
         this.levenstein = levenstein;
+        this.spearman = spearman;
         this.param1 = param1;
         this.param2 = param2;
     }
@@ -34,6 +36,11 @@ public class ComparisonData
         return levenstein;
     }
 
+    public Result getSpearman()
+    {
+        return spearman;
+    }
+    
     public Parameters getParam1() 
     {
         return param1;
@@ -70,7 +77,8 @@ public class ComparisonData
         getHeaderNames(builder, data[0].param2,",");
         
         builder.append("jaccard min,jaccard average,jaccard max,jaccard std,"
-                + "levenstein min,levenstein average,levenstein max,levenstein std");
+                + "levenstein min,levenstein average,levenstein max,levenstein std,"
+                + "spearman min, spearman average, spearman max, spearman std");
         
         builder.append(System.getProperty("line.separator"));
         
@@ -92,6 +100,11 @@ public class ComparisonData
             builder.append(data[i].levenstein.getAverage()).append(",");
             builder.append(data[i].levenstein.getMax()).append(",");
             builder.append(data[i].levenstein.getStd()).append(",");
+            
+            builder.append(data[i].spearman.getMin()).append(",");
+            builder.append(data[i].spearman.getAverage()).append(",");
+            builder.append(data[i].spearman.getMax()).append(",");
+            builder.append(data[i].spearman.getStd()).append(",");
             
             builder.append(System.getProperty("line.separator"));
         }
