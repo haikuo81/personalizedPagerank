@@ -15,7 +15,7 @@ public class Pearson
      * @param y Second array.
      * @return The pearson correlation coefficient.
      */
-    public double correlation(double[] x, double[] y)
+    public static double correlation(double[] x, double[] y)
     {
         if(x.length != y.length)
             throw new IllegalArgumentException("arrays must have same length");
