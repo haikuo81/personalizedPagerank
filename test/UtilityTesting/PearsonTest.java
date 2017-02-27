@@ -27,6 +27,18 @@ public class PearsonTest extends TestCase
         catch (IllegalArgumentException e) {}
     }
     
+    public void testUndefinedCorrelation1()
+    {
+        double[] x = {1d,2d,3d,4d,5d,99d};
+        double[] y = {1d,1d,1d,1d,1d,1d};
+        try 
+        {
+            Pearson.correlation(x, y);
+            fail("this line shouldn't be reached");
+        } 
+        catch (IllegalArgumentException e) {}
+    }
+     
     public void testDifferentLengths()
     {
         double[] x = new double[4];
@@ -48,17 +60,12 @@ public class PearsonTest extends TestCase
     
     public void testAntiCorrelated()
     {
-        double[] x = {1d,2d,3d,4d,5d,99d};
-        double[] y = {99d,5d,4d,3d,2d,1d};
+        double[] x = {1d,2d,3d,4d,5d,6d};
+        double[] y = {6d,5d,4d,3d,2d,1d};
         assertEquals(Pearson.correlation(x, y), -1d, 0.000001);
     }
     
-    public void testUndefinedCorrelation1()
-    {
-        double[] x = {1d,2d,3d,4d,5d,99d};
-        double[] y = {1d,1d,1d,1d,1d,1d};
-        assertEquals(Pearson.correlation(x, y), -1d, 0.000001);
-    }
+   
     
     public void testZeroCorrelation()
     {
@@ -69,8 +76,8 @@ public class PearsonTest extends TestCase
     
     public void testHalfCorrelation()
     {
-        double[] x = {0d,0d,4d,2d};
-        double[] y = {0d,0d,2d,4d};
+        double[] x = {0d,4d,2d};
+        double[] y = {0d,2d,4d};
         assertEquals(Pearson.correlation(x, y), 0.5, 0.000001);
     }
     
@@ -78,7 +85,7 @@ public class PearsonTest extends TestCase
     {
         double[] x = {0d,5d,6d,7d};
         double[] y = {0d,250d,1000d,1001d};
-        assertEquals(Pearson.correlation(x, y), 0.643598796, 0.000001);
+        assertEquals(Pearson.correlation(x, y), 0.8581, 0.0001);
     }
     
     //https://en.wikipedia.org/wiki/Anscombe%27s_quartet
