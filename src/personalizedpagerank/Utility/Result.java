@@ -7,50 +7,38 @@ import java.util.Arrays;
  */
 public class Result
     {
-        private final double[] stats;
+        private final double min, average, max, std;
 
+        public Result(double min, double average, double max, double std) 
+        {
+            this.min = min;
+            this.max = max;
+            this.average = average;
+            this.std = std;
+        }
+        
         public Result(final double[] stats)
         {
-            this.stats = Arrays.copyOf(stats, stats.length);
-        }
-        
-        public double getMin()
-        {
-            return stats[0];
-        }
-        
-        public double getAverage()
-        {
-            return stats[1];
-        }
-        
-        public double getMax()
-        {
-            return stats[2];
-        }
-        
-        //standard deviation
-        public double getStd()
-        {
-            return stats[3];
+            min = stats[0];
+            average = stats[1];
+            max = stats[2];
+            std = stats[3];
         }
 
-        //generated automatically
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Result other = (Result) obj;
-            if (!Arrays.equals(this.stats, other.stats)) {
-                return false;
-            }
-            return true;
+        public double getMin() {
+            return min;
         }
+
+        public double getMax() {
+            return max;
+        }
+
+        public double getAverage() {
+            return average;
+        }
+
+        public double getStd() {
+            return std;
+        }
+        
     }
