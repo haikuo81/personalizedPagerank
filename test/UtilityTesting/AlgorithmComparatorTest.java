@@ -8,13 +8,13 @@ import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Utility.ComparisonData;
-import personalizedpagerank.Utility.ResultComparator;
+import personalizedpagerank.Utility.AlgorithmComparator;
 
 
 
-public class ResultComparatorTest extends TestCase
+public class AlgorithmComparatorTest extends TestCase
 {
-    ResultComparator comp = new ResultComparator();
+    AlgorithmComparator comp = new AlgorithmComparator();
     Random random = new Random();
     
     public void testCompareSameAlgorithm()
@@ -27,8 +27,8 @@ public class ResultComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet());
-        ComparisonData data2 = comp.compare(p, p, g.vertexSet());
+        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data2 = comp.compare(p, p, g.vertexSet(), 3);
         
         assertTrue(data1.getParam1().equals(data1.getParam2()));
         assertTrue(data1.equals(data2));
@@ -57,8 +57,8 @@ public class ResultComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet());
-        ComparisonData data2 = comp.compare(p, p, g.vertexSet());
+        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data2 = comp.compare(p, p, g.vertexSet(), 3);
         
         assertTrue(data1.getParam1().equals(data1.getParam2()));
         assertTrue(data1.equals(data2));
@@ -90,12 +90,10 @@ public class ResultComparatorTest extends TestCase
         PersonalizedPageRankAlgorithm p5 = new GuerrieriRank(g, 3, 3, 100, 0.86, 0.0001);
         PersonalizedPageRankAlgorithm p6 = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0005);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet());
-        ComparisonData data2 = comp.compare(p2, p2, g.vertexSet());
-        ComparisonData data3 = comp.compare(p3, p3, g.vertexSet());
-        ComparisonData data4 = comp.compare(p4, p4, g.vertexSet());
-        ComparisonData data5 = comp.compare(p5, p5, g.vertexSet());
-        ComparisonData data6 = comp.compare(p6, p6, g.vertexSet());
+        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data4 = comp.compare(p4, p4, g.vertexSet(), 3);
+        ComparisonData data5 = comp.compare(p5, p5, g.vertexSet(), 3);
+        ComparisonData data6 = comp.compare(p6, p6, g.vertexSet(), 3);
         
         
         assertFalse(data1.equals(data4));
