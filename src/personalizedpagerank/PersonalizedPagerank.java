@@ -27,7 +27,6 @@ import personalizedpagerank.Utility.AlgorithmComparator;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
             //generateUndirectedBipartite(g,200,200,10000);
-            AlgorithmComparator comp = new AlgorithmComparator();
             importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
            // importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
@@ -39,7 +38,7 @@ import personalizedpagerank.Utility.AlgorithmComparator;
             System.out.println("done grank");
             
             int[] ks = {10, 30};
-            ComparisonData[] data = comp.compare(res1, res2, res2.getNodes(), ks);
+            ComparisonData[] data = AlgorithmComparator.compare(res1, res2, res2.getNodes(), ks);
             ComparisonData.writeCsv("test.csv", data);
         }
 

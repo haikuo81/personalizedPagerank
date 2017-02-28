@@ -11,13 +11,16 @@ import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 //class to do result comparison of the different algorithms, it assumes that the passed objects refer to the same graph
 public class AlgorithmComparator
 {
-    private final Jaccard<Integer> jaccard = new Jaccard<>();
-    private final Levenstein<Int2DoubleMap.Entry> levenstein = new Levenstein<>();
-    private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter<>();
+    private AlgorithmComparator(){}
+    
+    private static final Jaccard<Integer> JACCARD = new Jaccard<>();
+    private static final Levenstein<Int2DoubleMap.Entry> LEVENSTEIN = new Levenstein<>();
+    private static final PartialSorter<Int2DoubleOpenHashMap.Entry> SORTER = new PartialSorter<>();
+    
     
     //interface for functions returning some kind of value based on the personalized pagerank results for a node
     //see the implementing classes for details 
-    private interface Function
+    static private interface Function
     {
         double apply(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2,
                 final int selected, final int k);
@@ -39,7 +42,7 @@ public class AlgorithmComparator
      * @return An array of 4 elements, min, average, max, standard deviation of
      * the values returned by the function.
      */
-    private Result getStats(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2,
+    static private Result getStats(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2,
             Set<Integer> nodes, Function function, final int k) 
     {
         //min, average, max, std deviation
@@ -83,7 +86,7 @@ public class AlgorithmComparator
      * and alg2. (as if the entries were ordered by value descending)
      * @return Jaccard similarity of results for the selected node
      */
-    private class JaccardFunction implements Function
+    static private class JaccardFunction implements Function
     {
         @Override
         public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
@@ -102,14 +105,14 @@ public class AlgorithmComparator
             {
                 int min = Math.min(m1.length, m2.length);
                 min = Math.min(min, k);
-                sorter.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                SORTER.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
                         -> {
                     return e1.getDoubleValue() < e2.getDoubleValue() ? 1
                             : e1.getDoubleValue() == e2.getDoubleValue() ?
                             (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;
                 });
 
-                sorter.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                SORTER.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
                         -> {
                     return e1.getDoubleValue() < e2.getDoubleValue() ? 1
                             : e1.getDoubleValue() == e2.getDoubleValue() ?
@@ -130,7 +133,7 @@ public class AlgorithmComparator
                 entries1 = alg1.getMap(selected).keySet();
                 entries2 = alg2.getMap(selected).keySet();
             }
-            return jaccard.similarity(entries1, entries2);
+            return JACCARD.similarity(entries1, entries2);
         }    
     }
     
@@ -149,7 +152,7 @@ public class AlgorithmComparator
      * and alg2. (as if the entries were ordered by value descending)
      * @return Leveinstein distance of results for the selected node.
      */
-    private class LevensteinFunction implements Function
+    static private class LevensteinFunction implements Function
     {
         @Override
         public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
@@ -182,7 +185,7 @@ public class AlgorithmComparator
                 m2 = Arrays.copyOf(m2, Math.min(Math.min(m1.length, m2.length), k));
             }
 
-            return levenstein.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+            return LEVENSTEIN.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
             -> {
                 return (e1.getKey().equals(e2.getKey())) ? 0 : -1;
             })/(double)Math.min(Math.min(m1.length, m2.length), k);
@@ -208,7 +211,7 @@ public class AlgorithmComparator
      * @return Spearman correlation of the positions of the results for the
      * selected node.
      */
-    private class SpearmanFunction implements Function
+    static private class SpearmanFunction implements Function
     {
         @Override
         public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
@@ -300,16 +303,16 @@ public class AlgorithmComparator
      * @return Array of comparison data containing the results of the comparison
      * between the two algorithms for each different K used.
      */
-    public ComparisonData[] compare(PersonalizedPageRankAlgorithm alg1, 
+   static  public ComparisonData[] compare(PersonalizedPageRankAlgorithm alg1, 
             PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, 
             int[] differentKs)
     {
         ComparisonData[] res = new ComparisonData[differentKs.length];
         for(int i = 0 ; i < differentKs.length; i++)
         {
-            Result jc = this.getStats(alg1, alg2, nodes, new JaccardFunction(), differentKs[i]);
-            Result spear = this.getStats(alg1, alg2, nodes, new SpearmanFunction(), differentKs[i]);
-            Result lev = this.getStats(alg1, alg2, nodes, new LevensteinFunction(), differentKs[i]);
+            Result jc = getStats(alg1, alg2, nodes, new JaccardFunction(), differentKs[i]);
+            Result spear = getStats(alg1, alg2, nodes, new SpearmanFunction(), differentKs[i]);
+            Result lev = getStats(alg1, alg2, nodes, new LevensteinFunction(), differentKs[i]);
             res[i] = new ComparisonData(differentKs[i], jc, lev, spear, alg1.getParameters(), alg2.getParameters());
         }
         return res;
@@ -326,12 +329,12 @@ public class AlgorithmComparator
      * @return Comparison data containing the results of the comparison
      * between the two algorithms related to the K used.
      */
-    public ComparisonData compare(PersonalizedPageRankAlgorithm alg1, 
+    static public ComparisonData compare(PersonalizedPageRankAlgorithm alg1, 
             PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k)
     {
-        Result jc = this.getStats(alg1, alg2, nodes, new JaccardFunction(), k);
-        Result spear = this.getStats(alg1, alg2, nodes, new SpearmanFunction(), k);
-        Result lev = this.getStats(alg1, alg2, nodes, new LevensteinFunction(), k);
+        Result jc = getStats(alg1, alg2, nodes, new JaccardFunction(), k);
+        Result spear = getStats(alg1, alg2, nodes, new SpearmanFunction(), k);
+        Result lev = getStats(alg1, alg2, nodes, new LevensteinFunction(), k);
         return new ComparisonData(k, jc, lev, spear, alg1.getParameters(), alg2.getParameters());
     }
 }

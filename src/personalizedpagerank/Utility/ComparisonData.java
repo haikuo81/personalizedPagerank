@@ -30,6 +30,51 @@ public class ComparisonData
         this.param2 = param2;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 11 * hash + this.maxEntries;
+        hash = 11 * hash + Objects.hashCode(this.jaccard);
+        hash = 11 * hash + Objects.hashCode(this.levenstein);
+        hash = 11 * hash + Objects.hashCode(this.spearman);
+        hash = 11 * hash + Objects.hashCode(this.param1);
+        hash = 11 * hash + Objects.hashCode(this.param2);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ComparisonData other = (ComparisonData) obj;
+        if (this.maxEntries != other.maxEntries) {
+            return false;
+        }
+        if (!Objects.equals(this.jaccard, other.jaccard)) {
+            return false;
+        }
+        if (!Objects.equals(this.levenstein, other.levenstein)) {
+            return false;
+        }
+        if (!Objects.equals(this.spearman, other.spearman)) {
+            return false;
+        }
+        if (!Objects.equals(this.param1, other.param1)) {
+            return false;
+        }
+        if (!Objects.equals(this.param2, other.param2)) {
+            return false;
+        }
+        return true;
+    }
+
     public int getMaxEntries() {
         return maxEntries;
     }
@@ -92,6 +137,7 @@ public class ComparisonData
     {
         return param2;
     }
+    
     
     /**
      * Writes the comparison results in a csv file.
