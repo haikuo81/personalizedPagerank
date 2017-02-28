@@ -1,7 +1,5 @@
 package personalizedpagerank.Utility;
 
-import java.util.Arrays;
-
 /**
  * Class which stores results from comparisons in ResultComparator.
  */

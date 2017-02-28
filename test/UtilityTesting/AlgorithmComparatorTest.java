@@ -14,12 +14,31 @@ import personalizedpagerank.Utility.AlgorithmComparator;
 
 public class AlgorithmComparatorTest extends TestCase
 {
-    AlgorithmComparator comp = new AlgorithmComparator();
     Random random = new Random();
+    
+    public void testEmptyKs()
+    {
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
+        assertTrue(AlgorithmComparator.compare(p, p, g.vertexSet(), new int[0]).length == 0);
+    }
+    
+    public void testNonEmptyKs()
+    {
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
+        int[] ks = {1,2,3,4,5,6};
+        ComparisonData[] data = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
+        assertTrue(data.length == ks.length);
+        for(int i = 0; i < ks.length; i++)
+            assertEquals(data[i].getMaxEntries(), ks[i]);
+        
+    }
     
     public void testCompareSameAlgorithm()
     {
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        int[] ks = {3};
         
         g.addVertex(0);
         g.addVertex(1);
@@ -27,12 +46,17 @@ public class AlgorithmComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data2 = comp.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
+        ComparisonData[] data3 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
         
         assertTrue(data1.getParam1().equals(data1.getParam2()));
         assertTrue(data1.equals(data2));
         assertTrue(data2.equals(data1));
+        
+        assertTrue(data1.getParam1().equals(data3[0].getParam2()));
+        assertTrue(data1.equals(data3[0]));
+        assertTrue(data3[0].equals(data1));
         
         assertEquals(data1.getJaccard().getMin(), 1d, 0.001);
         assertEquals(data1.getJaccard().getAverage(), 1d, 0.001);
@@ -57,8 +81,8 @@ public class AlgorithmComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data2 = comp.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
         
         assertTrue(data1.getParam1().equals(data1.getParam2()));
         assertTrue(data1.equals(data2));
@@ -90,10 +114,10 @@ public class AlgorithmComparatorTest extends TestCase
         PersonalizedPageRankAlgorithm p5 = new GuerrieriRank(g, 3, 3, 100, 0.86, 0.0001);
         PersonalizedPageRankAlgorithm p6 = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0005);
         
-        ComparisonData data1 = comp.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data4 = comp.compare(p4, p4, g.vertexSet(), 3);
-        ComparisonData data5 = comp.compare(p5, p5, g.vertexSet(), 3);
-        ComparisonData data6 = comp.compare(p6, p6, g.vertexSet(), 3);
+        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
+        ComparisonData data4 = AlgorithmComparator.compare(p4, p4, g.vertexSet(), 3);
+        ComparisonData data5 = AlgorithmComparator.compare(p5, p5, g.vertexSet(), 3);
+        ComparisonData data6 = AlgorithmComparator.compare(p6, p6, g.vertexSet(), 3);
         
         
         assertFalse(data1.equals(data4));

@@ -84,40 +84,6 @@ public class ComparisonData
         return jaccard;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        return hash;
-    }
-
-    //automatically generated
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ComparisonData other = (ComparisonData) obj;
-        if (!Objects.equals(this.jaccard, other.jaccard)) {
-            return false;
-        }
-        if (!Objects.equals(this.levenstein, other.levenstein)) {
-            return false;
-        }
-        if (!Objects.equals(this.param1, other.param1)) {
-            return false;
-        }
-        if (!Objects.equals(this.param2, other.param2)) {
-            return false;
-        }
-        return true;
-    }
-
     public Result getLevenstein() 
     {
         return levenstein;
