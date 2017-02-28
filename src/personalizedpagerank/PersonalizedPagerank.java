@@ -19,33 +19,27 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedPageRank;
 import personalizedpagerank.Utility.ComparisonData;
-import personalizedpagerank.Utility.ResultComparator;
+import personalizedpagerank.Utility.AlgorithmComparator;
 
     public class PersonalizedPagerank {
 
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
-            generateUndirectedBipartite(g,500,3500,60000);
-            ResultComparator comp = new ResultComparator();
-            //importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
+            //generateUndirectedBipartite(g,200,200,10000);
+            AlgorithmComparator comp = new AlgorithmComparator();
+            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
            // importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
             
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 100);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 800);
             System.out.println("done prank");
-            
-            int iterations = 0;
-            ComparisonData[] data = new ComparisonData[iterations + 1];
-            for(int i = 0; i <= iterations; i++)
-            {
-                PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 30, 160, 100, 0.85, 0.0001);
-                data[i] = comp.compare(res1, res2, res2.getNodes());
-                System.out.println(i);
-                System.gc();
-            }
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 100, 100, 0.85, 0.0001);
             System.out.println("done grank");
+            
+            int[] ks = {10, 30};
+            ComparisonData[] data = comp.compare(res1, res2, res2.getNodes(), ks);
             ComparisonData.writeCsv("test.csv", data);
         }
 
@@ -154,7 +148,6 @@ import personalizedpagerank.Utility.ResultComparator;
             {
                 e.printStackTrace();
             }
-            System.out.println(count);
         }
 
 
