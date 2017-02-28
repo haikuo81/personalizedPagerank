@@ -23,6 +23,45 @@ public class Result
             std = stats[3];
         }
 
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 47 * hash + (int) (Double.doubleToLongBits(this.min) ^ (Double.doubleToLongBits(this.min) >>> 32));
+            hash = 47 * hash + (int) (Double.doubleToLongBits(this.average) ^ (Double.doubleToLongBits(this.average) >>> 32));
+            hash = 47 * hash + (int) (Double.doubleToLongBits(this.max) ^ (Double.doubleToLongBits(this.max) >>> 32));
+            hash = 47 * hash + (int) (Double.doubleToLongBits(this.std) ^ (Double.doubleToLongBits(this.std) >>> 32));
+            return hash;
+        }
+
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Result other = (Result) obj;
+            if (Double.doubleToLongBits(this.min) != Double.doubleToLongBits(other.min)) {
+                return false;
+            }
+            if (Double.doubleToLongBits(this.average) != Double.doubleToLongBits(other.average)) {
+                return false;
+            }
+            if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
+                return false;
+            }
+            if (Double.doubleToLongBits(this.std) != Double.doubleToLongBits(other.std)) {
+                return false;
+            }
+            return true;
+        }
+
+        
         public double getMin() {
             return min;
         }
