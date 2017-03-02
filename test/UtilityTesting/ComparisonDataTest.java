@@ -10,12 +10,29 @@ public class ComparisonDataTest extends TestCase
 {
     public void testConstructorAndGetters()
     {
+        
+        
         double[] in = {0d,1d,2d,3d};
         Result r1 = new Result(in);
         Result r2 = new Result(in);
         Result r3 = new Result(in);
         Parameters p1 = new Parameters(0, 1, 2, 3d, 4d);
         Parameters p2 = new Parameters(0, 1, 2, 3d, 4d);
+        
+        try 
+        {
+            new ComparisonData(0, r1, r2, r3, p1, p2);
+            fail("this line shouldn't be reached");
+        } 
+        catch (IllegalArgumentException e) {}
+        
+        try 
+        {
+            new ComparisonData(-1, r1, r2, r3, p1, p2);
+            fail("this line shouldn't be reached");
+        } 
+        catch (IllegalArgumentException e) {}
+        
         ComparisonData data = new ComparisonData(10, r1, r2, r3, p1, p2);
         assertEquals(data.getMaxEntries(), 10);
         assertSame(r1, data.getJaccard());

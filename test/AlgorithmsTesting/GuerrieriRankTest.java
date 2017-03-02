@@ -1,4 +1,3 @@
-
 package AlgorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
@@ -109,6 +108,18 @@ public class GuerrieriRankTest extends TestCase
         PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 10, 30, 100, 0.85, 0.0001);
         
         assertEquals(res.getMaps().size(), 0, 0);
+    }
+    
+    public void testReturning0()
+    {
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        g.addVertex(1);
+        g.addVertex(2);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
+        assertEquals(res.getRank(1, 2), 0d, 0d);
+        assertEquals(res.getRank(2, 1), 0d, 0d);
+        assertEquals(res.getMap(1).get(2), 0d, 0d);
+        assertEquals(res.getMap(2).get(1), 0d, 0d);
     }
     
     public void testL()
@@ -324,7 +335,7 @@ public class GuerrieriRankTest extends TestCase
         g.addEdge(99, 0);
         PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, K, g.vertexSet().size() * 2
                 , 100, 0.8, 0.0001);
-        
+        g.addVertex(1000);
         for(int i = 0; i < 100; i++)
             assertTrue( res.getMap(i).size() == K);
         
@@ -336,6 +347,8 @@ public class GuerrieriRankTest extends TestCase
                 assertTrue(res.getRank(i, u%100) != 0d);
                 assertTrue(res.getRank(i, (u +1)%100) != 0d);
                 assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
+                assertEquals(res.getRank(i, 1000), 0d, 0d);
+                assertEquals(res.getMap(i).get(1000), 0d, 0d);
             }
     }
 }
