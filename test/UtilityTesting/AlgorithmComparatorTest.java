@@ -1,11 +1,15 @@
 package UtilityTesting;
 
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import java.util.Map;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
+import personalizedpagerank.Algorithms.PageRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
@@ -193,12 +197,12 @@ public class AlgorithmComparatorTest extends TestCase
             assertEquals(data1.getJaccard(i), 1d, 0);
             assertEquals(data1.getLevenstein(i), 0d, 0);
             assertEquals(data1.getNeighbourIn(i), 0, 0);
-            assertEquals(data1.getNeighbourJaccard(i), 1d, 0);
+            assertEquals(data1.getNeighbourJaccard(i), 0d, 0);
             assertEquals(data1.getNeighbourLevenstein(i), 0d, 0);
             assertEquals(data1.getNeighbourOut(i), 0, 0);
             assertEquals(data1.getNeighbourPagerank(i), 0, 0);
             assertEquals(data1.getNeighbourPagerankError(i), 0, 0);
-            assertEquals(data1.getNeighbourSpearman(i), 1d, 0);
+            assertEquals(data1.getNeighbourSpearman(i), 0d, 0);
             assertEquals(data1.getOutdegree(i), 0, 0);
             assertEquals(data1.getPagerank(i), 0.3333, 0.0001);
             assertEquals(data1.getPagerankError(i), 0d, 0);
@@ -217,6 +221,9 @@ public class AlgorithmComparatorTest extends TestCase
             g.addEdge(random.nextInt(100), random.nextInt(100));
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
+        Map<Integer, Double> pagerank = (new PageRank(g, p.getParameters().getDamping(), 
+                p.getParameters().getIterations(), 
+                p.getParameters().getTolerance()).getScores());
         
         NodesComparisonData data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
         NodesComparisonData data2 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
@@ -231,17 +238,75 @@ public class AlgorithmComparatorTest extends TestCase
             assertEquals(data1.getIndegree(i), g.inDegreeOf(node), 0);
             assertEquals(data1.getJaccard(i), 1d, 0);
             assertEquals(data1.getLevenstein(i), 0d, 0);
-            assertEquals(data1.getNeighbourIn(i), 0, 0);
-            assertEquals(data1.getNeighbourJaccard(i), 1d, 0);
-            assertEquals(data1.getNeighbourLevenstein(i), 0d, 0);
-            assertEquals(data1.getNeighbourOut(i), 0, 0);
-            assertEquals(data1.getNeighbourPagerank(i), 0, 0);
-            assertEquals(data1.getNeighbourPagerankError(i), 0, 0);
-            assertEquals(data1.getNeighbourSpearman(i), 1d, 0);
-            assertEquals(data1.getOutdegree(i), 0, 0);
-            assertEquals(data1.getPagerank(i), 0.3333, 0.0001);
+            assertEquals(data1.getOutdegree(i), g.outDegreeOf(node), 0);
+            assertEquals(data1.getPagerank(i), pagerank.get(node), 0.0001);
             assertEquals(data1.getPagerankError(i), 0d, 0);
             assertEquals(data1.getSpearman(i), 1d, 0);
+        }
+        
+        //check stats for nodes that requires neighbour information
+        //maps to store jaccard/levenstein/spearman values to avoid calculating them more than once
+        Int2DoubleOpenHashMap jMap = new Int2DoubleOpenHashMap(data1.getLength());
+        Int2DoubleOpenHashMap lMap = new Int2DoubleOpenHashMap(data1.getLength());
+        Int2DoubleOpenHashMap sMap = new Int2DoubleOpenHashMap(data1.getLength());
+        jMap.defaultReturnValue(-1);
+        lMap.defaultReturnValue(-1);
+        sMap.defaultReturnValue(-1);
+        
+        for(int i = 0; i < data1.getLength(); i++)
+        {
+            int node = data1.getId(i);
+            boolean skipNeighbourhood = false;
+            double in = 0;
+            double out = 0;
+            double pr = 0;
+            int neighbourHood = 0;
+            
+            //father nodes
+            for(DefaultEdge edge: g.incomingEdgesOf(node))
+            {
+                neighbourHood++;
+                int neighbour = Graphs.getOppositeVertex(g, edge, node);
+                in += g.inDegreeOf(neighbour);
+                out += g.outDegreeOf(neighbour);
+                pr += pagerank.get(neighbour);
+
+                //only need to check one of the maps to check if the neighbour
+                //is not part of the nodes for which personalized pagerank scores
+                //have been calculated
+                skipNeighbourhood = skipNeighbourhood || jMap.get(neighbour) == -1;
+            }
+            
+            //children nodes
+            for(DefaultEdge edge: g.outgoingEdgesOf(node))
+            {
+                neighbourHood++;
+                int neighbour = Graphs.getOppositeVertex(g, edge, node);
+                in += g.inDegreeOf(neighbour);
+                out += g.outDegreeOf(neighbour);
+                pr += pagerank.get(neighbour);
+                
+                //only need to check one of the maps to check if the neighbour
+                //is not part of the nodes for which personalized pagerank scores
+                //have been calculated
+                skipNeighbourhood = skipNeighbourhood || jMap.get(neighbour) == -1;
+            }
+            
+            if(neighbourHood > 0)
+            {
+                in /= neighbourHood;
+                out /= neighbourHood;
+                pr /= neighbourHood;
+            }
+            
+            assertEquals(data1.getNeighbourIn(i), in, 0);
+            assertTrue(data1.getNeighbourJaccard(i) == 0d || data1.getNeighbourJaccard(i) == 1d);
+            assertTrue(data1.getNeighbourSpearman(i) == 0d || data1.getNeighbourSpearman(i) == 1d);
+            assertEquals(data1.getNeighbourLevenstein(i), 0d, 0d);
+            assertEquals(data1.getNeighbourOut(i), out, 0);
+            assertEquals(data1.getNeighbourPagerank(i), pr, 0d);
+            assertEquals(data1.getNeighbourPagerankError(i), 0d, 0);
+            
         }
     }
     

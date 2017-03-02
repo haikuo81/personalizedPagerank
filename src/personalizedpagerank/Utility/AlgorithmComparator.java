@@ -488,17 +488,19 @@ public class AlgorithmComparator
                 skipNeighbourhood = skipNeighbourhood || jMap.get(neighbour) == -1;
             }
             
-            in /= neighbourHood;
-            out /= neighbourHood;
-            pr /= neighbourHood;
-            j /= neighbourHood;
-            l /= neighbourHood;
-            s /= neighbourHood;
-            e /= neighbourHood;
-            
             //if neighbourhood jaccard/levenstein/spearman/error data has no value flag it
             if(skipNeighbourhood)
                 j = l = s = e = -1d;
+            else if(neighbourHood > 0)
+            {
+                in /= neighbourHood;
+                out /= neighbourHood;
+                pr /= neighbourHood;
+                j /= neighbourHood;
+                l /= neighbourHood;
+                s /= neighbourHood;
+                e /= neighbourHood;
+            }
             
             res.setNeighbourIn(index, in);
             res.setNeighbourOut(index, out);
