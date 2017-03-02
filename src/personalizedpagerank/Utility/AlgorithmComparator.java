@@ -488,17 +488,19 @@ public class AlgorithmComparator
                 skipNeighbourhood = skipNeighbourhood || jMap.get(neighbour) == -1;
             }
             
-            in /= neighbourHood;
-            out /= neighbourHood;
-            pr /= neighbourHood;
-            j /= neighbourHood;
-            l /= neighbourHood;
-            s /= neighbourHood;
-            e /= neighbourHood;
-            
             //if neighbourhood jaccard/levenstein/spearman/error data has no value flag it
             if(skipNeighbourhood)
                 j = l = s = e = -1d;
+            else if(neighbourHood > 0)
+            {
+                in /= neighbourHood;
+                out /= neighbourHood;
+                pr /= neighbourHood;
+                j /= neighbourHood;
+                l /= neighbourHood;
+                s /= neighbourHood;
+                e /= neighbourHood;
+            }
             
             res.setNeighbourIn(index, in);
             res.setNeighbourOut(index, out);
@@ -517,8 +519,7 @@ public class AlgorithmComparator
             PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k)
     {
        Int2DoubleOpenHashMap errMap = new Int2DoubleOpenHashMap(nodes.size());
-       for(Integer node: nodes)
-           errMap.put(node.intValue(), 0d);
+       errMap.defaultReturnValue(0d);
        
         //for each origin node
         for(Integer node: nodes)
@@ -527,10 +528,6 @@ public class AlgorithmComparator
             //for the selected node get entries for both algos as arrays
             Int2DoubleMap.Entry[] m1 = alg1.getMap(node).entrySet().toArray(new Int2DoubleMap.Entry[0]);
             Int2DoubleMap.Entry[] m2 = alg2.getMap(node).entrySet().toArray(new Int2DoubleMap.Entry[0]);
-           
-            
-            Int2DoubleOpenHashMap map1 = alg1.getMap(node.intValue());
-            Int2DoubleOpenHashMap map2 = alg2.getMap(node.intValue());
            
             int min = Math.min(m1.length, m2.length);
             min = Math.min(min, k);

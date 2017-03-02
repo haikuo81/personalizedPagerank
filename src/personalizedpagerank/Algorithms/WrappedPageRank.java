@@ -62,7 +62,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 Map<Integer, Double> pprScores = pr.getScores();
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
-                map.defaultReturnValue(-1);
+                map.defaultReturnValue(0d);
                 scores.put(nodes.get(i), map);
             }
     }
@@ -122,7 +122,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return (scores.get(origin).get(target) != -1)? scores.get(origin).get(target) : 0d;
+        return scores.get(origin).get(target);
     }
     
 }
