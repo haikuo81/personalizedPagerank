@@ -40,7 +40,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     {
         this.g = g;
         this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
-        pickedNodes = new HashSet();
+        pickedNodes = new HashSet(samples);
         
         if(samples < 0) 
             throw new IllegalArgumentException("Number of samples can't be negative");
@@ -62,7 +62,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 Map<Integer, Double> pprScores = pr.getScores();
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
-                map.defaultReturnValue(-1);
+                map.defaultReturnValue(0d);
                 scores.put(nodes.get(i), map);
             }
     }
@@ -70,6 +70,15 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     //GETTERS
     ////////////////////
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    {
+        return g;
+    }
+    
     public Set<Integer> getNodes() {
         return pickedNodes;
     }
@@ -113,7 +122,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return (scores.get(origin).get(target) != -1)? scores.get(origin).get(target) : 0d;
+        return scores.get(origin).get(target);
     }
     
 }

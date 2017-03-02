@@ -45,6 +45,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
 
     
+
+    
     
     //Private class to store running parameters
     public static class GuerrieriParameters extends Parameters
@@ -127,6 +129,15 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
+    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    {
+        return g;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    @Override
     public Parameters getParameters() 
     {
         return new GuerrieriParameters(this.parameters);
@@ -162,7 +173,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
         if(!g.containsVertex(target))
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return (scores.get(origin).get(target) != -1)? scores.get(origin).get(target) : 0d;
+        return scores.get(origin).get(target);
     }
     
     //methods (no getters)
@@ -182,14 +193,13 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap(this.parameters.largetTop);
             Int2DoubleOpenHashMap nextScoresMap = new Int2DoubleOpenHashMap(this.parameters.largetTop);
             //return values for when a key has no mapped value
-            scoresMap.defaultReturnValue(-1);
-            nextScoresMap.defaultReturnValue(-1);
+            scoresMap.defaultReturnValue(0d);
+            nextScoresMap.defaultReturnValue(0d);
             scoresMap.put(v.intValue(), 1d);
             scores.put(v, scoresMap);
             nextScores.put(v, nextScoresMap);
         }
         
-        double factor, contribution, summation;
         while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
         {
             //reset the highest difference to 0 at the start of the run
@@ -197,7 +207,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
-                factor = this.parameters.getDamping() / g.outDegreeOf(v);
+                double factor = this.parameters.getDamping() / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
                 Int2DoubleOpenHashMap currentMap = nextScores.get(v);
@@ -213,28 +223,14 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
                     /**
                      * for each value of personalized pagerank (max L values) saved 
                      * in the map  of a successor increment the personalized pagerank of v
-                     * of a fraction of it.
+                     * for that key of a fraction of it.
                      */
                     for(int key: successorMap.keySet())
                     {
-                        contribution = factor * successorMap.get(key);
-                        
-                        //if there was a previously stored value put the sum of that value and the contribution
-                        //stored will be used to store the new value
-                        /**
-                         * if there was a previously stored value for a key from 
-                         * another successor of v put the sum of that value and the 
-                         * contribution as the total score of the key.
-                         * stored i
-                         */
-                        summation = (summation = currentMap.get(key)) != -1? (summation + contribution) : contribution;
-                        currentMap.put(key, summation);
-                        
-                        //using contribution to store scores.get(v).get(key) (the old value) to call it only once
-                        contribution = (contribution = scores.get(v).get(key)) != -1? 0 : contribution;
-                        
+                        //increment value (or set if key wasn't mapped)
+                        currentMap.addTo(key, factor * successorMap.get(key));
                         //update maxDiff
-                        maxDiff = Math.max(maxDiff, Math.abs(contribution - summation));
+                        maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
                     }
                 }
                 //keep the top L values only
@@ -268,7 +264,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         sorter.partialSort(values, topL, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
         {
             return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
-                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
+                    e1.getDoubleValue() == e2.getDoubleValue()?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;  
         });
         //if too many to remove just clear and add the first topL
         //else just remove the non topL
