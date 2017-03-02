@@ -40,7 +40,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     {
         this.g = g;
         this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
-        pickedNodes = new HashSet();
+        pickedNodes = new HashSet(samples);
         
         if(samples < 0) 
             throw new IllegalArgumentException("Number of samples can't be negative");
@@ -70,6 +70,15 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     //GETTERS
     ////////////////////
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    {
+        return g;
+    }
+    
     public Set<Integer> getNodes() {
         return pickedNodes;
     }

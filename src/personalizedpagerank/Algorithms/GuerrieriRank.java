@@ -45,6 +45,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
 
     
+
+    
     
     //Private class to store running parameters
     public static class GuerrieriParameters extends Parameters
@@ -122,6 +124,15 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     
     //GETTERS
     ////////////////////
+    
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    {
+        return g;
+    }
     
     /**
      * @inheritDoc
@@ -268,7 +279,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         sorter.partialSort(values, topL, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2) ->
         {
             return e1.getDoubleValue() < e2.getDoubleValue()? 1 : 
-                    e1.getDoubleValue() == e2.getDoubleValue()? 0 : -1;
+                    e1.getDoubleValue() == e2.getDoubleValue()?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;  
         });
         //if too many to remove just clear and add the first topL
         //else just remove the non topL

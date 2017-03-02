@@ -2,6 +2,9 @@ package personalizedpagerank.Algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.Parameters;
 
 /**
@@ -47,4 +50,10 @@ public interface PersonalizedPageRankAlgorithm
      * @return An object containing the running parameters (may be a subclass).
      */
     public Parameters getParameters();
+    
+    /**
+     * Returns the graph for which the algorithm was run.
+     * @return 
+     */
+    public DirectedGraph<Integer, DefaultEdge> getGraph();
 }
