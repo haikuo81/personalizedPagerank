@@ -227,7 +227,8 @@ public class AlgorithmComparatorTest extends TestCase
         
         for(int i = 0; i < data1.getLength(); i++)
         {
-            assertEquals(data1.getIndegree(i), 0, 0);
+            int node = data1.getId(i);
+            assertEquals(data1.getIndegree(i), g.inDegreeOf(node), 0);
             assertEquals(data1.getJaccard(i), 1d, 0);
             assertEquals(data1.getLevenstein(i), 0d, 0);
             assertEquals(data1.getNeighbourIn(i), 0, 0);

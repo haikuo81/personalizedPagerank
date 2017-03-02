@@ -18,6 +18,8 @@ public class ComparisonData
     public ComparisonData(int maxEntries, Result jaccard, Result levenstein, 
             Result spearman, Parameters param1, Parameters param2)
     {
+        if(maxEntries <= 0)
+            throw new IllegalArgumentException("max scores to keep 'k' must be positive");
         this.maxEntries = maxEntries;
         this.jaccard = jaccard;
         this.levenstein = levenstein;
