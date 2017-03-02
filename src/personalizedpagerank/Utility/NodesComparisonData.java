@@ -1,5 +1,8 @@
 package personalizedpagerank.Utility;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Class to hold comparison data regarding the origin nodes of personalized
  * pagerank individually.
@@ -29,6 +32,8 @@ public class NodesComparisonData
     
     public NodesComparisonData(int maxEntries, int length, Parameters p1, Parameters p2)
     {
+        if(maxEntries <= 0)
+            throw new IllegalArgumentException("max scores to keep 'k' must be positive");
         this.maxEntries = maxEntries;
         id = new int[length];
         indegree = new int[length];
@@ -192,4 +197,102 @@ public class NodesComparisonData
     public Parameters getParam2() {
         return param2;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + this.maxEntries;
+        hash = 97 * hash + Arrays.hashCode(this.id);
+        hash = 97 * hash + Arrays.hashCode(this.indegree);
+        hash = 97 * hash + Arrays.hashCode(this.outdegree);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourIn);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourOut);
+        hash = 97 * hash + Arrays.hashCode(this.pagerank);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerank);
+        hash = 97 * hash + Arrays.hashCode(this.jaccard);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourJaccard);
+        hash = 97 * hash + Arrays.hashCode(this.levenstein);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourLevenstein);
+        hash = 97 * hash + Arrays.hashCode(this.spearman);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourSpearman);
+        hash = 97 * hash + Arrays.hashCode(this.pagerankError);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerankError);
+        hash = 97 * hash + Objects.hashCode(this.param1);
+        hash = 97 * hash + Objects.hashCode(this.param2);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final NodesComparisonData other = (NodesComparisonData) obj;
+        if (this.maxEntries != other.maxEntries) {
+            return false;
+        }
+        if (!Arrays.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Arrays.equals(this.indegree, other.indegree)) {
+            return false;
+        }
+        if (!Arrays.equals(this.outdegree, other.outdegree)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourIn, other.neighbourIn)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourOut, other.neighbourOut)) {
+            return false;
+        }
+        if (!Arrays.equals(this.pagerank, other.pagerank)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourPagerank, other.neighbourPagerank)) {
+            return false;
+        }
+        if (!Arrays.equals(this.jaccard, other.jaccard)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourJaccard, other.neighbourJaccard)) {
+            return false;
+        }
+        if (!Arrays.equals(this.levenstein, other.levenstein)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourLevenstein, other.neighbourLevenstein)) {
+            return false;
+        }
+        if (!Arrays.equals(this.spearman, other.spearman)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourSpearman, other.neighbourSpearman)) {
+            return false;
+        }
+        if (!Arrays.equals(this.pagerankError, other.pagerankError)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourPagerankError, other.neighbourPagerankError)) {
+            return false;
+        }
+        if (!Objects.equals(this.param1, other.param1)) {
+            return false;
+        }
+        if (!Objects.equals(this.param2, other.param2)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+    
+    
 }
