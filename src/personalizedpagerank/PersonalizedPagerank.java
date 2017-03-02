@@ -20,26 +20,36 @@ import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedPageRank;
 import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
+import personalizedpagerank.Utility.IOclass;
+import personalizedpagerank.Utility.NodesComparisonData;
 
-    public class PersonalizedPagerank {
+    //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
+    //su quali nodi (ogni altro nodo come origine) si accumula + errore?
+    //fare classe csv writer
+    public class PersonalizedPagerank 
+    {
 
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
-            //generateUndirectedBipartite(g,200,200,10000);
-            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
-           // importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
-            //printGraph(g, "g1.csv");
+            generateUndirectedBipartite(g,200,200, 10000);
+            //importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
+            //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
+            printGraph(g, "g1.csv");
             System.out.println("finished importing ");
             
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 800);
+            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 400);
             System.out.println("done prank");
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 100, 100, 0.85, 0.0001);
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 150, 100, 0.85, 0.0001);
             System.out.println("done grank");
             
-            int[] ks = {10, 30};
+            int[] ks = {100};
             ComparisonData[] data = AlgorithmComparator.compare(res1, res2, res2.getNodes(), ks);
-            ComparisonData.writeCsv("test.csv", data);
+            NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
+            
+            
+           IOclass.writeCsv("test.csv", data);
+           IOclass.writeCsv("originTest.csv", originData);
         }
 
         ////////////////
