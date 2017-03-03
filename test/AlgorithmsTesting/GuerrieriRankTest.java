@@ -60,7 +60,7 @@ public class GuerrieriRankTest extends TestCase
     
     public void testGetters()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(1);
         
@@ -103,7 +103,7 @@ public class GuerrieriRankTest extends TestCase
     
     public void testEmptyGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 10, 30, 100, 0.85, 0.0001);
         
@@ -112,7 +112,7 @@ public class GuerrieriRankTest extends TestCase
     
     public void testReturning0()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         g.addVertex(1);
         g.addVertex(2);
         PersonalizedPageRankAlgorithm res = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
@@ -126,7 +126,7 @@ public class GuerrieriRankTest extends TestCase
     {
         //adds 30 nodes and <= 30 random edges, then checks if the returned top 
         //for each node is always <= topL
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         PersonalizedPageRankAlgorithm res;
         for(int i = 0; i < 30; i++)
             g.addVertex(i);
@@ -141,7 +141,7 @@ public class GuerrieriRankTest extends TestCase
     }
     public void testSingleNodeGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         //1 node no edges
         g.addVertex(1);
@@ -161,7 +161,7 @@ public class GuerrieriRankTest extends TestCase
     
     public void testTwoNodesGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(1);
         g.addVertex(2);
@@ -188,7 +188,7 @@ public class GuerrieriRankTest extends TestCase
     
     public void testLineGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         for(int i = 0; i < 6; i++)
             g.addVertex(i);
@@ -211,7 +211,7 @@ public class GuerrieriRankTest extends TestCase
     public void testStarGraph()
     {
         //0 is the center which every node points/is connected to
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 6; i++)
             g.addVertex(i);
           
@@ -245,7 +245,7 @@ public class GuerrieriRankTest extends TestCase
     {
         //make a graph thats a line
         final int K = 10;
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 100; i++)
             g.addVertex(i);
         for(int i = 0; i < 99; i++)
@@ -272,7 +272,7 @@ public class GuerrieriRankTest extends TestCase
         //same test as before but L is now greater than K
         //make a graph thats a line
         final int K = 10;
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 100; i++)
             g.addVertex(i);
         for(int i = 0; i < 99; i++)
@@ -299,7 +299,7 @@ public class GuerrieriRankTest extends TestCase
         //same test as before but L is now equal to the number of nodes
         //make a graph thats a line
         final int K = 10;
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 100; i++)
             g.addVertex(i);
         for(int i = 0; i < 99; i++)
@@ -327,7 +327,7 @@ public class GuerrieriRankTest extends TestCase
         //same test as before but L is greater than the number of nodes
         //make a graph thats a line
         final int K = 10;
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 100; i++)
             g.addVertex(i);
         for(int i = 0; i < 99; i++)
