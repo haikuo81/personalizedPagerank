@@ -42,11 +42,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     private final DirectedGraph<Integer, DefaultEdge> g;
     private Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
     private final GuerrieriParameters parameters;
-    private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
+    private final PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter<>();
 
-    
-
-    
     
     //Private class to store running parameters
     public static class GuerrieriParameters extends Parameters
@@ -80,7 +77,6 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     }
     
     
-    
     //CONSTRUCTORS
     ////////////////////
     
@@ -98,7 +94,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     public GuerrieriRank(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
     {
         this.g = g;
-        this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
+        this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
         scores.defaultReturnValue(null);
         if(smallTop <= 0)
             throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
@@ -176,6 +172,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         return scores.get(origin).get(target);
     }
     
+    
     //methods (no getters)
     ////////////////////
     
@@ -186,8 +183,9 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     {
         int iterations = this.parameters.getIterations();
         double maxDiff = this.parameters.getTolerance();
+        
         //init scores
-        Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> nextScores = new Int2ObjectOpenHashMap(g.vertexSet().size());
+        Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> nextScores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
         for(Integer v: g.vertexSet())
         {
             Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap(this.parameters.largetTop);
@@ -196,8 +194,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             scoresMap.defaultReturnValue(0d);
             nextScoresMap.defaultReturnValue(0d);
             scoresMap.put(v.intValue(), 1d);
-            scores.put(v, scoresMap);
-            nextScores.put(v, nextScoresMap);
+            scores.put(v.intValue(), scoresMap);
+            nextScores.put(v.intValue(), nextScoresMap);
         }
         
         while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
@@ -215,27 +213,27 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
                 currentMap.put(v, 1 - this.parameters.getDamping());
                 
                 //for each successor of v
-                for(DefaultEdge e: g.outgoingEdgesOf(v))
+                for(int successor: Graphs.successorListOf(g, v))
                 {
-                    Integer successor = Graphs.getOppositeVertex(g, e, v);
-                    Int2DoubleOpenHashMap successorMap = scores.get(successor);
-                    
                     /**
                      * for each value of personalized pagerank (max L values) saved 
                      * in the map  of a successor increment the personalized pagerank of v
                      * for that key of a fraction of it.
                      */
-                    for(int key: successorMap.keySet())
+                    for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
                     {
                         //increment value (or set if key wasn't mapped)
-                        currentMap.addTo(key, factor * successorMap.get(key));
-                        //update maxDiff
-                        maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
+                        currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
                     }
                 }
+                
                 //keep the top L values only
                 if(currentMap.size() > this.parameters.largetTop)
                     keepTopL(currentMap, this.parameters.largetTop);
+                
+                //update maxDiff
+                for(int key: currentMap.keySet())
+                    maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
             }
             // swap scores
             Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> tmp = scores;
@@ -243,6 +241,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             nextScores = tmp;
             iterations--;            
         }
+        
         //keep smalltop only
         for(int v: scores.keySet())
         {
@@ -282,11 +281,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
         {
             //needs a temporary holder since changes in the map are reflected in the Map.Entry[]
             int[] toRemove = new int[values.length - topL];
-            for(int i = topL, index = 0; i < values.length; i++)
-            {
+            for(int i = topL, index = 0; i < values.length; i++, index++)
                 toRemove[index]= values[i].getIntKey();
-                index++;
-            }
             for(int i = 0; i < toRemove.length; i++)
                 input.remove(toRemove[i]);
         }

@@ -31,25 +31,27 @@ import personalizedpagerank.Utility.NodesComparisonData;
 
         public static void main(String[] args) 
         {
-            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
-            generateUndirectedBipartite(g,200,200, 10000);
-            //importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
+            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+            //generateUndirectedBipartite(g,200,200, 10000);
+            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
             //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
-            printGraph(g, "g1.csv");
+            //printGraph(g, "g1.csv");
+            
             System.out.println("finished importing ");
             
+            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
+            System.out.println("done grank");
+            /*
             WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 400);
             System.out.println("done prank");
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 150, 100, 0.85, 0.0001);
-            System.out.println("done grank");
             
-            int[] ks = {100};
+            int[] ks = {10, 20 , 30, 50, 100};
             ComparisonData[] data = AlgorithmComparator.compare(res1, res2, res2.getNodes(), ks);
             NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
             
-            
            IOclass.writeCsv("test.csv", data);
            IOclass.writeCsv("originTest.csv", originData);
+            */
         }
 
         ////////////////
@@ -164,7 +166,7 @@ import personalizedpagerank.Utility.NodesComparisonData;
 
         public static void generateUndirectedBipartite(DirectedGraph<Integer, DefaultEdge> g, int n1, int n2, int m)
         {
-           GnmRandomBipartiteGraphGenerator gen = new GnmRandomBipartiteGraphGenerator(n1, n2, m); 
+           GnmRandomBipartiteGraphGenerator<Integer, DefaultEdge> gen = new GnmRandomBipartiteGraphGenerator<>(n1, n2, m); 
 
            //make it  undirected
            gen.generateGraph(g, new factory(), null);
@@ -173,7 +175,7 @@ import personalizedpagerank.Utility.NodesComparisonData;
                    g.addEdge(Graphs.getOppositeVertex(g, e, i), i);
         }
 
-        public static class factory implements VertexFactory
+        public static class factory implements VertexFactory<Integer>
         {
             int val = 0;
             public Integer createVertex()

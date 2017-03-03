@@ -127,8 +127,8 @@ public class AlgorithmComparator
                 entries2 = new HashSet<>(min);
                 for (int i = 0; i < min; i++) 
                 {
-                    entries1.add(m1[i].getKey());
-                    entries2.add(m2[i].getKey());
+                    entries1.add(m1[i].getIntKey());
+                    entries2.add(m2[i].getIntKey());
                 }
             } 
             else 
@@ -190,7 +190,7 @@ public class AlgorithmComparator
 
             return LEVENSTEIN.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
             -> {
-                return (e1.getKey().equals(e2.getKey())) ? 0 : -1;
+                return (e1.getIntKey() == e2.getIntKey()) ? 0 : -1;
             })/(double)Math.min(Math.min(m1.length, m2.length), k);
         }        
     }
@@ -394,7 +394,7 @@ public class AlgorithmComparator
         Function spearman = new SpearmanFunction();
         
         //pagerank value (not personalized pagerank)
-        Map<Integer, Double> pagerank = (new PageRank(g, alg1.getParameters().getDamping(), 
+        Map<Integer, Double> pagerank = (new PageRank<>(g, alg1.getParameters().getDamping(), 
                 alg1.getParameters().getIterations(), 
                 alg1.getParameters().getTolerance()).getScores());
         NodesComparisonData res = new NodesComparisonData(k, nodes.size(), alg1.getParameters(), alg2.getParameters());
