@@ -39,8 +39,8 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
             final double dampingFactor, final double tolerance, int samples)
     {
         this.g = g;
-        this.scores = new Int2ObjectOpenHashMap(g.vertexSet().size());
-        pickedNodes = new HashSet(samples);
+        this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
+        pickedNodes = new HashSet<>(samples);
         
         if(samples < 0) 
             throw new IllegalArgumentException("Number of samples can't be negative");
@@ -57,13 +57,13 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
         for(int i = 0; i < samples; i++)
             {
                 pickedNodes.add(nodes.get(i));
-                VertexScoringAlgorithm pr = new PageRank(g, parameters.getDamping(), 
+                VertexScoringAlgorithm<Integer, Double> pr = new PageRank<>(g, parameters.getDamping(), 
                         parameters.getIterations(), parameters.getTolerance(), nodes.get(i));
                 Map<Integer, Double> pprScores = pr.getScores();
                 //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
                 map.defaultReturnValue(0d);
-                scores.put(nodes.get(i), map);
+                scores.put(nodes.get(i).intValue(), map);
             }
     }
     
