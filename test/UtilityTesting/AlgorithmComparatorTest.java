@@ -25,14 +25,14 @@ public class AlgorithmComparatorTest extends TestCase
     ///////////////////////////////////
     public void testCompareEmptyKs()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         assertTrue(AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), new int[0]).length == 0);
     }
     
     public void testCompareNonEmptyKs()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         int[] ks = {1,2,3,4,5,6};
         ComparisonData[] data = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
@@ -44,7 +44,7 @@ public class AlgorithmComparatorTest extends TestCase
     
     public void testCompareSameAlgorithm()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         int[] ks = {3};
         
         g.addVertex(0);
@@ -79,7 +79,7 @@ public class AlgorithmComparatorTest extends TestCase
     public void testCompareSameAlgorithmBigGraph()
     {
         
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         for(int i = 0; i < 500; i++)
             g.addVertex(i);
@@ -108,7 +108,7 @@ public class AlgorithmComparatorTest extends TestCase
     
     public void testCompareDifferentAlgorithm()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(0);
         g.addVertex(1);
@@ -152,14 +152,14 @@ public class AlgorithmComparatorTest extends TestCase
     
     public void testCompareOriginsEmptyKs()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         assertTrue(AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), new int[0]).length == 0);
     }
     
     public void testCompareOriginsNonEmptyKs()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         int[] ks = {1,2,3,4,5,6};
         NodesComparisonData[] data = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
@@ -170,7 +170,7 @@ public class AlgorithmComparatorTest extends TestCase
     
     public void testCompareOriginsSameAlgorithm()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         int[] ks = {3};
         
         g.addVertex(0);
@@ -213,7 +213,7 @@ public class AlgorithmComparatorTest extends TestCase
     public void testCompareOriginsSameAlgorithmBigGraph()
     {
         
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         for(int i = 0; i < 500; i++)
             g.addVertex(i);
@@ -312,7 +312,7 @@ public class AlgorithmComparatorTest extends TestCase
     
     public void testCompareOriginsDifferentAlgorithm()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(0);
         g.addVertex(1);

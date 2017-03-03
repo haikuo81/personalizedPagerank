@@ -7,7 +7,7 @@ import personalizedpagerank.Utility.Levenstein;
 
 public class LevensteinTest extends TestCase
 {
-    final Levenstein<Integer> lev = new Levenstein();
+    final Levenstein<Integer> lev = new Levenstein<>();
     final Random random = new Random();
     
     //tests for method with no comparator

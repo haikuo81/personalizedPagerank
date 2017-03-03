@@ -9,7 +9,7 @@ import personalizedpagerank.Utility.PartialSorter;
 public class SorterTest extends TestCase
 {
     
-    PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter();
+    PartialSorter<Int2DoubleOpenHashMap.Entry> sorter = new PartialSorter<>();
     
     public void testEmpty()
     {
