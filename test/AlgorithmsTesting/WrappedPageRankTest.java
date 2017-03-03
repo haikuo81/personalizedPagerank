@@ -59,7 +59,7 @@ public class WrappedPageRankTest extends TestCase
     
     public void testGetters()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(1);
         
@@ -101,7 +101,7 @@ public class WrappedPageRankTest extends TestCase
     
     public void testEmptyGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         PersonalizedPageRankAlgorithm res = new WrappedPageRank(g, 10, 0.5, 0.0001, 0);
         
@@ -110,7 +110,7 @@ public class WrappedPageRankTest extends TestCase
     
     public void testSingleNodeGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         //1 node no edges
         g.addVertex(1);
@@ -132,7 +132,7 @@ public class WrappedPageRankTest extends TestCase
     
     public void testTwoNodesGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         g.addVertex(1);
         g.addVertex(2);
@@ -158,7 +158,7 @@ public class WrappedPageRankTest extends TestCase
     
     public void testLineGraph()
     {
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
         for(int i = 0; i < 6; i++)
             g.addVertex(i);
@@ -181,7 +181,7 @@ public class WrappedPageRankTest extends TestCase
     public void testStarGraph()
     {
         //0 is the center which every node points/is connected to
-        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph(DefaultEdge.class);     
+        DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);     
         for(int i = 0; i < 6; i++)
             g.addVertex(i);
           
