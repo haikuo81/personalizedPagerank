@@ -51,6 +51,8 @@ public class NodesComparisonDataTest extends TestCase
             assertEquals(data.getPagerank(i), 0, 0);
             assertEquals(data.getPagerankError(i), 0, 0);
             assertEquals(data.getSpearman(i), 0, 0);
+            assertEquals(data.getExcluded(i), 0 , 0);
+            assertEquals(data.getIncluded(i), 0 , 0);
         }
     }
     
@@ -76,6 +78,11 @@ public class NodesComparisonDataTest extends TestCase
             data.setPagerank(i, i);
             data.setPagerankError(i, i);
             data.setSpearman(i, i);
+            data.setExcluded(i, i);
+            data.setIncluded(i, i);
+            data.setNeighbourExcluded(i, i);
+            data.setNeighbourIncluded(i, i);
+            
         }
         
         for(int i = 0; i < 100; i++)
@@ -95,6 +102,10 @@ public class NodesComparisonDataTest extends TestCase
             assertEquals(data.getPagerank(i), i, 0);
             assertEquals(data.getPagerankError(i), i, 0);
             assertEquals(data.getSpearman(i), i, 0);
+            assertEquals(data.getExcluded(i), i , 0);
+            assertEquals(data.getIncluded(i), i , 0);
+            assertEquals(data.getNeighbourExcluded(i), i, 0);
+            assertEquals(data.getNeighbourIncluded(i), i, 0);
         }
     }
 

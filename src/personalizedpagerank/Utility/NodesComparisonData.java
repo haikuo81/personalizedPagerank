@@ -26,6 +26,10 @@ public class NodesComparisonData
     private final double[] neighbourSpearman;
     private final double[] pagerankError;
     private final double[] neighbourPagerankError;
+    private final int[] excluded;
+    private final double[] neighbourExcluded;
+    private final int[] included;
+    private final double[] neighbourIncluded;
     private final Parameters param1;
     private final Parameters param2;
 
@@ -50,6 +54,10 @@ public class NodesComparisonData
         neighbourSpearman = new double[length];
         pagerankError = new double[length];
         neighbourPagerankError = new double[length];
+        excluded = new int[length];
+        neighbourExcluded = new double[length];
+        included = new int[length];
+        neighbourIncluded = new double[length];
         param1 = p1;
         param2 = p2;
     }
@@ -117,6 +125,21 @@ public class NodesComparisonData
         neighbourPagerankError[index] = value;
     }
     
+    public void setExcluded(int index, int value) {
+        excluded[index] = value;
+    }
+    
+    public void setNeighbourExcluded(int index, double value) {
+        neighbourExcluded[index] = value;
+    }
+    
+    public void setIncluded(int index, int value) {
+        included[index] = value;
+    }
+    
+    public void setNeighbourIncluded(int index, double value) {
+        neighbourIncluded[index] = value;
+    }
     
     //GETTERS
     /////////
@@ -198,27 +221,47 @@ public class NodesComparisonData
         return param2;
     }
 
+    public int getExcluded(int index) {
+        return excluded[index];
+    }
+    
+    public double getNeighbourExcluded(int index) {
+        return neighbourExcluded[index];
+    }
+    
+    public int getIncluded(int index) {
+        return included[index];
+    }
+    
+    public double getNeighbourIncluded(int index) {
+        return neighbourIncluded[index];
+    }
+
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + this.maxEntries;
-        hash = 97 * hash + Arrays.hashCode(this.id);
-        hash = 97 * hash + Arrays.hashCode(this.indegree);
-        hash = 97 * hash + Arrays.hashCode(this.outdegree);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourIn);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourOut);
-        hash = 97 * hash + Arrays.hashCode(this.pagerank);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerank);
-        hash = 97 * hash + Arrays.hashCode(this.jaccard);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourJaccard);
-        hash = 97 * hash + Arrays.hashCode(this.levenstein);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourLevenstein);
-        hash = 97 * hash + Arrays.hashCode(this.spearman);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourSpearman);
-        hash = 97 * hash + Arrays.hashCode(this.pagerankError);
-        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerankError);
-        hash = 97 * hash + Objects.hashCode(this.param1);
-        hash = 97 * hash + Objects.hashCode(this.param2);
+        int hash = 3;
+        hash = 41 * hash + this.maxEntries;
+        hash = 41 * hash + Arrays.hashCode(this.id);
+        hash = 41 * hash + Arrays.hashCode(this.indegree);
+        hash = 41 * hash + Arrays.hashCode(this.outdegree);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourIn);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourOut);
+        hash = 41 * hash + Arrays.hashCode(this.pagerank);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourPagerank);
+        hash = 41 * hash + Arrays.hashCode(this.jaccard);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourJaccard);
+        hash = 41 * hash + Arrays.hashCode(this.levenstein);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourLevenstein);
+        hash = 41 * hash + Arrays.hashCode(this.spearman);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourSpearman);
+        hash = 41 * hash + Arrays.hashCode(this.pagerankError);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourPagerankError);
+        hash = 41 * hash + Arrays.hashCode(this.excluded);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourExcluded);
+        hash = 41 * hash + Arrays.hashCode(this.included);
+        hash = 41 * hash + Arrays.hashCode(this.neighbourIncluded);
+        hash = 41 * hash + Objects.hashCode(this.param1);
+        hash = 41 * hash + Objects.hashCode(this.param2);
         return hash;
     }
 
@@ -282,6 +325,18 @@ public class NodesComparisonData
         if (!Arrays.equals(this.neighbourPagerankError, other.neighbourPagerankError)) {
             return false;
         }
+        if (!Arrays.equals(this.excluded, other.excluded)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourExcluded, other.neighbourExcluded)) {
+            return false;
+        }
+        if (!Arrays.equals(this.included, other.included)) {
+            return false;
+        }
+        if (!Arrays.equals(this.neighbourIncluded, other.neighbourIncluded)) {
+            return false;
+        }
         if (!Objects.equals(this.param1, other.param1)) {
             return false;
         }
@@ -290,9 +345,4 @@ public class NodesComparisonData
         }
         return true;
     }
-    
-    
-    
-    
-    
 }
