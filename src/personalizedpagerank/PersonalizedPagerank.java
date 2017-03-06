@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.jgrapht.DirectedGraph;
@@ -32,26 +34,40 @@ import personalizedpagerank.Utility.NodesComparisonData;
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            //generateUndirectedBipartite(g,200,200, 10000);
-            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/wikiElec.csv");
+            //generateUndirectedBipartite(g,1000,1000, 1000 * 1000);
+            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
             //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             
             System.out.println("finished importing ");
             
-            PersonalizedPageRankAlgorithm res1 = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
-            System.out.println("done grank");
-            /*
-            WrappedPageRank res2 = new WrappedPageRank(g, 100, 0.85, 0.0001, 400);
+            WrappedPageRank pr = new WrappedPageRank(g, 100, 0.85, 0.0001, 400);
             System.out.println("done prank");
             
-            int[] ks = {10, 20 , 30, 50, 100};
-            ComparisonData[] data = AlgorithmComparator.compare(res1, res2, res2.getNodes(), ks);
-            NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
+            /*
+            ArrayList<ComparisonData> data = new ArrayList<>();
+            for(int i = 1; i <= 500; i++)
+            {
+                int[] ks = new int[i];
+                for(int u = 1; u <= i; u++ )
+                    ks[u-1] = u;
+                PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, i, i, 50, 0.85, 0.0001);
+                data.addAll(new ArrayList<>
+                    (Arrays.asList(AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks))));
+                System.out.println(i);
+            }
+       
+           IOclass.writeCsv("data.csv", data.toArray(new ComparisonData[0]));
+           */
             
-           IOclass.writeCsv("test.csv", data);
-           IOclass.writeCsv("originTest.csv", originData);
-            */
+            
+            int[] ks = {100};
+            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
+            ComparisonData[] data = AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks);
+            IOclass.writeCsv("data.csv", data);
+            
+            //NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
+            
         }
 
         ////////////////
