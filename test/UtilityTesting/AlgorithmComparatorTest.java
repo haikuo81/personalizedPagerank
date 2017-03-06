@@ -207,6 +207,10 @@ public class AlgorithmComparatorTest extends TestCase
             assertEquals(data1.getPagerank(i), 0.3333, 0.0001);
             assertEquals(data1.getPagerankError(i), 0d, 0);
             assertEquals(data1.getSpearman(i), 1d, 0);
+            assertEquals(data1.getExcluded(i), 0, 0);
+            assertEquals(data1.getIncluded(i), 0, 0);
+            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
         }
     }
    
@@ -221,7 +225,7 @@ public class AlgorithmComparatorTest extends TestCase
             g.addEdge(random.nextInt(100), random.nextInt(100));
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
-        Map<Integer, Double> pagerank = (new PageRank(g, p.getParameters().getDamping(), 
+        Map<Integer, Double> pagerank = (new PageRank<>(g, p.getParameters().getDamping(), 
                 p.getParameters().getIterations(), 
                 p.getParameters().getTolerance()).getScores());
         
@@ -242,6 +246,12 @@ public class AlgorithmComparatorTest extends TestCase
             assertEquals(data1.getPagerank(i), pagerank.get(node), 0.0001);
             assertEquals(data1.getPagerankError(i), 0d, 0);
             assertEquals(data1.getSpearman(i), 1d, 0);
+            assertEquals(data1.getExcluded(i), 0, 0);
+            assertEquals(data1.getIncluded(i), 0, 0);
+            assertEquals(data1.getExcluded(i), 0, 0);
+            assertEquals(data1.getIncluded(i), 0, 0);
+            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
         }
         
         //check stats for nodes that requires neighbour information
@@ -305,8 +315,11 @@ public class AlgorithmComparatorTest extends TestCase
             assertEquals(data1.getNeighbourLevenstein(i), 0d, 0d);
             assertEquals(data1.getNeighbourOut(i), out, 0);
             assertEquals(data1.getNeighbourPagerank(i), pr, 0d);
-            assertEquals(data1.getNeighbourPagerankError(i), 0d, 0);
-            
+            assertEquals(data1.getNeighbourPagerankError(i), 0d, 00d);
+            assertEquals(data1.getExcluded(i), 0, 0);
+            assertEquals(data1.getIncluded(i), 0, 0);
+            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
         }
     }
     
