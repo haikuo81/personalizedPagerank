@@ -221,8 +221,8 @@ public class AlgorithmComparator
                 final int selected, final int k) 
         {
             //if it's an isolated node just return 1
-            if(alg1.getMap(selected).entrySet().size() == 1)
-                return 1;
+            if(alg1.getMap(selected).entrySet().size() == 1 || alg2.getMap(selected).entrySet().size() == 1)
+                return 1d;
             
             //for the selected node get entries for both algos as arrays
             Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
@@ -252,6 +252,9 @@ public class AlgorithmComparator
             if(same)
                 return 1;
             
+            if(k == 1)
+                return (m1[0].getIntKey() == m2[0].getIntKey())? 1d : 0d;
+                        
             //for the second algorithm associate every node to it's position in the order
             //when ranked by the second algorithm
             Int2IntOpenHashMap positionsAlg2 = new Int2IntOpenHashMap(m2.length);
@@ -288,7 +291,6 @@ public class AlgorithmComparator
                 ranks1[i] = i;
                 ranks2[i] = tmp;
             }
-
             return Pearson.correlation(ranks1, ranks2);
         }        
     }
@@ -415,7 +417,11 @@ public class AlgorithmComparator
         and al2, this is repeated for every origin node (node part of the "nodes"
         set parameter)
         */
-        Int2DoubleOpenHashMap errorMap = pagerankError(alg1, alg2, nodes, k);
+        Int2DoubleOpenHashMap errorMap = new Int2DoubleOpenHashMap(g.vertexSet().size());
+        Int2IntOpenHashMap excludedMap = new Int2IntOpenHashMap(g.vertexSet().size());
+        Int2IntOpenHashMap includedMap = new Int2IntOpenHashMap(g.vertexSet().size());
+        errors(alg1, alg2, nodes, k, errorMap, excludedMap, includedMap);
+
         
         //set stats for nodes that can be computed now
         int index = 0;
@@ -433,6 +439,8 @@ public class AlgorithmComparator
             res.setLevenstein(index, lMap.get(node.intValue()));
             res.setSpearman(index, sMap.get(node.intValue()));
             res.setPagerankError(index, errorMap.get(node.intValue()));
+            res.setExcluded(index, excludedMap.get(node.intValue()));
+            res.setIncluded(index, includedMap.get(node.intValue()));
             index++;
         }
         
@@ -441,13 +449,15 @@ public class AlgorithmComparator
         for(Integer node: nodes)
         {
             boolean skipNeighbourhood = false;
-            double in = 0;
-            double out = 0;
-            double pr = 0;
+            double in = 0;//in degree
+            double out = 0;//out degree
+            double pr = 0;//page rank
             double j = 0;//jaccard
             double l = 0;//levenstein
             double s = 0;//spearman
             double e = 0;//pagerank error
+            double ex = 0;//excluded
+            double inc = 0;//included
             int neighbourHood = 0;
             
             //father nodes
@@ -462,6 +472,8 @@ public class AlgorithmComparator
                 l += lMap.get(neighbour);
                 s += sMap.get(neighbour);
                 e += errorMap.get(neighbour);
+                ex += excludedMap.get(neighbour);
+                inc += includedMap.get(neighbour);
 
                 //only need to check one of the maps to check if the neighbour
                 //is not part of the nodes for which personalized pagerank scores
@@ -481,6 +493,8 @@ public class AlgorithmComparator
                 l += lMap.get(neighbour);
                 s += sMap.get(neighbour);
                 e += errorMap.get(neighbour);
+                ex += excludedMap.get(neighbour);
+                inc += includedMap.get(neighbour);
                 
                 //only need to check one of the maps to check if the neighbour
                 //is not part of the nodes for which personalized pagerank scores
@@ -488,10 +502,8 @@ public class AlgorithmComparator
                 skipNeighbourhood = skipNeighbourhood || jMap.get(neighbour) == -1;
             }
             
-            //if neighbourhood jaccard/levenstein/spearman/error data has no value flag it
-            if(skipNeighbourhood)
-                j = l = s = e = -1d;
-            else if(neighbourHood > 0)
+            
+            if(neighbourHood > 0)
             {
                 in /= neighbourHood;
                 out /= neighbourHood;
@@ -500,7 +512,12 @@ public class AlgorithmComparator
                 l /= neighbourHood;
                 s /= neighbourHood;
                 e /= neighbourHood;
+                ex /= neighbourHood;
+                inc /= neighbourHood;
             }
+            //if neighbourhood jaccard/levenstein/spearman/error data has no value flag it
+            if(skipNeighbourhood)
+                j = l = s = e = -1d;
             
             res.setNeighbourIn(index, in);
             res.setNeighbourOut(index, out);
@@ -509,17 +526,22 @@ public class AlgorithmComparator
             res.setNeighbourLevenstein(index, l);
             res.setNeighbourSpearman(index, s);
             res.setNeighbourPagerankError(index, e);
+            res.setNeighbourExcluded(index, ex);
+            res.setNeighbourIncluded(index, inc);
             
             index ++;
         }
         return res;
     }
     
-    private static Int2DoubleOpenHashMap pagerankError(PersonalizedPageRankAlgorithm alg1, 
-            PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k)
+    private static Int2DoubleOpenHashMap errors(PersonalizedPageRankAlgorithm alg1, 
+            PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k,
+            Int2DoubleOpenHashMap errMap, Int2IntOpenHashMap excludedMap,
+            Int2IntOpenHashMap includedMap)
     {
-       Int2DoubleOpenHashMap errMap = new Int2DoubleOpenHashMap(nodes.size());
        errMap.defaultReturnValue(0d);
+       excludedMap.defaultReturnValue(0);
+       includedMap.defaultReturnValue(0);
        
         //for each origin node
         for(Integer node: nodes)
@@ -551,15 +573,32 @@ public class AlgorithmComparator
                 });
             }
             
+            Int2IntOpenHashMap inTop1 = new Int2IntOpenHashMap(min);
+            Int2IntOpenHashMap inTop2 = new Int2IntOpenHashMap(min);
+            inTop1.defaultReturnValue(0);
+            inTop2.defaultReturnValue(0);
+            for(int i = 0; i < min; i++)
+            {
+                inTop1.put(m1[i].getIntKey(), 1);
+                inTop2.put(m2[i].getIntKey(), 1);
+            }
+            
             //increment the error for the nodes in the top K
             for(int i = 0; i < min; i++)
             {
                 int target1 = m1[i].getIntKey();
                 int target2 = m2[i].getIntKey();
                 errMap.addTo(target1, 
-                        Math.abs(alg1.getRank(node, target1) - alg2.getRank(node, target1)));
+                        Math.abs((alg1.getRank(node, target1) - alg2.getRank(node, target1)))/alg2.getRank(node, target1));
                 errMap.addTo(target2, 
-                        Math.abs(alg1.getRank(node, target2) - alg2.getRank(node, target2)));
+                        Math.abs((alg1.getRank(node, target2) - alg2.getRank(node, target2))/alg2.getRank(node, target2)));
+                //if its in the top of alg1 but not in the top of alg2
+                if(inTop2.get(target1) == 0)
+                    includedMap.addTo(target1, 1);
+                //if its in the top of alg2 but not in the top of alg1
+                if(inTop1.get(target2) == 0)
+                    excludedMap.addTo(target2, 1);
+                    
             }
        }
        return errMap;

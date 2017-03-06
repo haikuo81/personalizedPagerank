@@ -34,9 +34,9 @@ public class IOclass
         getHeaderNames(builder, data[0].getParam1(),",");
         getHeaderNames(builder, data[0].getParam2(),",");
         
-        builder.append("max entries, jaccard min,jaccard average,jaccard max,jaccard std,"
+        builder.append("max entries,jaccard min,jaccard average,jaccard max,jaccard std,"
                 + "levenstein min,levenstein average,levenstein max,levenstein std,"
-                + "spearman min, spearman average, spearman max, spearman std");
+                + "spearman min,spearman average,spearman max,spearman std");
         
         builder.append(System.getProperty("line.separator"));
         
@@ -97,10 +97,11 @@ public class IOclass
         getHeaderNames(builder, data[0].getParam2(),",");
         
         builder.append("max entries,node id,indegree,outdegree,"
-                + " neighbour indegree,neighbour outdegree,pagerank,"
+                + "neighbour indegree,neighbour outdegree,pagerank,"
                 + "neighbour pagerank,jaccard,neighbour jaccard,levenstein,"
                 + "neighbour levenstein,spearman,neighbour spearman,"
-                + "pagerank error, neighbour pagerank error");
+                + "pagerank error,neighbour pagerank error,"
+                + "excluded,neighbour excluded,included,neighbour included");
           
         builder.append(System.getProperty("line.separator"));
         
@@ -136,7 +137,13 @@ public class IOclass
                 builder.append(data[i].getNeighbourSpearman(node)).append(",");
                 
                 builder.append(data[i].getPagerankError(node)).append(",");
-                builder.append(data[i].getNeighbourPagerankError(node));
+                builder.append(data[i].getNeighbourPagerankError(node)).append(",");
+                
+                builder.append(data[i].getExcluded(node)).append(",");
+                builder.append(data[i].getNeighbourExcluded(node)).append(",");
+                
+                builder.append(data[i].getIncluded(node)).append(",");
+                builder.append(data[i].getNeighbourIncluded(node));
                 
                 builder.append(System.getProperty("line.separator"));
             }
