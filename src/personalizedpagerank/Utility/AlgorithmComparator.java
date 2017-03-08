@@ -282,7 +282,7 @@ public class AlgorithmComparator
      * @return Comparison data containing the results of the comparison
      * between the two algorithms related to the K used.
      */
-    private static ComparisonData compare(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
+    public static ComparisonData compare(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
             Set<Integer> nodes, final int k) 
     {
         //min, average, max, std deviation for jaccard
