@@ -242,54 +242,47 @@ public class AlgorithmComparator
                         : e1.getDoubleValue() == e2.getDoubleValue() ?
                         (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
             });
-            //keep only the top k
-            m1 = Arrays.copyOf(m1, Math.min(m1.length, k));
             
-            //if the firts k ordered values are the same just return 1
+            int min = Math.min(m1.length, k);
+            
+            //if the first k ordered values are the same just return 1
             boolean same = true;
-            for(int i = 0; i < m1.length && same; i++)
+            for(int i = 0; i < min && same; i++)
                 same = m1[i].getIntKey() == m2[i].getIntKey();
             if(same)
                 return 1;
-            
+
+            //if k = 1 just check of the first ranked node is the same
             if(k == 1)
                 return (m1[0].getIntKey() == m2[0].getIntKey())? 1d : 0d;
                         
-            //for the second algorithm associate every node to it's position in the order
-            //when ranked by the second algorithm
-            Int2IntOpenHashMap positionsAlg2 = new Int2IntOpenHashMap(m2.length);
-            //to avoid mapping every single node ASAP we map nodes in chunks of 100
-            int currentIndex = 0;
-            int currentLimit = 0;
-            //return value to use when there's nothing mapped to a key
-            positionsAlg2.defaultReturnValue(-1);
+            //for every node in the topK of alg1 get its score from alg2
+            Int2DoubleOpenHashMap kScoresAlg2 = new Int2DoubleOpenHashMap(min);
+            Int2DoubleOpenHashMap positionsK2 = new Int2DoubleOpenHashMap(min);          
+            for (int i = 0; i < min; i++) 
+                kScoresAlg2.put(m1[i].getIntKey(), alg2.getRank(selected, m1[i].getIntKey()));
+		
+	    //sort the kScoresAlg2 entries by value, descending
+            Int2DoubleMap.Entry[] kAlg2 = kScoresAlg2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+	    
+            Arrays.sort(kAlg2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                    -> {
+                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                        : e1.getDoubleValue() == e2.getDoubleValue() ?
+                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+            });
+	    //for each entry in kScoresAlg2 associate a node to its position in the order
+            for(int i = 0; i < kAlg2.length; i++)
+		positionsK2.put(kAlg2[i].getIntKey(), i);
 
-            //for every node of the topK from alg1
-            //store the rankings (position) which the 2 algorithms would give to the node
-            double[] ranks1 = new double[m1.length];
-            double[] ranks2 = new double[m1.length];
+	    //prepare input for Pearson.correlation
+            double[] ranks1 = new double[min];
+            double[] ranks2 = new double[min];
 
-            //add to ranks1 and ranks2 the positions that a node assumes in the topK
-            //from alg1 and in alg2
-            for (int i = 0; i < m1.length; i++) 
+            for(int i = 0; i < min; i++)
             {
-                int tmp;
-
-                //if the m1[i] node is missing from the map read a chunk of nodes from the m2 array
-                while ((tmp = positionsAlg2.get(m1[i].getIntKey())) == -1) 
-                {
-                    //if the entire array has been read but the node still isn't mapped
-                    //give the node a position of m2.length
-                    if (currentLimit == m2.length) 
-                        tmp = m2.length;
-                    currentLimit += 100;
-                    currentLimit = Math.min(currentLimit, m2.length);
-                    for (; currentIndex < currentLimit; currentIndex++) 
-                        positionsAlg2.put(m2[currentIndex].getIntKey(), currentIndex);
-                }
-
                 ranks1[i] = i;
-                ranks2[i] = tmp;
+                ranks2[i] = positionsK2.get(m1[i].getIntKey());
             }
             return Pearson.correlation(ranks1, ranks2);
         }        
