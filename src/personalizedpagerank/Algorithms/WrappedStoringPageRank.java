@@ -16,7 +16,7 @@ import personalizedpagerank.Utility.Parameters;
  * Wrapper of the PageRank class from jgrapht library to store results from
  * multiple runs of the algorithm from different origin nodes.
  */
-public class WrappedPageRank implements PersonalizedPageRankAlgorithm
+public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
 {
     private final DirectedGraph<Integer, DefaultEdge> g;
     private final Parameters parameters;
@@ -35,7 +35,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * @param samples Number of nodes for which to run the algorithm.
      */
-    public WrappedPageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
+    public WrappedStoringPageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
             final double dampingFactor, final double tolerance, int samples)
     {
         this.g = g;
