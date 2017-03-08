@@ -22,264 +22,6 @@ public class AlgorithmComparator
     private static final Levenstein<Int2DoubleMap.Entry> LEVENSTEIN = new Levenstein<>();
     private static final PartialSorter<Int2DoubleOpenHashMap.Entry> SORTER = new PartialSorter<>();
     
-    
-    //interface for functions returning some kind of value based on the personalized pagerank results for a node
-    //see the implementing classes for details 
-    private static interface Function
-    {
-        double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2, final int k);
-    }
-    
-    /**
-     * Given a set of nodes, for each node a function returning a value
-     * depending on the two sets of top scorers (in terms of personalized
-     * pagerank) provided by the two algorithms is computed. The information is
-     * then used to compute the min, average, max and standard deviation of the
-     * values returned by the function. It's assumed that alg1 and alg2 have
-     * been computed from the same graph.
-     * @param alg1 First algorithm providing results.
-     * @param alg2 Second algorithm providing results.
-     * @param nodes Set of nodes to use as an argument for the function..
-     * @param function A Function that will return some kind of significant
-     * value (i.e. a coefficient) given a node and the 2 algorithms having
-     * personalized pagerank scores for that node.
-     * @return An array of 4 elements, min, average, max, standard deviation of
-     * the values returned by the function.
-     */
-    private static Result getStats(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2,
-            Set<Integer> nodes, Function function, final int k) 
-    {
-        //min, average, max, std deviation
-        double min, average, max, std, squareSum;
-        min = Double.MAX_VALUE;
-        max = Double.MIN_VALUE;
-        average = squareSum = 0;
-
-        for (Integer v : nodes) {
-            double tmp = function.apply(alg1.getMap(v), alg2.getMap(v), k);
-            //update min and max
-            min = Math.min(min, tmp);
-            max = Math.max(max, tmp);
-
-            average += tmp;
-            squareSum += tmp * tmp;
-        }
-        //compute std deviation as sqrt ( 1/n *(squaresum - sum^2/N) )
-        std = Math.sqrt(
-                (squareSum - (average * average) / nodes.size()) / nodes.size()
-        );
-        average /= nodes.size();
-        return new Result(min, average, max, std);
-    }
-    
-    
-    private static class JaccardFunction implements Function
-    {
-        /**
-         * Given 2 maps containing personalized pagerank scores calculate the
-         * jaccard similarity between the sets of nodes that would be the topK
-         * scorers for both maps, if K is the
-         * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
-         * map2.size()) entries for each map are kept.
-         *
-         * @param map1 map where keys are nodes and values are scores
-         * @param map2 map where keys are nodes and values are scores
-         * @param k Max number of entries to keep for each node from the entries
-         * of map1 and map2. (as if the entries were ordered by value
-         * descending)
-         * @return Jaccard similarity between the maps top keys.
-         */
-        @Override
-        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
-                final int k) 
-        {
-            //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Set<Integer> entries1;
-            Set<Integer> entries2;
-
-            //in case the first array stores topK results and the second stores topL results with K!=L
-            //or if the length is different from k
-            if (m1.length != m2.length || m1.length != k)
-            {
-                int min = Math.min(m1.length, m2.length);
-                min = Math.min(min, k);
-                SORTER.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                        -> {
-                    return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                            : e1.getDoubleValue() == e2.getDoubleValue() ?
-                            (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;
-                });
-
-                SORTER.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                        -> {
-                    return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                            : e1.getDoubleValue() == e2.getDoubleValue() ?
-                            (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;
-                });
-
-                //create sets and do jaccard
-                entries1 = new HashSet<>(min);
-                entries2 = new HashSet<>(min);
-                for (int i = 0; i < min; i++) 
-                {
-                    entries1.add(m1[i].getIntKey());
-                    entries2.add(m2[i].getIntKey());
-                }
-            } 
-            else 
-            {
-                entries1 = map1.keySet();
-                entries2 = map2.keySet();
-            }
-            return JACCARD.similarity(entries1, entries2);
-        }    
-    }
-    
-     
-    private static class LevensteinFunction implements Function
-    {
-         /**
-         * Given 2 maps containing personalized pagerank scores calculate the
-         * normalised levenstein distance between the sets of nodes that would be the topK
-         * scorers for both maps, if K is the min(K,min(map1.size(),map2.size())),
-         * else the top min(map1.size(), map2.size()) entries for each map are kept.
-         * The normalisation is done by dividing the distance by 
-         * min(K,min(map1.size(),map2.size())).
-         * @param map1 map where keys are nodes and values are scores
-         * @param map2 map where keys are nodes and values are scores
-         * @param k Max number of entries to keep for each node from the entries of map1
-         * and map2. (as if the entries were ordered by value descending)
-         * @return normalised levenstein distance between the maps top keys.
-         */
-        @Override
-        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
-                final int k) 
-        {
-            //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-
-            //sort entries by values, descending
-            Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                    -> {
-                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                        : e1.getDoubleValue() == e2.getDoubleValue() ? 
-                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-            });
-
-            Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                    -> {
-                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                        : e1.getDoubleValue() == e2.getDoubleValue() ?
-                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-            });
-
-            //in case the first array stores topK results and the second stores topL results with K!=L
-            //or if the length is different from k
-            if (m1.length != m2.length || m1.length != k) 
-            {
-                m1 = Arrays.copyOf(m1, Math.min(Math.min(m1.length, m2.length), k));
-                m2 = Arrays.copyOf(m2, Math.min(Math.min(m1.length, m2.length), k));
-            }
-
-            return LEVENSTEIN.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-            -> {
-                return (e1.getIntKey() == e2.getIntKey()) ? 0 : -1;
-            })/(double)Math.min(Math.min(m1.length, m2.length), k);
-        }        
-    }
-    
-    private static class SpearmanFunction implements Function
-    {
-        /**
-         * https://en.wikipedia.org/wiki/Spearman's_rank_correlation_coefficient
-         * Given 2 maps containing personalized pagerank scores calculate the
-         * spearman's rank correlation coefficient between the sets of nodes 
-         * that would be the topK scorers for both maps, if K is the
-         * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
-         * map2.size()) entries for each map are kept.
-         *
-         * @param map1 map where keys are nodes and values are scores
-         * @param map2 map where keys are nodes and values are scores
-         * @param k Max number of entries to keep for each node from the entries
-         * of map1 and map2. (as if the entries were ordered by value
-         * descending)
-         * @return spearman coefficient between the map entries
-         */
-        @Override
-        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
-                final int k) 
-        {
-            //if it's an isolated node just return 1
-            if(map1.entrySet().size() == 1 || map2.entrySet().size() == 1)
-                return 1d;
-            
-            //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-
-            //sort entries by values, descending
-            Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                    -> {
-                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                        : e1.getDoubleValue() == e2.getDoubleValue() ?
-                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-            });
-
-            Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                    -> {
-                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                        : e1.getDoubleValue() == e2.getDoubleValue() ?
-                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-            });
-            
-            int min = Math.min(m1.length, k);
-            
-            //if the first k ordered values are the same just return 1
-            boolean same = true;
-            for(int i = 0; i < min && same; i++)
-                same = m1[i].getIntKey() == m2[i].getIntKey();
-            if(same)
-                return 1;
-
-            //if k = 1 just check of the first ranked node is the same
-            if(k == 1)
-                return (m1[0].getIntKey() == m2[0].getIntKey())? 1d : 0d;
-                        
-            //for every node in the topK of alg1 get its score from alg2
-            Int2DoubleOpenHashMap kScoresAlg2 = new Int2DoubleOpenHashMap(min);
-            Int2DoubleOpenHashMap positionsK2 = new Int2DoubleOpenHashMap(min);          
-            for (int i = 0; i < min; i++) 
-                kScoresAlg2.put(m1[i].getIntKey(), map2.get(m1[i].getIntKey()));
-		
-	    //sort the kScoresAlg2 entries by value, descending
-            Int2DoubleMap.Entry[] kAlg2 = kScoresAlg2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-	    
-            Arrays.sort(kAlg2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                    -> {
-                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                        : e1.getDoubleValue() == e2.getDoubleValue() ?
-                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-            });
-	    //for each entry in kScoresAlg2 associate a node to its position in the order
-            for(int i = 0; i < kAlg2.length; i++)
-		positionsK2.put(kAlg2[i].getIntKey(), i);
-
-	    //prepare input for Pearson.correlation
-            double[] ranks1 = new double[min];
-            double[] ranks2 = new double[min];
-
-            for(int i = 0; i < min; i++)
-            {
-                ranks1[i] = i;
-                ranks2[i] = positionsK2.get(m1[i].getIntKey());
-            }
-            return Pearson.correlation(ranks1, ranks2);
-        }        
-    }
-    
     /**
      * Given 2 algorithms compares their personalized pagerank results of a 
      * set of nodes for different K values (see dirrentKs param).
@@ -301,26 +43,6 @@ public class AlgorithmComparator
         for(int i = 0 ; i < differentKs.length; i++)
             res[i] = compare(alg1, alg2, nodes, differentKs[i]);
         return res;
-    }
-    
-    /**
-     * Given 2 algorithms compares their personalized pagerank results of a 
-     * set of nodes.
-     * @param alg1 First algorithm.
-     * @param alg2 Second algorithm.
-     * @param nodes Set of nodes for which to do a comparison on the results.
-     * @param k Given a k, if a node is mapped to a map containing the scores
-     * of more than K nodes only the top K scoring nodes are kept.
-     * @return Comparison data containing the results of the comparison
-     * between the two algorithms related to the K used.
-     */
-    public static ComparisonData compare(PersonalizedPageRankAlgorithm alg1, 
-            PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k)
-    {
-        Result jc = getStats(alg1, alg2, nodes, new JaccardFunction(), k);
-        Result spear = getStats(alg1, alg2, nodes, new SpearmanFunction(), k);
-        Result lev = getStats(alg1, alg2, nodes, new LevensteinFunction(), k);
-        return new ComparisonData(k, jc, lev, spear, alg1.getParameters(), alg2.getParameters());
     }
     
     /**
@@ -351,6 +73,290 @@ public class AlgorithmComparator
         }
         return res;
     }
+   
+    /**
+     * Given 2 maps containing personalized pagerank scores calculate the
+     * jaccard similarity between the sets of nodes that would be the topK
+     * scorers for both maps, if K is the
+     * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
+     * map2.size()) entries for each map are kept.
+     *
+     * @param map1 map where keys are nodes and values are scores
+     * @param map2 map where keys are nodes and values are scores
+     * @param k Max number of entries to keep for each node from the entries
+     * of map1 and map2. (as if the entries were ordered by value
+     * descending)
+     * @return Jaccard similarity between the maps top keys.
+     */
+    static private double jaccard(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+            final int k) 
+    {
+        //for the selected node get entries for both algos as arrays
+        Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        Set<Integer> entries1;
+        Set<Integer> entries2;
+
+        //in case the first array stores topK results and the second stores topL results with K!=L
+        //or if the length is different from k
+        if (m1.length != m2.length || m1.length != k)
+        {
+            int min = Math.min(m1.length, m2.length);
+            min = Math.min(min, k);
+            SORTER.partialSort(m1, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                    -> {
+                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                        : e1.getDoubleValue() == e2.getDoubleValue() ?
+                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;
+            });
+
+            SORTER.partialSort(m2, min - 1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                    -> {
+                return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                        : e1.getDoubleValue() == e2.getDoubleValue() ?
+                        (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;
+            });
+
+            //create sets and do jaccard
+            entries1 = new HashSet<>(min);
+            entries2 = new HashSet<>(min);
+            for (int i = 0; i < min; i++) 
+            {
+                entries1.add(m1[i].getIntKey());
+                entries2.add(m2[i].getIntKey());
+            }
+        } 
+        else 
+        {
+            entries1 = map1.keySet();
+            entries2 = map2.keySet();
+        }
+        return JACCARD.similarity(entries1, entries2);
+    }    
+    
+    /**
+     * Given 2 maps containing personalized pagerank scores calculate the
+     * normalised levenstein distance between the sets of nodes that would be the topK
+     * scorers for both maps, if K is the min(K,min(map1.size(),map2.size())),
+     * else the top min(map1.size(), map2.size()) entries for each map are kept.
+     * The normalisation is done by dividing the distance by 
+     * min(K,min(map1.size(),map2.size())).
+     * @param map1 map where keys are nodes and values are scores
+     * @param map2 map where keys are nodes and values are scores
+     * @param k Max number of entries to keep for each node from the entries of map1
+     * and map2. (as if the entries were ordered by value descending)
+     * @return normalised levenstein distance between the maps top keys.
+     */
+    static private double levenstein(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+            final int k) 
+    {
+        //for the selected node get entries for both algos as arrays
+        Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+
+        //sort entries by values, descending
+        Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                -> {
+            return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                    : e1.getDoubleValue() == e2.getDoubleValue() ? 
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+        });
+
+        Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                -> {
+            return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                    : e1.getDoubleValue() == e2.getDoubleValue() ?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+        });
+
+        //in case the first array stores topK results and the second stores topL results with K!=L
+        //or if the length is different from k
+        if (m1.length != m2.length || m1.length != k) 
+        {
+            m1 = Arrays.copyOf(m1, Math.min(Math.min(m1.length, m2.length), k));
+            m2 = Arrays.copyOf(m2, Math.min(Math.min(m1.length, m2.length), k));
+        }
+
+        return LEVENSTEIN.distance(m1, m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+        -> {
+            return (e1.getIntKey() == e2.getIntKey()) ? 0 : -1;
+        })/(double)Math.min(Math.min(m1.length, m2.length), k);
+    }        
+    
+    /**
+     * https://en.wikipedia.org/wiki/Spearman's_rank_correlation_coefficient
+     * Given 2 maps containing personalized pagerank scores calculate the
+     * spearman's rank correlation coefficient between the sets of nodes 
+     * that would be the topK scorers for both maps, if K is the
+     * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
+     * map2.size()) entries for each map are kept.
+     *
+     * @param map1 map where keys are nodes and values are scores
+     * @param map2 map where keys are nodes and values are scores
+     * @param k Max number of entries to keep for each node from the entries
+     * of map1 and map2. (as if the entries were ordered by value
+     * descending)
+     * @return spearman coefficient between the map entries
+     */
+    static private double spearman(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+            final int k) 
+    {
+        //if it's an isolated node just return 1
+        if(map1.entrySet().size() == 1 || map2.entrySet().size() == 1)
+            return 1d;
+
+        //for the selected node get entries for both algos as arrays
+        Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+        Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+
+        //sort entries by values, descending
+        Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                -> {
+            return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                    : e1.getDoubleValue() == e2.getDoubleValue() ?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+        });
+
+        Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                -> {
+            return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                    : e1.getDoubleValue() == e2.getDoubleValue() ?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+        });
+
+        int min = Math.min(m1.length, k);
+
+        //if the first k ordered values are the same just return 1
+        boolean same = true;
+        for(int i = 0; i < min && same; i++)
+            same = m1[i].getIntKey() == m2[i].getIntKey();
+        if(same)
+            return 1;
+
+        //if k = 1 just check of the first ranked node is the same
+        if(k == 1)
+            return (m1[0].getIntKey() == m2[0].getIntKey())? 1d : 0d;
+
+        //for every node in the topK of alg1 get its score from alg2
+        Int2DoubleOpenHashMap kScoresAlg2 = new Int2DoubleOpenHashMap(min);
+        Int2DoubleOpenHashMap positionsK2 = new Int2DoubleOpenHashMap(min);          
+        for (int i = 0; i < min; i++) 
+            kScoresAlg2.put(m1[i].getIntKey(), map2.get(m1[i].getIntKey()));
+
+        //sort the kScoresAlg2 entries by value, descending
+        Int2DoubleMap.Entry[] kAlg2 = kScoresAlg2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+
+        Arrays.sort(kAlg2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
+                -> {
+            return e1.getDoubleValue() < e2.getDoubleValue() ? 1
+                    : e1.getDoubleValue() == e2.getDoubleValue() ?
+                    (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
+        });
+        //for each entry in kScoresAlg2 associate a node to its position in the order
+        for(int i = 0; i < kAlg2.length; i++)
+            positionsK2.put(kAlg2[i].getIntKey(), i);
+
+        //prepare input for Pearson.correlation
+        double[] ranks1 = new double[min];
+        double[] ranks2 = new double[min];
+
+        for(int i = 0; i < min; i++)
+        {
+            ranks1[i] = i;
+            ranks2[i] = positionsK2.get(m1[i].getIntKey());
+        }
+        return Pearson.correlation(ranks1, ranks2);
+    }        
+    
+    /**
+     * Given 2 algorithms compares their personalized pagerank results for a 
+     * set of nodes and return data about the min, average, max and standard
+     * deviation of the jaccard similarity, normalised levenstein distance and
+     * spearman coefficient for the top K scores for each node of the set of
+     * nodes.
+     * @param alg1 First algorithm.
+     * @param alg2 Second algorithm.
+     * @param nodes Set of nodes for which to do a comparison on the results.
+     * @param k Given a k, if a node is mapped to a map containing the scores
+     * of more than K nodes only the top K scoring nodes are kept.
+     * @return Comparison data containing the results of the comparison
+     * between the two algorithms related to the K used.
+     */
+    public static ComparisonData compare(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
+            Set<Integer> nodes, final int k) 
+    {
+        //min, average, max, std deviation for jaccard
+        double Jmin, Javerage, Jmax, Jstd, JsquareSum;
+        Jmin = Double.MAX_VALUE;
+        Jmax = Double.MIN_VALUE;
+        Javerage = JsquareSum = 0;
+        
+        //min, average, max, std deviation for levenstein
+        double Lmin, Laverage, Lmax, Lstd, LsquareSum;
+        Lmin = Double.MAX_VALUE;
+        Lmax = Double.MIN_VALUE;
+        Laverage = LsquareSum = 0;
+        
+        //min, average, max, std deviation for spearman
+        double Smin, Saverage, Smax, Sstd, SsquareSum; 
+        Smin = Double.MAX_VALUE;
+        Smax = Double.MIN_VALUE;
+        Saverage = SsquareSum = 0;
+
+        for (Integer node : nodes) 
+        {
+            Int2DoubleOpenHashMap map1 = alg1.getMap(node);
+            Int2DoubleOpenHashMap map2 = alg2.getMap(node);
+            double Jtmp = jaccard(map1, map2, k);
+            double Ltmp = levenstein(map1, map2, k);
+            double Stmp = spearman(map1, map2, k);
+            
+            //update min and max for jaccard
+            Jmin = Math.min(Jmin, Jtmp);
+            Jmax = Math.max(Jmax, Jtmp);
+
+            Javerage += Jtmp;
+            JsquareSum += Jtmp * Jtmp;
+            
+            //update min and max for levenstein
+            Lmin = Math.min(Lmin, Ltmp);
+            Lmax = Math.max(Lmax, Ltmp);
+
+            Laverage += Ltmp;
+            LsquareSum += Ltmp * Ltmp;
+            
+            //update min and max for spearman
+            Smin = Math.min(Smin, Stmp);
+            Smax = Math.max(Smax, Stmp);
+
+            Saverage += Stmp;
+            SsquareSum += Stmp * Stmp;
+        }
+        
+        //compute std deviation as sqrt ( 1/n *(squaresum - sum^2/N) ) for jaccard
+        Jstd = Math.sqrt(
+                (JsquareSum - (Javerage * Javerage) / nodes.size()) / nodes.size()
+        );
+        Javerage /= nodes.size();
+        
+        //compute std deviation as sqrt ( 1/n *(squaresum - sum^2/N) ) for levenstein
+        Lstd = Math.sqrt(
+                (LsquareSum - (Laverage * Laverage) / nodes.size()) / nodes.size()
+        );
+        Laverage /= nodes.size();
+        
+        //compute std deviation as sqrt ( 1/n *(squaresum - sum^2/N) ) for spearman
+        Sstd = Math.sqrt(
+                (SsquareSum - (Saverage * Saverage) / nodes.size()) / nodes.size()
+        );
+        Saverage /= nodes.size();
+        
+        Result Jr = new Result(Jmin, Javerage, Jmax, Jstd);
+        Result Lr = new Result(Lmin, Laverage, Lmax, Lstd);
+        Result Sr = new Result(Smin, Saverage, Smax, Sstd);
+        
+        return new ComparisonData(k, Jr, Lr, Sr, alg1.getParameters(), alg2.getParameters());
+    }
     
     /**
      * Given 2 algorithms compares their personalized pagerank results for
@@ -374,16 +380,13 @@ public class AlgorithmComparator
             PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k)
     {
         DirectedGraph<Integer,DefaultEdge> g = alg1.getGraph(); 
-        //function objects
-        Function jaccard = new JaccardFunction();
-        Function levenstein = new LevensteinFunction();
-        Function spearman = new SpearmanFunction();
         
         //pagerank value (not personalized pagerank)
         Map<Integer, Double> pagerank = (new PageRank<>(g, alg1.getParameters().getDamping(), 
                 alg1.getParameters().getIterations(), 
                 alg1.getParameters().getTolerance()).getScores());
-        NodesComparisonData res = new NodesComparisonData(k, nodes.size(), alg1.getParameters(), alg2.getParameters());
+        NodesComparisonData res = new NodesComparisonData(k, nodes.size(),
+                alg1.getParameters(), alg2.getParameters());
         
         //maps to store jaccard/levenstein/spearman values to avoid calculating them more than once
         Int2DoubleOpenHashMap jMap = new Int2DoubleOpenHashMap(nodes.size());
@@ -421,14 +424,15 @@ public class AlgorithmComparator
         Int2IntOpenHashMap includedMap = new Int2IntOpenHashMap(g.vertexSet().size());
         errors(alg1, alg2, nodes, k, errorMap, excludedMap, includedMap);
 
-        
         //set stats for nodes that can be computed now
         int index = 0;
         for(Integer node: nodes)
         {
-            jMap.put(node.intValue(), jaccard.apply(alg1.getMap(node), alg2.getMap(node), k));
-            lMap.put(node.intValue(),levenstein.apply(alg1.getMap(node), alg2.getMap(node), k));
-            sMap.put(node.intValue(), spearman.apply(alg1.getMap(node), alg2.getMap(node), k));
+            Int2DoubleOpenHashMap map1 = alg1.getMap(node);
+            Int2DoubleOpenHashMap map2 = alg2.getMap(node);
+            jMap.put(node.intValue(), jaccard(map1, map2, k));
+            lMap.put(node.intValue(),levenstein(map1,map2, k));
+            sMap.put(node.intValue(), spearman(map1, map2, k));
             
             res.setId(index, node);
             res.setIndegree(index, g.inDegreeOf(node));
@@ -533,6 +537,32 @@ public class AlgorithmComparator
         return res;
     }
     
+    /**
+     * Given 2 algorithms calculates 3 kinds of "errors" cumulatively for each
+     * node of the graph.
+     * For each origin node in the "nodes" parameter the top K from alg1 and 
+     * alg2 scores are used to increment values in 3 different maps which associate
+     * to a node of the graph some kind of value.
+     * errMap: for each node accumulates the normalised difference between the 
+     * rank given by alg1 and alg2 for this node when this node is part of the 
+     * topK of alg1 or alg2
+     * 
+     * excludedMap: for each node increment by one it's associated value when
+     * the node was part of a top K from alg2 but wasn't part of the top K for
+     * the same origin node from alg1
+     * 
+     * includedMap: for each node increment by one it's associated value when
+     * the node was part of a top K from alg1 but wasn't part of the top K for
+     * the same origin node from alg2
+     * @param alg1
+     * @param alg2
+     * @param nodes
+     * @param k
+     * @param errMap
+     * @param excludedMap
+     * @param includedMap
+     * @return 
+     */
     private static Int2DoubleOpenHashMap errors(PersonalizedPageRankAlgorithm alg1, 
             PersonalizedPageRankAlgorithm alg2, Set<Integer> nodes, int k,
             Int2DoubleOpenHashMap errMap, Int2IntOpenHashMap excludedMap,
@@ -545,10 +575,12 @@ public class AlgorithmComparator
         //for each origin node
         for(Integer node: nodes)
         {
-           
+            Int2DoubleOpenHashMap map1 = alg1.getMap(node);
+            Int2DoubleOpenHashMap map2 = alg2.getMap(node);
+            
             //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = alg1.getMap(node).entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = alg2.getMap(node).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
            
             int min = Math.min(m1.length, m2.length);
             min = Math.min(min, k);
@@ -572,32 +604,33 @@ public class AlgorithmComparator
                 });
             }
             
-            Int2IntOpenHashMap inTop1 = new Int2IntOpenHashMap(min);
-            Int2IntOpenHashMap inTop2 = new Int2IntOpenHashMap(min);
-            inTop1.defaultReturnValue(0);
-            inTop2.defaultReturnValue(0);
+            Set<Integer> inTop1 = new HashSet<>(min);
+            Set<Integer> inTop2 = new HashSet<>(min);
+            //map wich nodes are part of the top K from alg1 and alg2
             for(int i = 0; i < min; i++)
             {
-                inTop1.put(m1[i].getIntKey(), 1);
-                inTop2.put(m2[i].getIntKey(), 1);
+                inTop1.add(m1[i].getIntKey());
+                inTop2.add(m2[i].getIntKey());
             }
             
-            //increment the error for the nodes in the top K
+            /*
+            for each node in the top K of alg1 and alg2 increment it's error and 
+            possibly it's excluded/included values
+            */
             for(int i = 0; i < min; i++)
             {
                 int target1 = m1[i].getIntKey();
                 int target2 = m2[i].getIntKey();
                 errMap.addTo(target1, 
-                        Math.abs((alg1.getRank(node, target1) - alg2.getRank(node, target1)))/alg2.getRank(node, target1));
+                        Math.abs((map1.get(target1) - map2.get(target1)))/map2.get(target1));
                 errMap.addTo(target2, 
-                        Math.abs((alg1.getRank(node, target2) - alg2.getRank(node, target2))/alg2.getRank(node, target2)));
+                        Math.abs((map1.get(target2) - map2.get(target2)))/map2.get(target2));
                 //if its in the top of alg1 but not in the top of alg2
-                if(inTop2.get(target1) == 0)
+                if(!inTop2.contains(target1))
                     includedMap.addTo(target1, 1);
                 //if its in the top of alg2 but not in the top of alg1
-                if(inTop1.get(target2) == 0)
+                if(!inTop1.contains(target2))
                     excludedMap.addTo(target2, 1);
-                    
             }
        }
        return errMap;

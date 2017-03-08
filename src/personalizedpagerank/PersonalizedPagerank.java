@@ -9,7 +9,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -19,7 +21,8 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedPageRank;
+import personalizedpagerank.Algorithms.WrappedOnlinePageRank;
+import personalizedpagerank.Algorithms.WrappedStoringPageRank;
 import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.IOclass;
@@ -41,7 +44,7 @@ import personalizedpagerank.Utility.NodesComparisonData;
             
             System.out.println("finished importing ");
             
-            WrappedPageRank pr = new WrappedPageRank(g, 100, 0.85, 0.0001, 400);
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, g.vertexSet().size());
             System.out.println("done prank");
             
             /*
@@ -63,7 +66,8 @@ import personalizedpagerank.Utility.NodesComparisonData;
             
             int[] ks = {100};
             PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
-            ComparisonData[] data = AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks);
+            System.out.println("done grank");
+            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), ks);
             IOclass.writeCsv("data.csv", data);
             
             //NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
@@ -74,7 +78,6 @@ import personalizedpagerank.Utility.NodesComparisonData;
         //////////the code written below here is just some stuff written hastily to try out stuff
         ///not part of the project, not commented, not tested
         /////////////////////////////////////////////////////////////////////////////////////
-        
         
         
         private static void printGraph(DirectedGraph<Integer, DefaultEdge> g, final String path)

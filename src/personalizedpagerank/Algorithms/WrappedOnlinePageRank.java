@@ -14,7 +14,7 @@ import personalizedpagerank.Utility.Parameters;
  * pagerank of the origin node; no results are stored.
  * 
  */
-public class WrappedPageRank implements PersonalizedPageRankAlgorithm
+public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
 {
     private final DirectedGraph<Integer, DefaultEdge> g;
     private final Parameters parameters;
@@ -30,7 +30,7 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
      * @param dampingFactor The damping factor.
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      */
-    public WrappedPageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
+    public WrappedOnlinePageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
             final double dampingFactor, final double tolerance)
     {
         this.g = g;
