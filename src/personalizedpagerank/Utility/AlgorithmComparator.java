@@ -27,8 +27,7 @@ public class AlgorithmComparator
     //see the implementing classes for details 
     private static interface Function
     {
-        double apply(final PersonalizedPageRankAlgorithm alg1, final PersonalizedPageRankAlgorithm alg2,
-                final int selected, final int k);
+        double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2, final int k);
     }
     
     /**
@@ -57,7 +56,7 @@ public class AlgorithmComparator
         average = squareSum = 0;
 
         for (Integer v : nodes) {
-            double tmp = function.apply(alg1, alg2, v, k);
+            double tmp = function.apply(alg1.getMap(v), alg2.getMap(v), k);
             //update min and max
             min = Math.min(min, tmp);
             max = Math.max(max, tmp);
@@ -73,32 +72,30 @@ public class AlgorithmComparator
         return new Result(min, average, max, std);
     }
     
-    /**
-     * Given 2 objects implementing the PersonalizedPagerankAlgorithm interface
-     * referring to the same graph (it's assumed, not checked) calculate the
-     * jaccard similarity between the sets of nodes that would be the topK
-     * scorers for both algorithms, starting from the same "selected" node (see
-     * param selected). If one algorithm stores the topK scores while the other
-     * one stores the topL with K!=L only the top min(K,L) scoring nodes are
-     * considered.
-     *
-     * @param alg1 The first object containing computed personalized pageranks.
-     * @param alg2 The second object containing computed personalized pageranks.
-     * @param selected For which node results gets compared.
-     * @param k Max number of entries to keep for each node from the entries of alg1
-     * and alg2. (as if the entries were ordered by value descending)
-     * @return Jaccard similarity of results for the selected node
-     */
+    
     private static class JaccardFunction implements Function
     {
+        /**
+         * Given 2 maps containing personalized pagerank scores calculate the
+         * jaccard similarity between the sets of nodes that would be the topK
+         * scorers for both maps, if K is the
+         * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
+         * map2.size()) entries for each map are kept.
+         *
+         * @param map1 map where keys are nodes and values are scores
+         * @param map2 map where keys are nodes and values are scores
+         * @param k Max number of entries to keep for each node from the entries
+         * of map1 and map2. (as if the entries were ordered by value
+         * descending)
+         * @return Jaccard similarity between the maps top keys.
+         */
         @Override
-        public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
-                final int selected, final int k) 
+        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+                final int k) 
         {
-            
             //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
             Set<Integer> entries1;
             Set<Integer> entries2;
 
@@ -133,37 +130,36 @@ public class AlgorithmComparator
             } 
             else 
             {
-                entries1 = alg1.getMap(selected).keySet();
-                entries2 = alg2.getMap(selected).keySet();
+                entries1 = map1.keySet();
+                entries2 = map2.keySet();
             }
             return JACCARD.similarity(entries1, entries2);
         }    
     }
     
-    /**
-     * Given 2 objects implementing the PersonalizedPagerankAlgorithm interface
-     * referring to the same graph (it's assumed, not checked) calculate the
-     * levenstein distance between the nodes that would be the topK scorers for
-     * both algorithms, starting from the same "selected" node (see param
-     * selected). If one algorithm stores the topK scores while the other one
-     * stores the topL with K!=L only the top min(K,L) scoring nodes are
-     * considered.
-     * @param alg1 The first object containing computed personalized pageranks.
-     * @param alg2 The second object containing computed personalized pageranks.
-     * @param selected For which node results gets compared.
-     * @param k Max number of entries to keep for each node from the entries of alg1
-     * and alg2. (as if the entries were ordered by value descending)
-     * @return Leveinstein distance of results for the selected node.
-     */
+     
     private static class LevensteinFunction implements Function
     {
+         /**
+         * Given 2 maps containing personalized pagerank scores calculate the
+         * normalised levenstein distance between the sets of nodes that would be the topK
+         * scorers for both maps, if K is the min(K,min(map1.size(),map2.size())),
+         * else the top min(map1.size(), map2.size()) entries for each map are kept.
+         * The normalisation is done by dividing the distance by 
+         * min(K,min(map1.size(),map2.size())).
+         * @param map1 map where keys are nodes and values are scores
+         * @param map2 map where keys are nodes and values are scores
+         * @param k Max number of entries to keep for each node from the entries of map1
+         * and map2. (as if the entries were ordered by value descending)
+         * @return normalised levenstein distance between the maps top keys.
+         */
         @Override
-        public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
-                final int selected, final int k) 
+        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+                final int k) 
         {
             //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
 
             //sort entries by values, descending
             Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
@@ -195,38 +191,34 @@ public class AlgorithmComparator
         }        
     }
     
-    /**
-     * https://en.wikipedia.org/wiki/Spearman's_rank_correlation_coefficient
-     *
-     * Given 2 objects implementing the PersonalizedPagerankAlgorithm interface
-     * referring to the same graph (it's assumed, not checked) calculate the
-     * spearman rank correlation coefficient between the positions that both
-     * algorithms would give to the top K ordered descending entries of alg1.
-     * It's assumed that every node that is in the topK of alg1 is a key in
-     * alg2.getMap(selected), otherwise the node is given a default position
-     * given by the size of the keyset of the map from alg2.
-     * For an isolated node (alg1.getMap(selected) == 1) the result will always be 1.
-     * @param alg1 The first object containing computed personalized pageranks.
-     * @param alg2 The second object containing computed personalized pageranks.
-     * @param selected For which node results gets compared.
-     * @param k Max number of entries to keep for each node in the entries of alg1.
-     * (as if the entries were ordered by value descending)
-     * @return Spearman correlation of the positions of the results for the
-     * selected node.
-     */
     private static class SpearmanFunction implements Function
     {
+        /**
+         * https://en.wikipedia.org/wiki/Spearman's_rank_correlation_coefficient
+         * Given 2 maps containing personalized pagerank scores calculate the
+         * spearman's rank correlation coefficient between the sets of nodes 
+         * that would be the topK scorers for both maps, if K is the
+         * min(K,min(map1.size(),map2.size())), else the top min(map1.size(),
+         * map2.size()) entries for each map are kept.
+         *
+         * @param map1 map where keys are nodes and values are scores
+         * @param map2 map where keys are nodes and values are scores
+         * @param k Max number of entries to keep for each node from the entries
+         * of map1 and map2. (as if the entries were ordered by value
+         * descending)
+         * @return spearman coefficient between the map entries
+         */
         @Override
-        public double apply(PersonalizedPageRankAlgorithm alg1, PersonalizedPageRankAlgorithm alg2,
-                final int selected, final int k) 
+        public double apply(Int2DoubleOpenHashMap map1, Int2DoubleOpenHashMap map2,
+                final int k) 
         {
             //if it's an isolated node just return 1
-            if(alg1.getMap(selected).entrySet().size() == 1 || alg2.getMap(selected).entrySet().size() == 1)
+            if(map1.entrySet().size() == 1 || map2.entrySet().size() == 1)
                 return 1d;
             
             //for the selected node get entries for both algos as arrays
-            Int2DoubleMap.Entry[] m1 = alg1.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
-            Int2DoubleMap.Entry[] m2 = alg2.getMap(selected).entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
+            Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
 
             //sort entries by values, descending
             Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
@@ -260,7 +252,7 @@ public class AlgorithmComparator
             Int2DoubleOpenHashMap kScoresAlg2 = new Int2DoubleOpenHashMap(min);
             Int2DoubleOpenHashMap positionsK2 = new Int2DoubleOpenHashMap(min);          
             for (int i = 0; i < min; i++) 
-                kScoresAlg2.put(m1[i].getIntKey(), alg2.getRank(selected, m1[i].getIntKey()));
+                kScoresAlg2.put(m1[i].getIntKey(), map2.get(m1[i].getIntKey()));
 		
 	    //sort the kScoresAlg2 entries by value, descending
             Int2DoubleMap.Entry[] kAlg2 = kScoresAlg2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
@@ -330,7 +322,6 @@ public class AlgorithmComparator
         Result lev = getStats(alg1, alg2, nodes, new LevensteinFunction(), k);
         return new ComparisonData(k, jc, lev, spear, alg1.getParameters(), alg2.getParameters());
     }
-    
     
     /**
      * Given 2 algorithms compares their personalized pagerank results for
@@ -407,11 +398,26 @@ public class AlgorithmComparator
         node in the top K of alg1 and for every node in the top K of alg2
         the double value mapped to that node is incremented by the absolute
         difference between the personalized pagerank score assigned by alg1
-        and al2, this is repeated for every origin node (node part of the "nodes"
+        and alg2 divided by the score assigned by alg2,
+        this is repeated for every origin node (node part of the "nodes"
         set parameter)
         */
         Int2DoubleOpenHashMap errorMap = new Int2DoubleOpenHashMap(g.vertexSet().size());
+        
+        /**
+         * for every node in the top K of alg2 that is not in the top K of alg1
+         * increment the value associated to that node by 1
+         * this is repeated
+         * for every origin node (node part of the "nodes" set parameter)
+         */
         Int2IntOpenHashMap excludedMap = new Int2IntOpenHashMap(g.vertexSet().size());
+        
+        /**
+         * for every node in the top K of alg1 that is not in the top K of alg2
+         * increment the value associated to that node by 1
+         * this is repeated for every origin node (node part of the "nodes"
+         * set parameter)
+         */
         Int2IntOpenHashMap includedMap = new Int2IntOpenHashMap(g.vertexSet().size());
         errors(alg1, alg2, nodes, k, errorMap, excludedMap, includedMap);
 
@@ -420,9 +426,9 @@ public class AlgorithmComparator
         int index = 0;
         for(Integer node: nodes)
         {
-            jMap.put(node.intValue(), jaccard.apply(alg1, alg2, node, k));
-            lMap.put(node.intValue(),levenstein.apply(alg1, alg2, node, k));
-            sMap.put(node.intValue(), spearman.apply(alg1, alg2, node, k));
+            jMap.put(node.intValue(), jaccard.apply(alg1.getMap(node), alg2.getMap(node), k));
+            lMap.put(node.intValue(),levenstein.apply(alg1.getMap(node), alg2.getMap(node), k));
+            sMap.put(node.intValue(), spearman.apply(alg1.getMap(node), alg2.getMap(node), k));
             
             res.setId(index, node);
             res.setIndegree(index, g.inDegreeOf(node));

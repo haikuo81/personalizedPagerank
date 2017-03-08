@@ -35,7 +35,7 @@ import personalizedpagerank.Utility.NodesComparisonData;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
             //generateUndirectedBipartite(g,1000,1000, 1000 * 1000);
-            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
+            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
             //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             

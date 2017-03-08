@@ -27,8 +27,9 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
     ////////////////////
     
     /**
-     * Create object and run the algorithm, results of the personalized pagerank
-     * are stored in the object.
+     * Create object and run the algorithm for a number of randomly picked
+     * nodes equal to the parameter "samples".
+     * Results of the personalized pageranks are stored in the object.
      * @param g The input graph.
      * @param iterations The number of iterations to perform.
      * @param dampingFactor The damping factor.
@@ -64,6 +65,38 @@ public class WrappedPageRank implements PersonalizedPageRankAlgorithm
                 Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
                 map.defaultReturnValue(0d);
                 scores.put(nodes.get(i).intValue(), map);
+            }
+    }
+    
+    /**
+     * Create object and run the algorithm for the selected nodes, results of 
+     * the personalized pageranks are stored in the object.
+     * @param g The input graph.
+     * @param iterations The number of iterations to perform.
+     * @param dampingFactor The damping factor.
+     * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
+     * @param nodes Set of nodes for which run classic personalized pagerank
+     */
+    public WrappedPageRank(final DirectedGraph<Integer, DefaultEdge> g, final int iterations, 
+            final double dampingFactor, final double tolerance, Set<Integer> nodes)
+    {
+        this.g = g;
+        this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
+        pickedNodes = nodes;
+        
+        
+        parameters = new Parameters(g.vertexSet().size(), g.edgeSet().size(), 
+                iterations, dampingFactor, tolerance);
+        
+        for(int node: pickedNodes)
+            {
+                VertexScoringAlgorithm<Integer, Double> pr = new PageRank<>(g, parameters.getDamping(), 
+                        parameters.getIterations(), parameters.getTolerance(), node);
+                Map<Integer, Double> pprScores = pr.getScores();
+                //"translate" this map into a Int2DoubleOpenHashMap to satisty the interface
+                Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
+                map.defaultReturnValue(0d);
+                scores.put(node, map);
             }
     }
     
