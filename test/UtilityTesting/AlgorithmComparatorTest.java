@@ -53,34 +53,30 @@ public class AlgorithmComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
-        ComparisonData[] data3 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
+        ComparisonData[] data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
+        ComparisonData[] data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
         
-        assertTrue(data1.getParam1().equals(data1.getParam2()));
-        assertTrue(data1.equals(data2));
-        assertTrue(data2.equals(data1));
+        assertTrue(data1[0].getParam1().equals(data1[0].getParam2()));
+        assertTrue(data1[0].equals(data2[0]));
+        assertTrue(data2[0].equals(data1[0]));
         
-        assertTrue(data1.getParam1().equals(data3[0].getParam2()));
-        assertTrue(data1.equals(data3[0]));
-        assertTrue(data3[0].equals(data1));
         
-        assertEquals(data1.getJaccard().getMin(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getAverage(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getMax(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getJaccard().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1.getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
     }
     
     public void testCompareSameAlgorithmBigGraph()
     {
         
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-        
+        int[] ks = {3};
         for(int i = 0; i < 500; i++)
             g.addVertex(i);
         for(int i = 0; i < 500; i++)
@@ -88,28 +84,28 @@ public class AlgorithmComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
+        ComparisonData[] data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
+        ComparisonData[] data2 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
         
-        assertTrue(data1.getParam1().equals(data1.getParam2()));
-        assertTrue(data1.equals(data2));
-        assertTrue(data2.equals(data1));
+        assertTrue(data1[0].getParam1().equals(data1[0].getParam2()));
+        assertTrue(data1[0].equals(data2[0]));
+        assertTrue(data2[0].equals(data1[0]));
         
-        assertEquals(data1.getJaccard().getMin(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getAverage(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getMax(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getJaccard().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1.getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
     }
     
     public void testCompareDifferentAlgorithm()
     {
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-        
+        int[] ks = {3};
         g.addVertex(0);
         g.addVertex(1);
         g.addVertex(2);
@@ -121,30 +117,30 @@ public class AlgorithmComparatorTest extends TestCase
         PersonalizedPageRankAlgorithm p5 = new GuerrieriRank(g, 3, 3, 100, 0.86, 0.0001);
         PersonalizedPageRankAlgorithm p6 = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0005);
         
-        ComparisonData data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), 3);
-        ComparisonData data4 = AlgorithmComparator.compare(p4, p4, g.vertexSet(), 3);
-        ComparisonData data5 = AlgorithmComparator.compare(p5, p5, g.vertexSet(), 3);
-        ComparisonData data6 = AlgorithmComparator.compare(p6, p6, g.vertexSet(), 3);
+        ComparisonData[] data1 = AlgorithmComparator.compare(p, p, g.vertexSet(), ks);
+        ComparisonData[] data4 = AlgorithmComparator.compare(p4, p4, g.vertexSet(), ks);
+        ComparisonData[] data5 = AlgorithmComparator.compare(p5, p5, g.vertexSet(), ks);
+        ComparisonData[] data6 = AlgorithmComparator.compare(p6, p6, g.vertexSet(), ks);
         
         
-        assertFalse(data1.equals(data4));
-        assertFalse(data4.equals(data1));
+        assertFalse(data1[0].equals(data4[0]));
+        assertFalse(data4[0].equals(data1[0]));
         
-        assertFalse(data1.equals(data5));
-        assertFalse(data5.equals(data1));
+        assertFalse(data1[0].equals(data5[0]));
+        assertFalse(data5[0].equals(data1[0]));
         
-        assertFalse(data1.equals(data6));
-        assertFalse(data6.equals(data1));
+        assertFalse(data1[0].equals(data6[0]));
+        assertFalse(data6[0].equals(data1[0]));
         
-        assertEquals(data1.getJaccard().getMin(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getAverage(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getMax(), 1d, 0.001);
-        assertEquals(data1.getJaccard().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getJaccard().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1.getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1.getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
+        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
     }
     
     //AlgorithmComparator.compareOriginsOriginsTests

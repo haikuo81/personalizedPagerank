@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,12 +22,10 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedOnlinePageRank;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
 import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.IOclass;
-import personalizedpagerank.Utility.NodesComparisonData;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
     //su quali nodi (ogni altro nodo come origine) si accumula + errore?
@@ -38,18 +37,17 @@ import personalizedpagerank.Utility.NodesComparisonData;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
             //generateUndirectedBipartite(g,1000,1000, 1000 * 1000);
-            importBipartiteUndirectedFromCsv(g, "data/graphs/undirected/bipartite/collab.csv");
+            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
             //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             
             System.out.println("finished importing ");
             
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, g.vertexSet().size());
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 100);
             System.out.println("done prank");
             
-            /*
             ArrayList<ComparisonData> data = new ArrayList<>();
-            for(int i = 1; i <= 500; i++)
+            for(int i = 1; i <= 100; i++)
             {
                 int[] ks = new int[i];
                 for(int u = 1; u <= i; u++ )
@@ -58,27 +56,38 @@ import personalizedpagerank.Utility.NodesComparisonData;
                 data.addAll(new ArrayList<>
                     (Arrays.asList(AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks))));
                 System.out.println(i);
+                IOclass.writeCsv("data.csv", data.toArray(new ComparisonData[0]));
             }
        
-           IOclass.writeCsv("data.csv", data.toArray(new ComparisonData[0]));
-           */
+           
             
-            
+            /*
             int[] ks = {100};
             PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
             System.out.println("done grank");
-            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), ks);
+            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank,
+                    pr, nodesSubset(g, 400), ks);
             IOclass.writeCsv("data.csv", data);
-            
+            */
             //NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
             
         }
 
+        
         ////////////////
         //////////the code written below here is just some stuff written hastily to try out stuff
         ///not part of the project, not commented, not tested
         /////////////////////////////////////////////////////////////////////////////////////
         
+        private static Set<Integer> nodesSubset(Graph<Integer, DefaultEdge> g, int k)
+        {
+            Set<Integer> res = new HashSet<>(k);
+            ArrayList<Integer> nodes = new ArrayList<>(g.vertexSet());
+            Collections.shuffle(nodes);
+            for(int i = 0; i < k; i++)
+                res.add(nodes.get(i));
+            return res;
+        }
         
         private static void printGraph(DirectedGraph<Integer, DefaultEdge> g, final String path)
         {
