@@ -21,16 +21,16 @@ def draw_heatmap(df, title, xName, yName, zName, **args):
     plt_y = np.arange(plt_z.shape[0])
     plt_x = np.arange(plt_z.shape[1])
 
-    z_min = plt_z.min()
-    z_max = plt_z.max() 
+    z_min = 0.4
+    z_max = 1.0;
 
-
-    color_map = plt.cm.winter #plt.cm.gist_heat #plt.cm.rainbow #plt.cm.hot #plt.cm.gist_heat
+    color_map = plt.cm.gist_heat #plt.cm.winter #plt.cm.gist_heat #plt.cm.rainbow #plt.cm.hot #plt.cm.gist_heat
     fig, ax = plt.subplots(figsize=(10,10))
     cax = ax.pcolor(plt_x, plt_y, plt_z, cmap=color_map, vmin=z_min, vmax=z_max)
+
     ax.set_xlim(plt_x.min(), plt_x.max())
     ax.set_ylim(plt_y.min(), plt_y.max())
-    fig.colorbar(cax).set_label(zName , rotation=270, labelpad = 15)
+    cbar = fig.colorbar(cax).set_label(zName , rotation=270, labelpad = 15)
     ax.set_title(title)  
     ax.set_aspect('equal')
     figure = plt.gcf()
@@ -40,7 +40,7 @@ def draw_heatmap(df, title, xName, yName, zName, **args):
     plt.ylabel(args.get("ylabel", yName))
     plt.grid(True)
 
-    plt.savefig(args.get("path", "") + xName + "_" + yName + "_" + zName);
+    plt.savefig(args.get("path", "") + args.get("xlabel", xName) + "_" + args.get("ylabel", yName) + "_" + zName);
     plt.close()
 
 def heatmaps(filename, title, undirected):
@@ -58,7 +58,7 @@ def heatmaps(filename, title, undirected):
         edges /= 2
     edges = str(edges)
 
-    title += " " + nodes + " nodes and " + edges + " edges."
+    title += "\n" + nodes + " nodes and " + edges + " edges."
 
     for x in xList:
         for y in yList:
