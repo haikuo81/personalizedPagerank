@@ -10,33 +10,54 @@ public class ComparisonData
 {
     private final int maxEntries;//max number of entries for each node considered for the comparison
     private final Result jaccard;
-    private final Result levenstein;
-    private final Result spearman;
+    private final Result kendall;
     private final Parameters param1;//parameters of the first algorithm
     private final Parameters param2;//parameters of the second algorithm
 
-    public ComparisonData(int maxEntries, Result jaccard, Result levenstein, 
-            Result spearman, Parameters param1, Parameters param2)
+    public ComparisonData(int maxEntries, Result jaccard, Result kendall, 
+            Parameters param1, Parameters param2)
     {
         if(maxEntries <= 0)
             throw new IllegalArgumentException("max scores to keep 'k' must be positive");
         this.maxEntries = maxEntries;
         this.jaccard = jaccard;
-        this.levenstein = levenstein;
-        this.spearman = spearman;
+        this.kendall = kendall;
         this.param1 = param1;
         this.param2 = param2;
     }
 
+    public int getMaxEntries() {
+        return maxEntries;
+    }
+
+    public Result getJaccard() 
+    {
+        return jaccard;
+    }
+
+    public Result getKendall()
+    {
+        return kendall;
+    }
+
+    public Parameters getParam1() 
+    {
+        return param1;
+    }
+
+    public Parameters getParam2() 
+    {
+        return param2;
+    }
+
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 11 * hash + this.maxEntries;
-        hash = 11 * hash + Objects.hashCode(this.jaccard);
-        hash = 11 * hash + Objects.hashCode(this.levenstein);
-        hash = 11 * hash + Objects.hashCode(this.spearman);
-        hash = 11 * hash + Objects.hashCode(this.param1);
-        hash = 11 * hash + Objects.hashCode(this.param2);
+        int hash = 7;
+        hash = 83 * hash + this.maxEntries;
+        hash = 83 * hash + Objects.hashCode(this.jaccard);
+        hash = 83 * hash + Objects.hashCode(this.kendall);
+        hash = 83 * hash + Objects.hashCode(this.param1);
+        hash = 83 * hash + Objects.hashCode(this.param2);
         return hash;
     }
 
@@ -58,10 +79,7 @@ public class ComparisonData
         if (!Objects.equals(this.jaccard, other.jaccard)) {
             return false;
         }
-        if (!Objects.equals(this.levenstein, other.levenstein)) {
-            return false;
-        }
-        if (!Objects.equals(this.spearman, other.spearman)) {
+        if (!Objects.equals(this.kendall, other.kendall)) {
             return false;
         }
         if (!Objects.equals(this.param1, other.param1)) {
@@ -71,34 +89,5 @@ public class ComparisonData
             return false;
         }
         return true;
-    }
-
-    public int getMaxEntries() {
-        return maxEntries;
-    }
-
-    public Result getJaccard() 
-    {
-        return jaccard;
-    }
-
-    public Result getLevenstein() 
-    {
-        return levenstein;
-    }
-
-    public Result getSpearman()
-    {
-        return spearman;
-    }
-    
-    public Parameters getParam1() 
-    {
-        return param1;
-    }
-
-    public Parameters getParam2() 
-    {
-        return param2;
     }
 }

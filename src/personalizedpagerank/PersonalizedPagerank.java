@@ -23,9 +23,9 @@ import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
-import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.IOclass;
+import personalizedpagerank.Utility.NodesComparisonData;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
     //su quali nodi (ogni altro nodo come origine) si accumula + errore?
@@ -43,11 +43,13 @@ import personalizedpagerank.Utility.IOclass;
             
             System.out.println("finished importing ");
             
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 100);
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 400);
             System.out.println("done prank");
             
+            /*
             ArrayList<ComparisonData> data = new ArrayList<>();
-            for(int i = 1; i <= 100; i++)
+            
+            for(int i = 1; i <= 1000; i++)
             {
                 int[] ks = new int[i];
                 for(int u = 1; u <= i; u++ )
@@ -58,17 +60,21 @@ import personalizedpagerank.Utility.IOclass;
                 System.out.println(i);
                 IOclass.writeCsv("data.csv", data.toArray(new ComparisonData[0]));
             }
-       
-           
+       */
+            ArrayList<NodesComparisonData> data2 = new ArrayList<>();
+            for(int i = 1; i <= 1000; i++)
+            {
+                int[] ks = new int[i];
+                for(int u = 1; u <= i; u++ )
+                    ks[u-1] = u;
+                PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, i, i, 50, 0.85, 0.0001);
+                data2.addAll(new ArrayList<>
+                    (Arrays.asList(AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), ks))));
+                System.out.println(i);
+                IOclass.writeCsv("data.csv", data2.toArray(new NodesComparisonData[0]));
+            }
             
-            /*
-            int[] ks = {100};
-            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
-            System.out.println("done grank");
-            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank,
-                    pr, nodesSubset(g, 400), ks);
-            IOclass.writeCsv("data.csv", data);
-            */
+            
             //NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
             
         }

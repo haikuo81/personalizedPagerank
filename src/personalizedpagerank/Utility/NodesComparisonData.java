@@ -20,10 +20,8 @@ public class NodesComparisonData
     private final double[] neighbourPagerank;//average pagerank of the neighbour
     private final double[] jaccard;
     private final double[] neighbourJaccard;
-    private final double[] levenstein;
-    private final double[] neighbourLevenstein;
-    private final double[] spearman;
-    private final double[] neighbourSpearman;
+    private final double[] kendall;
+    private final double[] neighbourKendall;
     private final double[] pagerankError;
     private final double[] neighbourPagerankError;
     private final int[] excluded;
@@ -48,10 +46,8 @@ public class NodesComparisonData
         neighbourPagerank = new double[length];
         jaccard = new double[length];
         neighbourJaccard = new double[length];
-        levenstein = new double[length];
-        neighbourLevenstein = new double[length];
-        spearman = new double[length];
-        neighbourSpearman = new double[length];
+        kendall = new double[length];
+        neighbourKendall = new double[length];
         pagerankError = new double[length];
         neighbourPagerankError = new double[length];
         excluded = new int[length];
@@ -101,22 +97,14 @@ public class NodesComparisonData
         neighbourJaccard[index] = value;
     }
 
-    public void setLevenstein(int index, double value) {
-        levenstein[index] = value;
+    public void setKendall(int index, double value) {
+        kendall[index] = value;
     }
 
-    public void setNeighbourLevenstein(int index, double value) {
-        neighbourLevenstein[index] = value;
+    public void setNeighbourKendall(int index, double value) {
+        neighbourKendall[index] = value;
     }
 
-    public void setSpearman(int index, double value) {
-        spearman[index] = value;
-    }
-
-    public void setNeighbourSpearman(int index, double value) {
-        neighbourSpearman[index] = value;
-    }
-    
     public void setPagerankError(int index, double value) {
         pagerankError[index] = value;
     }
@@ -189,20 +177,12 @@ public class NodesComparisonData
         return neighbourJaccard[index];
     }
 
-    public double getLevenstein(int index) {
-        return levenstein[index];
+    public double getKendall(int index) {
+        return kendall[index];
     }
 
-    public double getNeighbourLevenstein(int index) {
-        return neighbourLevenstein[index];
-    }
-
-    public double getSpearman(int index) {
-        return spearman[index];
-    }
-
-    public double getNeighbourSpearman(int index) {
-        return neighbourSpearman[index];
+    public double getNeighbourKendall(int index) {
+        return neighbourKendall[index];
     }
 
     public double getPagerankError(int index) {
@@ -239,29 +219,27 @@ public class NodesComparisonData
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 41 * hash + this.maxEntries;
-        hash = 41 * hash + Arrays.hashCode(this.id);
-        hash = 41 * hash + Arrays.hashCode(this.indegree);
-        hash = 41 * hash + Arrays.hashCode(this.outdegree);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourIn);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourOut);
-        hash = 41 * hash + Arrays.hashCode(this.pagerank);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourPagerank);
-        hash = 41 * hash + Arrays.hashCode(this.jaccard);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourJaccard);
-        hash = 41 * hash + Arrays.hashCode(this.levenstein);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourLevenstein);
-        hash = 41 * hash + Arrays.hashCode(this.spearman);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourSpearman);
-        hash = 41 * hash + Arrays.hashCode(this.pagerankError);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourPagerankError);
-        hash = 41 * hash + Arrays.hashCode(this.excluded);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourExcluded);
-        hash = 41 * hash + Arrays.hashCode(this.included);
-        hash = 41 * hash + Arrays.hashCode(this.neighbourIncluded);
-        hash = 41 * hash + Objects.hashCode(this.param1);
-        hash = 41 * hash + Objects.hashCode(this.param2);
+        int hash = 5;
+        hash = 97 * hash + this.maxEntries;
+        hash = 97 * hash + Arrays.hashCode(this.id);
+        hash = 97 * hash + Arrays.hashCode(this.indegree);
+        hash = 97 * hash + Arrays.hashCode(this.outdegree);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourIn);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourOut);
+        hash = 97 * hash + Arrays.hashCode(this.pagerank);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerank);
+        hash = 97 * hash + Arrays.hashCode(this.jaccard);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourJaccard);
+        hash = 97 * hash + Arrays.hashCode(this.kendall);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourKendall);
+        hash = 97 * hash + Arrays.hashCode(this.pagerankError);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourPagerankError);
+        hash = 97 * hash + Arrays.hashCode(this.excluded);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourExcluded);
+        hash = 97 * hash + Arrays.hashCode(this.included);
+        hash = 97 * hash + Arrays.hashCode(this.neighbourIncluded);
+        hash = 97 * hash + Objects.hashCode(this.param1);
+        hash = 97 * hash + Objects.hashCode(this.param2);
         return hash;
     }
 
@@ -307,16 +285,10 @@ public class NodesComparisonData
         if (!Arrays.equals(this.neighbourJaccard, other.neighbourJaccard)) {
             return false;
         }
-        if (!Arrays.equals(this.levenstein, other.levenstein)) {
+        if (!Arrays.equals(this.kendall, other.kendall)) {
             return false;
         }
-        if (!Arrays.equals(this.neighbourLevenstein, other.neighbourLevenstein)) {
-            return false;
-        }
-        if (!Arrays.equals(this.spearman, other.spearman)) {
-            return false;
-        }
-        if (!Arrays.equals(this.neighbourSpearman, other.neighbourSpearman)) {
+        if (!Arrays.equals(this.neighbourKendall, other.neighbourKendall)) {
             return false;
         }
         if (!Arrays.equals(this.pagerankError, other.pagerankError)) {
@@ -345,4 +317,6 @@ public class NodesComparisonData
         }
         return true;
     }
+
+    
 }
