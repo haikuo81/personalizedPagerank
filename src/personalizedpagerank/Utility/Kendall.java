@@ -11,6 +11,10 @@ import org.jgrapht.alg.util.Pair;
  *   William R. Knight,
  * If the values have no possible ties and the input length is short it's better
  * to use the O(n^2) method.
+ * Arrays with length that would cause (length * (length -1)) to overflow
+ * as a double will lead to incorrect results. No checks or corrections for this 
+ * have been made since in this project this class is called many times but with
+ * small/very small values.
  */
 public class Kendall 
 {
@@ -19,8 +23,10 @@ public class Kendall
    public static double correlation(double[] x, double[] y, boolean sortedX)
    {
        if(x.length != y.length)
-            throw new IllegalArgumentException("the two arrays must have same length");
-       
+           throw new IllegalArgumentException("the two arrays must have same length");
+       if(x.length == 0 || y.length == 0)
+           throw new IllegalArgumentException("length of arrays must be at least 1");
+           
        //make array of pairs for easier handling
        DoublePair[] pairs = new DoublePair[x.length]; 
        for(int i = 0; i < x.length; i++)
@@ -41,10 +47,10 @@ public class Kendall
            });
        
        //accounting for ties by same X or same X and Y 
-       int sameX = 0;
-       int sameXY = 0;
-       int consecutiveSameX = 1;
-       int consecutiveSameXY = 1;
+       double sameX = 0;
+       double sameXY = 0;
+       double consecutiveSameX = 1;
+       double consecutiveSameXY = 1;
        DoublePair old = pairs[0];
        for(int i = 1; i < pairs.length; i++) 
        {
@@ -62,8 +68,8 @@ public class Kendall
                else
                {
                    // (n * (n -1))/2
-                   sameXY += (consecutiveSameXY * (consecutiveSameXY -1))/2;
-                   consecutiveSameXY = 1;
+                   sameXY += (consecutiveSameXY * (consecutiveSameXY -1d))/2d;
+                   consecutiveSameXY = 1d;
                }
            }
            else
@@ -75,17 +81,17 @@ public class Kendall
                -update value of equal pairs
                -reset consecutiveSameXY to 1
                */
-               sameX += (consecutiveSameX * (consecutiveSameX - 1))/2;
-               consecutiveSameX = 1;
+               sameX += (consecutiveSameX * (consecutiveSameX - 1d))/2d;
+               consecutiveSameX = 1d;
                
-               sameXY += (consecutiveSameXY * (consecutiveSameXY -1))/2;
-               consecutiveSameXY = 1;
+               sameXY += (consecutiveSameXY * (consecutiveSameXY -1d))/2d;
+               consecutiveSameXY = 1d;
            } 
            old = pairs[i];
        }
        //(needed if all the values are equal)
-       sameX += (consecutiveSameX * (consecutiveSameX - 1))/2;
-       sameXY += (consecutiveSameXY * (consecutiveSameXY -1))/2;
+       sameX += (consecutiveSameX * (consecutiveSameX - 1d))/2d;
+       sameXY += (consecutiveSameXY * (consecutiveSameXY -1d))/2d;
        
        //get number of swaps needed and the pairs ordered by Y
        Pair<Long, DoublePair[]> disc = getDiscording(pairs);
@@ -93,8 +99,8 @@ public class Kendall
        pairs = disc.getSecond();
       
        //accounting for ties for same Y 
-       int sameY = 0;
-       int consecutiveSameY = 1;
+       double sameY = 0;
+       double consecutiveSameY = 1;
        old = pairs[0];
        for(int i = 1; i < pairs.length; i++)
        {
@@ -102,12 +108,12 @@ public class Kendall
                consecutiveSameY++;
            else
            {
-               sameY += (consecutiveSameY * (consecutiveSameY -1))/2;
-               consecutiveSameY = 1;
+               sameY += (consecutiveSameY * (consecutiveSameY -1d))/2d;
+               consecutiveSameY = 1d;
            }
            old = pairs[i];
        }
-       sameY += (consecutiveSameY * (consecutiveSameY -1))/2;
+       sameY += (consecutiveSameY * (consecutiveSameY -1d))/2d;
        
        //return correlation
        //https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient
@@ -119,7 +125,7 @@ public class Kendall
        double num = totalPairs - sameX - sameY + sameXY - 2 * discording;
        double den = Math.sqrt((totalPairs - sameX) * (totalPairs - sameY));
        
-       return num/den;
+       return (den == 0d)? (sameX == sameY? 1d : 0) : num/den;
    }
    
    /**

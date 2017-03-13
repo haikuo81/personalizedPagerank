@@ -66,7 +66,7 @@ public class KendallTest extends TestCase
         double[] x = new double[1];
         double[] y = new double[1];
         
-        assertEquals(Double.NaN, Kendall.correlation(x, y, false));
+        assertEquals(1d, Kendall.correlation(x, y, false));
     }
     //tests with no ties
     
@@ -166,7 +166,7 @@ public class KendallTest extends TestCase
             for(int i = 0; i < n ; i++)
                 y[i] = i;
 
-            assertEquals(Double.NaN, Kendall.correlation(x, y, false), 0.0001);
+            assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
         }
     }
     
@@ -180,7 +180,7 @@ public class KendallTest extends TestCase
             for(int i = 0; i < n ; i++)
                 x[i] = i;
 
-            assertEquals(Double.NaN, Kendall.correlation(x, y, false), 0.0001);
+            assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
         }
     }
     
@@ -191,7 +191,7 @@ public class KendallTest extends TestCase
             double[] x = new double[n];
             double[] y = new double[n];
 
-            assertEquals(Double.NaN, Kendall.correlation(x, y, false), 0.0001);
+            assertEquals(1d, Kendall.correlation(x, y, false), 0.0001);
         }
     }
     
