@@ -35,8 +35,7 @@ public class IOclass
         getHeaderNames(builder, data[0].getParam2(),",");
         
         builder.append("max entries,jaccard min,jaccard average,jaccard max,jaccard std,"
-                + "levenstein min,levenstein average,levenstein max,levenstein std,"
-                + "spearman min,spearman average,spearman max,spearman std");
+                + "kendall min,kendall average,kendall max,kendall std");
         
         builder.append(System.getProperty("line.separator"));
         
@@ -55,15 +54,10 @@ public class IOclass
             builder.append(data[i].getJaccard().getMax()).append(",");
             builder.append(data[i].getJaccard().getStd()).append(",");
             
-            builder.append(data[i].getLevenstein().getMin()).append(",");
-            builder.append(data[i].getLevenstein().getAverage()).append(",");
-            builder.append(data[i].getLevenstein().getMax()).append(",");
-            builder.append(data[i].getLevenstein().getStd()).append(",");
-            
-            builder.append(data[i].getSpearman().getMin()).append(",");
-            builder.append(data[i].getSpearman().getAverage()).append(",");
-            builder.append(data[i].getSpearman().getMax()).append(",");
-            builder.append(data[i].getSpearman().getStd());
+            builder.append(data[i].getKendall().getMin()).append(",");
+            builder.append(data[i].getKendall().getAverage()).append(",");
+            builder.append(data[i].getKendall().getMax()).append(",");
+            builder.append(data[i].getKendall().getStd()).append(",");
             
             builder.append(System.getProperty("line.separator"));
         }
@@ -98,8 +92,8 @@ public class IOclass
         
         builder.append("max entries,node id,indegree,outdegree,"
                 + "neighbour indegree,neighbour outdegree,pagerank,"
-                + "neighbour pagerank,jaccard,neighbour jaccard,levenstein,"
-                + "neighbour levenstein,spearman,neighbour spearman,"
+                + "neighbour pagerank,jaccard,neighbour jaccard,kendall,"
+                + "neighbour kendall,"
                 + "pagerank error,neighbour pagerank error,"
                 + "excluded,neighbour excluded,included,neighbour included");
           
@@ -130,11 +124,8 @@ public class IOclass
                 builder.append(data[i].getJaccard(node)).append(",");
                 builder.append(data[i].getNeighbourJaccard(node)).append(",");
                 
-                builder.append(data[i].getLevenstein(node)).append(",");
-                builder.append(data[i].getNeighbourLevenstein(node)).append(",");
-                
-                builder.append(data[i].getSpearman(node)).append(",");
-                builder.append(data[i].getNeighbourSpearman(node)).append(",");
+                builder.append(data[i].getKendall(node)).append(",");
+                builder.append(data[i].getNeighbourKendall(node)).append(",");
                 
                 builder.append(data[i].getPagerankError(node)).append(",");
                 builder.append(data[i].getNeighbourPagerankError(node)).append(",");

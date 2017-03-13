@@ -66,10 +66,10 @@ public class AlgorithmComparatorTest extends TestCase
         assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
         assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getKendall().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getStd(), 0d, 0.001);
     }
     
     public void testCompareSameAlgorithmBigGraph()
@@ -96,10 +96,10 @@ public class AlgorithmComparatorTest extends TestCase
         assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
         assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getKendall().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getStd(), 0d, 0.001);
     }
     
     public void testCompareDifferentAlgorithm()
@@ -137,10 +137,10 @@ public class AlgorithmComparatorTest extends TestCase
         assertEquals(data1[0].getJaccard().getMax(), 1d, 0.001);
         assertEquals(data1[0].getJaccard().getStd(), 0d, 0.001);
         
-        assertEquals(data1[0].getLevenstein().getMin(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getAverage(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getMax(), 0d, 0.001);
-        assertEquals(data1[0].getLevenstein().getStd(), 0d, 0.001);
+        assertEquals(data1[0].getKendall().getMin(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getAverage(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getMax(), 1d, 0.001);
+        assertEquals(data1[0].getKendall().getStd(), 0d, 0.001);
     }
     
     //AlgorithmComparator.compareOriginsOriginsTests
@@ -175,38 +175,36 @@ public class AlgorithmComparatorTest extends TestCase
         
         PersonalizedPageRankAlgorithm p = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0001);
         
-        NodesComparisonData data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
-        NodesComparisonData data2 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
+        NodesComparisonData[] data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
+        NodesComparisonData[] data2 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
         NodesComparisonData[] data3 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
         
-        assertTrue(data1.getParam1().equals(data1.getParam2()));
-        assertTrue(data1.equals(data2));
-        assertTrue(data2.equals(data1));
+        assertTrue(data1[0].getParam1().equals(data1[0].getParam2()));
+        assertTrue(data1[0].equals(data2[0]));
+        assertTrue(data2[0].equals(data1[0]));
         
-        assertTrue(data1.getParam1().equals(data3[0].getParam2()));
-        assertTrue(data1.equals(data3[0]));
-        assertTrue(data3[0].equals(data1));
+        assertTrue(data1[0].getParam1().equals(data3[0].getParam2()));
+        assertTrue(data1[0].equals(data3[0]));
+        assertTrue(data3[0].equals(data1[0]));
         
-       for(int i = 0; i < data1.getLength(); i++)
+       for(int i = 0; i < data1[0].getLength(); i++)
         {
-            assertEquals(data1.getIndegree(i), 0, 0);
-            assertEquals(data1.getJaccard(i), 1d, 0);
-            assertEquals(data1.getLevenstein(i), 0d, 0);
-            assertEquals(data1.getNeighbourIn(i), 0, 0);
-            assertEquals(data1.getNeighbourJaccard(i), 0d, 0);
-            assertEquals(data1.getNeighbourLevenstein(i), 0d, 0);
-            assertEquals(data1.getNeighbourOut(i), 0, 0);
-            assertEquals(data1.getNeighbourPagerank(i), 0, 0);
-            assertEquals(data1.getNeighbourPagerankError(i), 0, 0);
-            assertEquals(data1.getNeighbourSpearman(i), 0d, 0);
-            assertEquals(data1.getOutdegree(i), 0, 0);
-            assertEquals(data1.getPagerank(i), 0.3333, 0.0001);
-            assertEquals(data1.getPagerankError(i), 0d, 0);
-            assertEquals(data1.getSpearman(i), 1d, 0);
-            assertEquals(data1.getExcluded(i), 0, 0);
-            assertEquals(data1.getIncluded(i), 0, 0);
-            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
-            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
+            assertEquals(data1[0].getIndegree(i), 0, 0);
+            assertEquals(data1[0].getJaccard(i), 1d, 0);
+            assertEquals(data1[0].getKendall(i), 1d, 0);
+            assertEquals(data1[0].getNeighbourIn(i), 0, 0);
+            assertEquals(data1[0].getNeighbourJaccard(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourKendall(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourOut(i), 0, 0);
+            assertEquals(data1[0].getNeighbourPagerank(i), 0, 0);
+            assertEquals(data1[0].getNeighbourPagerankError(i), 0, 0);
+            assertEquals(data1[0].getOutdegree(i), 0, 0);
+            assertEquals(data1[0].getPagerank(i), 0.3333, 0.0001);
+            assertEquals(data1[0].getPagerankError(i), 0d, 0);
+            assertEquals(data1[0].getExcluded(i), 0, 0);
+            assertEquals(data1[0].getIncluded(i), 0, 0);
+            assertEquals(data1[0].getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourIncluded(i), 0d, 0);
         }
     }
    
@@ -225,43 +223,43 @@ public class AlgorithmComparatorTest extends TestCase
                 p.getParameters().getIterations(), 
                 p.getParameters().getTolerance()).getScores());
         
-        NodesComparisonData data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
-        NodesComparisonData data2 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
+        int[] ks = {3};
+        NodesComparisonData[] data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
+        NodesComparisonData[] data2 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
         
-        assertTrue(data1.getParam1().equals(data1.getParam2()));
-        assertTrue(data1.equals(data2));
-        assertTrue(data2.equals(data1));
+        assertTrue(data1[0].getParam1().equals(data1[0].getParam2()));
+        assertTrue(data1[0].equals(data2[0]));
+        assertTrue(data2[0].equals(data1[0]));
         
-        for(int i = 0; i < data1.getLength(); i++)
+        for(int i = 0; i < data1[0].getLength(); i++)
         {
-            int node = data1.getId(i);
-            assertEquals(data1.getIndegree(i), g.inDegreeOf(node), 0);
-            assertEquals(data1.getJaccard(i), 1d, 0);
-            assertEquals(data1.getLevenstein(i), 0d, 0);
-            assertEquals(data1.getOutdegree(i), g.outDegreeOf(node), 0);
-            assertEquals(data1.getPagerank(i), pagerank.get(node), 0.0001);
-            assertEquals(data1.getPagerankError(i), 0d, 0);
-            assertEquals(data1.getSpearman(i), 1d, 0);
-            assertEquals(data1.getExcluded(i), 0, 0);
-            assertEquals(data1.getIncluded(i), 0, 0);
-            assertEquals(data1.getExcluded(i), 0, 0);
-            assertEquals(data1.getIncluded(i), 0, 0);
-            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
-            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
+            int node = data1[0].getId(i);
+            assertEquals(data1[0].getIndegree(i), g.inDegreeOf(node), 0);
+            assertEquals(data1[0].getJaccard(i), 1d, 0);
+            assertEquals(data1[0].getKendall(i), 1d, 0);
+            assertEquals(data1[0].getOutdegree(i), g.outDegreeOf(node), 0);
+            assertEquals(data1[0].getPagerank(i), pagerank.get(node), 0.0001);
+            assertEquals(data1[0].getPagerankError(i), 0d, 0);
+            assertEquals(data1[0].getExcluded(i), 0, 0);
+            assertEquals(data1[0].getIncluded(i), 0, 0);
+            assertEquals(data1[0].getExcluded(i), 0, 0);
+            assertEquals(data1[0].getIncluded(i), 0, 0);
+            assertEquals(data1[0].getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourIncluded(i), 0d, 0);
         }
         
         //check stats for nodes that requires neighbour information
         //maps to store jaccard/levenstein/spearman values to avoid calculating them more than once
-        Int2DoubleOpenHashMap jMap = new Int2DoubleOpenHashMap(data1.getLength());
-        Int2DoubleOpenHashMap lMap = new Int2DoubleOpenHashMap(data1.getLength());
-        Int2DoubleOpenHashMap sMap = new Int2DoubleOpenHashMap(data1.getLength());
+        Int2DoubleOpenHashMap jMap = new Int2DoubleOpenHashMap(data1[0].getLength());
+        Int2DoubleOpenHashMap lMap = new Int2DoubleOpenHashMap(data1[0].getLength());
+        Int2DoubleOpenHashMap sMap = new Int2DoubleOpenHashMap(data1[0].getLength());
         jMap.defaultReturnValue(-1);
         lMap.defaultReturnValue(-1);
         sMap.defaultReturnValue(-1);
         
-        for(int i = 0; i < data1.getLength(); i++)
+        for(int i = 0; i < data1[0].getLength(); i++)
         {
-            int node = data1.getId(i);
+            int node = data1[0].getId(i);
             boolean skipNeighbourhood = false;
             double in = 0;
             double out = 0;
@@ -305,17 +303,17 @@ public class AlgorithmComparatorTest extends TestCase
                 pr /= neighbourHood;
             }
             
-            assertEquals(data1.getNeighbourIn(i), in, 0);
-            assertTrue(data1.getNeighbourJaccard(i) == 0d || data1.getNeighbourJaccard(i) == 1d);
-            assertTrue(data1.getNeighbourSpearman(i) == 0d || data1.getNeighbourSpearman(i) == 1d);
-            assertEquals(data1.getNeighbourLevenstein(i), 0d, 0d);
-            assertEquals(data1.getNeighbourOut(i), out, 0);
-            assertEquals(data1.getNeighbourPagerank(i), pr, 0d);
-            assertEquals(data1.getNeighbourPagerankError(i), 0d, 00d);
-            assertEquals(data1.getExcluded(i), 0, 0);
-            assertEquals(data1.getIncluded(i), 0, 0);
-            assertEquals(data1.getNeighbourExcluded(i), 0d, 0);
-            assertEquals(data1.getNeighbourIncluded(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourIn(i), in, 0);
+            //could be either 1 or 0 depedending if a node has neighbours or not
+            assertTrue(data1[0].getNeighbourJaccard(i) == 0d || data1[0].getNeighbourJaccard(i) == 1d);
+            assertTrue(data1[0].getNeighbourKendall(i) == 0d || data1[0].getNeighbourKendall(i) == 1d);
+            assertEquals(data1[0].getNeighbourOut(i), out, 0);
+            assertEquals(data1[0].getNeighbourPagerank(i), pr, 0d);
+            assertEquals(data1[0].getNeighbourPagerankError(i), 0d, 00d);
+            assertEquals(data1[0].getExcluded(i), 0, 0);
+            assertEquals(data1[0].getIncluded(i), 0, 0);
+            assertEquals(data1[0].getNeighbourExcluded(i), 0d, 0);
+            assertEquals(data1[0].getNeighbourIncluded(i), 0d, 0);
         }
     }
     
@@ -334,19 +332,20 @@ public class AlgorithmComparatorTest extends TestCase
         PersonalizedPageRankAlgorithm p5 = new GuerrieriRank(g, 3, 3, 100, 0.86, 0.0001);
         PersonalizedPageRankAlgorithm p6 = new GuerrieriRank(g, 3, 3, 100, 0.85, 0.0005);
         
-        NodesComparisonData data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), 3);
-        NodesComparisonData data4 = AlgorithmComparator.compareOrigins(p4, p4, g.vertexSet(), 3);
-        NodesComparisonData data5 = AlgorithmComparator.compareOrigins(p5, p5, g.vertexSet(), 3);
-        NodesComparisonData data6 = AlgorithmComparator.compareOrigins(p6, p6, g.vertexSet(), 3);
+        int[] ks = {3};
+        NodesComparisonData[] data1 = AlgorithmComparator.compareOrigins(p, p, g.vertexSet(), ks);
+        NodesComparisonData[] data4 = AlgorithmComparator.compareOrigins(p4, p4, g.vertexSet(), ks);
+        NodesComparisonData[] data5 = AlgorithmComparator.compareOrigins(p5, p5, g.vertexSet(), ks);
+        NodesComparisonData[] data6 = AlgorithmComparator.compareOrigins(p6, p6, g.vertexSet(), ks);
         
         
-        assertFalse(data1.equals(data4));
-        assertFalse(data4.equals(data1));
+        assertFalse(data1[0].equals(data4[0]));
+        assertFalse(data4.equals(data1[0]));
         
-        assertFalse(data1.equals(data5));
-        assertFalse(data5.equals(data1));
+        assertFalse(data1[0].equals(data5[0]));
+        assertFalse(data5[0].equals(data1[0]));
         
-        assertFalse(data1.equals(data6));
-        assertFalse(data6.equals(data1));
+        assertFalse(data1[0].equals(data6[0]));
+        assertFalse(data6[0].equals(data1[0]));
     }
 }

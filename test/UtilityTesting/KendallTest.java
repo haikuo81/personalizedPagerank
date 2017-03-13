@@ -11,9 +11,10 @@ public class KendallTest extends TestCase
 {
     public void testBadConstructorsParameters()
     {
-        double[] x = new double[0];
-        double[] y = new double[1];
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
         
+        y.add(1d);
         try 
         {
             Kendall.correlation(x, y, false);
@@ -44,8 +45,7 @@ public class KendallTest extends TestCase
          
         try 
         {
-            x = new double[0];
-            y = new double[0];
+            y.clear();
             Kendall.correlation(y, x, false);
             fail("this line shouldn't be reached");
         } 
@@ -53,8 +53,6 @@ public class KendallTest extends TestCase
         
         try 
         {
-            x = new double[0];
-            y = new double[0];
             Kendall.correlation(y, x, true);
             fail("this line shouldn't be reached");
         } 
@@ -63,8 +61,10 @@ public class KendallTest extends TestCase
     
     public void test1Element()
     {
-        double[] x = new double[1];
-        double[] y = new double[1];
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
+        x.add(1d);
+        y.add(1d);
         
         assertEquals(1d, Kendall.correlation(x, y, false));
     }
@@ -74,13 +74,13 @@ public class KendallTest extends TestCase
     {
         for(int n = 100; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n ; i++)
+            for(double i = 0; i < n ; i++)
             {
-                x[i] = i;
-                y[i] = i;
+                x.add(i);
+                y.add(i);
             }
             assertEquals(1.0, Kendall.correlation(x, y, false), 0.0001);
         }
@@ -90,13 +90,13 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n ; i++)
+            for(double i = 0; i < n ; i++)
             {
-                x[i] = n - i;
-                y[i] = i;
+                x.add(n-i);
+                y.add(i);
             }
 
             assertEquals(-1.0, Kendall.correlation(x, y, false), 0.0001);
@@ -105,50 +105,67 @@ public class KendallTest extends TestCase
     
     public void testNoTies0Correlation()
     {
-            double[] x = {0, 1, 2, 3};
-            double[] y = {0, 1, 0.8, 0.7};
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
+        x.add(0d);
+        x.add(1d);
+        x.add(2d);
+        x.add(3d);
+        y.add(0d);
+        y.add(1d);
+        y.add(0.8);
+        y.add(0.7);
 
-            assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
+        assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
     }
     
     public void testNoTiesPositiveCorrelation()
     {
-            double[] x = {0, 1, 2, 3};
-            double[] y = {0, 1, 0.8, 0.9};
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
+        x.add(0d);
+        x.add(1d);
+        x.add(2d);
+        x.add(3d);
+        y.add(0d);
+        y.add(1d);
+        y.add(0.8);
+        y.add(0.9);
 
-            assertEquals(2d/6d, Kendall.correlation(x, y, false), 0.0001);
+        assertEquals(2d/6d, Kendall.correlation(x, y, false), 0.0001);
     }
     
     public void testNoTiesNegativeCorrelation()
     {
-            double[] x = {0, 1, 2, 3};
-            double[] y = {0, 1, 0.8, -0.5};
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
+        x.add(0d);
+        x.add(1d);
+        x.add(2d);
+        x.add(3d);
+        y.add(0d);
+        y.add(1d);
+        y.add(0.8);
+        y.add(-0.5);
 
-            assertEquals(-2d/6d, Kendall.correlation(x, y, false), 0.0001);
+        assertEquals(-2d/6d, Kendall.correlation(x, y, false), 0.0001);
     }
     
     public void testShuffledNoTies()
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
-
-            for(int i = 0; i < n ; i++)
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
+            
+            for(double i = 0; i < n ; i++)
             {
-                x[i] = i;
-                y[i] = i;
+                x.add(i);
+                y.add(i);
             }
             
-            //shuffle x and y
-            ArrayList<Double> arr1 = new ArrayList(Arrays.stream(x).boxed().collect(Collectors.toList()));
-            ArrayList<Double> arr2 = new ArrayList(Arrays.stream(y).boxed().collect(Collectors.toList()));
-            
-            Collections.shuffle(arr1);
-            Collections.shuffle(arr2);
-            x = arr1.stream().mapToDouble(i -> i).toArray();
-            y = arr2.stream().mapToDouble(i -> i).toArray();
-            
+            Collections.shuffle(x);
+            Collections.shuffle(y);
 
             assertEquals(lazyMethod(x, y), Kendall.correlation(x, y, false), 0.0001);
         }
@@ -160,12 +177,14 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n ; i++)
-                y[i] = i;
-
+            for(double i = 0; i < n ; i++)
+            {
+                x.add(0d);
+                y.add(i);
+            }
             assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
         }
     }
@@ -174,12 +193,14 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n ; i++)
-                x[i] = i;
-
+            for(double i = 0; i < n ; i++)
+            {
+                x.add(i);
+                y.add(0d);
+            }
             assertEquals(0d, Kendall.correlation(x, y, false), 0.0001);
         }
     }
@@ -188,8 +209,13 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
+            for(double i = 0; i < n; i++)
+            {
+                x.add(0d);
+                y.add(0d);
+            }
 
             assertEquals(1d, Kendall.correlation(x, y, false), 0.0001);
         }
@@ -199,18 +225,19 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n/2; i++)
+            for(double i = 0; i < n/2; i++)
             {
-                x[i] = -1d;
-                y[i] = i;
+                x.add(-1d);
+                y.add(i);
             }
-            for(int i = n/2; i < n; i++)
+            
+            for(double i = n/2; i < n; i++)
             {
-                x[i] = i;
-                y[i] = i;
+                x.add(i);
+                y.add(i);
             }
 
             assertEquals(expectedResult(n, (n/2d *(n/2d - 1d)/2), 0, 0), Kendall.correlation(x, y, false), 0.0001);
@@ -221,18 +248,18 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
-            for(int i = 0; i < n/2; i++)
+            for(double i = 0; i < n/2; i++)
             {
-                y[i] = -1d;
-                x[i] = i;
+                y.add(-1d);
+                x.add(i);
             }
-            for(int i = n/2; i < n; i++)
+            for(double i = n/2; i < n; i++)
             {
-                x[i] = i;
-                y[i] = i;
+                x.add(i);
+                y.add(i);
             }
 
             assertEquals(expectedResult(n, 0, (n/2d *(n/2d - 1d)/2), 0), Kendall.correlation(x, y, false), 0.0001);
@@ -243,18 +270,18 @@ public class KendallTest extends TestCase
     {
         for(int n = 10; n < 100000; n *= 10)
         {
-            double[] x = new double[n];
-            double[] y = new double[n];
+            ArrayList<Double> x = new ArrayList<>();
+            ArrayList<Double> y = new ArrayList<>();
 
             for(int i = 0; i < n/2; i++)
             {
-                y[i] = -1d;
-                x[i] = -1d;
+                y.add(-1d);
+                x.add(-1d);
             }
-            for(int i = n/2; i < n; i++)
+            for(double i = n/2; i < n; i++)
             {
-                x[i] = i;
-                y[i] = i;
+                x.add(i);
+                y.add(i);
             }
 
             assertEquals(expectedResult(n, (n/2d *(n/2d - 1d)/2),
@@ -272,14 +299,14 @@ public class KendallTest extends TestCase
     }
     
     //O(n^2) method that doesn't include ties
-    public double lazyMethod(double[] x, double[] y)
+    public double lazyMethod(ArrayList<Double> x, ArrayList<Double> y)
     {
-        int n = x.length;
+        int n = x.size();
         double totalPairs = (n * (n - 1d))/2d;
         double res = 0;
-        for(int i = 0; i < x.length; i++)
-            for(int u = i+1; u < x.length; u++)
-                res += Math.signum(x[i] - x[u]) * Math.signum(y[i]- y[u]);
+        for(int i = 0; i < x.size(); i++)
+            for(int u = i+1; u < x.size(); u++)
+                res += Math.signum(x.get(i) - x.get(u)) * Math.signum(y.get(i)- y.get(u));
         return res/totalPairs;
     }
 }
