@@ -1,5 +1,6 @@
 package personalizedpagerank.Utility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import org.jgrapht.alg.util.Pair;
 
@@ -20,28 +21,28 @@ public class Kendall
 {
    private Kendall(){};
    
-   public static double correlation(double[] x, double[] y, boolean sortedX)
+   public static double correlation(ArrayList<Double> x, ArrayList<Double> y, boolean sortedX)
    {
-       if(x.length != y.length)
+       if(x.size() != y.size())
            throw new IllegalArgumentException("the two arrays must have same length");
-       if(x.length == 0 || y.length == 0)
+       if(x.isEmpty() || y.isEmpty())
            throw new IllegalArgumentException("length of arrays must be at least 1");
            
        //make array of pairs for easier handling
-       DoublePair[] pairs = new DoublePair[x.length]; 
-       for(int i = 0; i < x.length; i++)
-           pairs[i] = new DoublePair(x[i], y[i]);
+       Pair<Double, Double>[] pairs = new Pair[x.size()]; 
+       for(int i = 0; i < x.size(); i++)
+           pairs[i] = new Pair<>(x.get(i), y.get(i));
        
        if(!sortedX)
-           Arrays.sort(pairs, (DoublePair p1, DoublePair p2) ->
+           Arrays.sort(pairs, (Pair<Double, Double> p1, Pair<Double, Double> p2) ->
            {
-               if(p1.x < p2.x)
+               if(p1.getFirst() < p2.getFirst())
                    return - 1;
-               if(p1.x > p2.x)
+               if(p1.getFirst() > p2.getFirst())
                    return 1;
-               if(p1.y < p2.y)
+               if(p1.getSecond() < p2.getSecond())
                    return -1;
-               if(p1.y > p2.y)
+               if(p1.getSecond() > p2.getSecond())
                    return 1;
                return 0;
            });
@@ -51,11 +52,11 @@ public class Kendall
        double sameXY = 0;
        double consecutiveSameX = 1;
        double consecutiveSameXY = 1;
-       DoublePair old = pairs[0];
+       Pair<Double, Double> old = pairs[0];
        for(int i = 1; i < pairs.length; i++) 
        {
            //if same X increment number of consecutive pairs with same X
-           if (pairs[i].x == old.x) 
+           if (pairs[i].getFirst().equals(old.getFirst())) 
            {
                consecutiveSameX++;
                /*
@@ -63,7 +64,7 @@ public class Kendall
                else reset consecutive equal pairs to 1 after updating the value
                of the same pairs (sameXY)
                */
-               if(pairs[i].y == old.y)
+               if(pairs[i].getSecond().equals(old.getSecond()))
                    consecutiveSameXY++;
                else
                {
@@ -94,7 +95,7 @@ public class Kendall
        sameXY += (consecutiveSameXY * (consecutiveSameXY -1d))/2d;
        
        //get number of swaps needed and the pairs ordered by Y
-       Pair<Long, DoublePair[]> disc = getDiscording(pairs);
+       Pair<Long, Pair<Double,Double>[]> disc = getDiscording(pairs);
        double discording = disc.getFirst();
        pairs = disc.getSecond();
       
@@ -104,7 +105,7 @@ public class Kendall
        old = pairs[0];
        for(int i = 1; i < pairs.length; i++)
        {
-           if(pairs[i].y == old.y)
+           if(pairs[i].getSecond().equals(old.getSecond()))
                consecutiveSameY++;
            else
            {
@@ -135,11 +136,11 @@ public class Kendall
     * @return A pair consisting of the number of swaps needed and the array
     * sorted by the y value of the pairs.
     */
-   private static Pair<Long, DoublePair[]> getDiscording(DoublePair[] pairs)
+   private static Pair<Long, Pair<Double, Double>[]> getDiscording(Pair<Double, Double>[] pairs)
    {
        long discording = 0;
 
-       DoublePair[] holder = new DoublePair[pairs.length];
+       Pair<Double, Double>[] holder = new Pair[pairs.length];
 
        /*
        non recursive merge sort
@@ -172,7 +173,7 @@ public class Kendall
                    have a Y greater than the Y of the left half pair currently
                    being checked
                    */
-                   if(pairs[startLeft].y > pairs[startRight].y)
+                   if(pairs[startLeft].getSecond() > pairs[startRight].getSecond())
                    {
                        holder[index] = pairs[startRight];
                        startRight++;
@@ -198,27 +199,10 @@ public class Kendall
                for(;startLeft < endLeft; startLeft++, index++)
                    holder[index] = pairs[startLeft];
            }
-           DoublePair[] tmp = pairs;
+           Pair<Double, Double>[] tmp = pairs;
            pairs = holder;
            holder = tmp;
        }
        return new Pair<>(discording, pairs);
-   }
-   
-   private static class DoublePair
-   {
-       double x;
-       double y;
-       
-       private DoublePair(double x, double y)
-       {
-           this.x = x;
-           this.y = y;
-       }
-       
-       public boolean equals(DoublePair other) 
-       {
-           return this.x == other.x && this.y == other.y;
-       }
    }
 }
