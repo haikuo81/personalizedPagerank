@@ -100,8 +100,8 @@ public class AlgorithmComparator
             Set<Integer> j1 = new HashSet<>(differentKs[differentKs.length-1]);
             Set<Integer> j2 = new HashSet<>(differentKs[differentKs.length-1]);
             
-            ArrayList<Double> k1 = new ArrayList(differentKs[differentKs.length-1]);
-            ArrayList<Double> k2 = new ArrayList(differentKs[differentKs.length-1]);
+            ArrayList<Double> k1 = new ArrayList<>(differentKs[differentKs.length-1]);
+            ArrayList<Double> k2 = new ArrayList<>(differentKs[differentKs.length-1]);
             
             for(int i = 0; i < differentKs.length; i++)
             {
@@ -294,8 +294,8 @@ public class AlgorithmComparator
             Set<Integer> j1 = new HashSet<>(differentKs[differentKs.length - 1]);
             Set<Integer> j2 = new HashSet<>(differentKs[differentKs.length - 1]);
 
-            ArrayList<Double> k1 = new ArrayList(differentKs[differentKs.length - 1]);
-            ArrayList<Double> k2 = new ArrayList(differentKs[differentKs.length - 1]);
+            ArrayList<Double> k1 = new ArrayList<>(differentKs[differentKs.length - 1]);
+            ArrayList<Double> k2 = new ArrayList<>(differentKs[differentKs.length - 1]);
             
             for(int k = 0; k < differentKs.length; k++)
                 {
