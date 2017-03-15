@@ -340,19 +340,19 @@ public class AlgorithmComparator
         index = 0;
         for(Integer node: nodes)
         {
-            boolean skipNeighbourhood = false;
-            double in = 0;//in degree
-            double out = 0;//out degree
-            double pr = 0;//page rank
-            double j = 0;//jaccard
-            double k = 0;//kendall
-            double e = 0;//pagerank error
-            double ex = 0;//excluded
-            double inc = 0;//included
-            int neighbourHood = 0;
-            
             for(int i = 0; i < differentKs.length; i++)
             {
+                boolean skipNeighbourhood = false;
+                double in = 0;//in degree
+                double out = 0;//out degree
+                double pr = 0;//page rank
+                double j = 0;//jaccard
+                double k = 0;//kendall
+                double e = 0;//pagerank error
+                double ex = 0;//excluded
+                double inc = 0;//included
+                int neighbourHood = 0;
+                
                 //father nodes
                 for(DefaultEdge edge: g.incomingEdgesOf(node))
                 {
