@@ -11,6 +11,7 @@ import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PageRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Algorithms.WrappedStoringPageRank;
 import personalizedpagerank.Utility.ComparisonData;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.NodesComparisonData;
@@ -347,5 +348,45 @@ public class AlgorithmComparatorTest extends TestCase
         
         assertFalse(data1[0].equals(data6[0]));
         assertFalse(data6[0].equals(data1[0]));
+    }
+    
+    public void testSameKSameResultCompare()
+    {
+        for(int k = 1; k < 100; k++)
+        {
+            int nodes = 100;
+            int edges = 3000;
+            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+            for (int i = 0; i < nodes; i++) 
+                g.addVertex(i);
+            for (int i = 0; i < edges; i++) 
+                g.addEdge(random.nextInt(nodes), random.nextInt(nodes));
+
+            int[] ks = {k, k};
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85d, 0.0001, nodes);
+            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
+            ComparisonData[] data = AlgorithmComparator.compare(pr, grank, pr.getNodes(), ks);
+            assertTrue(data[0].equals(data[1]));
+        }
+    }
+    
+    public void testSameKSameResultCompareOrigins()
+    {
+        for (int k = 1; k < 100; k++) 
+        {
+            int nodes = 100;
+            int edges = 3000;
+            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+            for (int i = 0; i < nodes; i++) 
+                g.addVertex(i);
+            for (int i = 0; i < edges; i++) 
+                g.addEdge(random.nextInt(nodes), random.nextInt(nodes));
+
+            int[] ks = {k,k};
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85d, 0.0001, nodes);
+            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
+            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(pr, grank, pr.getNodes(), ks);
+            assertTrue(data[0].equals(data[1]));
+        }
     }
 }
