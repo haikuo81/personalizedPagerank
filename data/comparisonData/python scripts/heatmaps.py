@@ -50,7 +50,7 @@ def heatmaps(filename, title, undirected):
 
     yList = ["max entries"]
 
-    zList = ["jaccard average", "spearman average", "levenstein average"]
+    zList = ["jaccard average", "kendall average"]
 
     nodes = str(df["nodes"][0])
     edges = df["edges"][0]

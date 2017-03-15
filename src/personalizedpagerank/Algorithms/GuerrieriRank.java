@@ -24,18 +24,18 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     //the LARGE_TOP only the small top will be kept as a valid result.
     public static final int DEFAULT_SMALL_TOP = 10;
     
-    //Default number of max scores to keep for each during computation node if it's 
-    //not specified in the constructor, if scores[V].size() > max scores the lowest 
+    //Default number of max scores to keep for each during computation node,
+    //if scores[V].size() > max scores the lowest 
     //ones gets removed, keeping only the first max scores.
     public static final int DEFAULT_LARGE_TOP = 30;
 
-    //Default number of maximum iterations to be used if it's not specified in the constructor.
+    //Default number of maximum iterations to be used 
     public static final int DEFAULT_ITERATIONS = 100;
     
-    //Default number of maximum iterations to be used if it's not specified in the constructor.
+    //Default damping factor
     public static final double DEFAULT_DAMPING_FACTOR = 0.85d;
     
-    //Default number of tolerance, if the highest difference of scores between 2 iterations is lower
+    //Default tolerance, if the highest difference of scores between 2 iterations is lower
     //than this the algorithm will stop.
     public static final double DEFAULT_TOLERANCE = 0.0001;
     
@@ -77,7 +77,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
     }
     
     
-    //CONSTRUCTORS
+    //CONSTRUCTOR
     ////////////////////
     
     /**
@@ -91,7 +91,8 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * Negative values are allowed to specify that tolerance must be ignored.
      */
-    public GuerrieriRank(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
+    public GuerrieriRank(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, 
+            final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
     {
         this.g = g;
         this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
