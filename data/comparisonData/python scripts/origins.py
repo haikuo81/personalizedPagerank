@@ -43,9 +43,9 @@ def scatter(df, title, x, y, **args):
 def originsPlots(filename, title, undirected):
     df = pd.read_csv(filename, na_values = ['-1'])
 
-    xList = ["indegree", "outdegree", "neighbour indegree", "neighbour outdegree", "pagerank", "neighbour pagerank", "neighbour pagerank error", "neighbour jaccard", "neighbour spearman", "neighbour excluded", "neighbour included"]
+    xList = ["indegree", "outdegree", "neighbour indegree", "neighbour outdegree", "pagerank", "neighbour pagerank", "neighbour pagerank error", "neighbour jaccard", "neighbour kendall", "neighbour excluded", "neighbour included"]
 
-    yList = ["jaccard", "spearman", "pagerank error", "pagerank", "excluded", "included"]
+    yList = ["jaccard", "kendall", "pagerank error", "pagerank", "excluded", "included"]
 
     K = str(df["max entries"][0])
     L = str(df["largeTop"][0])
