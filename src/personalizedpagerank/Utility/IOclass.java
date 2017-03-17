@@ -3,6 +3,7 @@ package personalizedpagerank.Utility;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 
 public class IOclass 
@@ -57,7 +58,7 @@ public class IOclass
             builder.append(data[i].getKendall().getMin()).append(",");
             builder.append(data[i].getKendall().getAverage()).append(",");
             builder.append(data[i].getKendall().getMax()).append(",");
-            builder.append(data[i].getKendall().getStd()).append(",");
+            builder.append(data[i].getKendall().getStd());
             
             builder.append(System.getProperty("line.separator"));
         }
@@ -154,6 +155,8 @@ public class IOclass
         header.append("iterations,damping,tolerance");
         if(parameters instanceof GuerrieriRank.GuerrieriParameters)
             header.append(",smallTop,largeTop,topRatio");
+        if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
+            header.append(",frontierThreshold");
         header.append(append);
     }
     
@@ -177,6 +180,13 @@ public class IOclass
             content.append(p.getSmallTop()).append(",");
             content.append(p.getLargetTop()).append(",");
             content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+        }
+        if (parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
+        {
+            BoundaryRestrictedPageRank.BoundaryRestrictedParameters p =
+                    (BoundaryRestrictedPageRank.BoundaryRestrictedParameters) parameters;
+            content.append(",");
+            content.append(p.getFrontierThreshold());
         }
         content.append(append);
     }
