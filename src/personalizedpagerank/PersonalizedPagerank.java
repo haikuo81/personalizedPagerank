@@ -25,6 +25,7 @@ import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Algorithms.WrappedOnlinePageRank;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.ComparisonData;
@@ -41,14 +42,15 @@ import personalizedpagerank.Utility.NodesComparisonData;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
             //generateUndirectedBipartite(g,200, 200, 1000);
-            importBipartiteUndirectedFromCsv(g, "collab.csv");
-            //importGraphFromCsv(g, "data/graphs/directed/p2p-Gnutella04.csv");
+            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
+            //importGraphFromCsv(g, "p2p-Gnutella04.csv");
             //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
             
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 400);
+            WrappedOnlinePageRank pr = new WrappedOnlinePageRank(g, 100, 0.85, 0.0001);
             System.out.println("done prank");
             
+            /*
             ArrayList<ComparisonData> data = new ArrayList<>();
             double tol = 0.001;
             for(int i = 1; i <= 250; i++)
@@ -56,28 +58,25 @@ import personalizedpagerank.Utility.NodesComparisonData;
                 int[] ks = new int[250];
                 for(int u = 1; u <= 250; u++ )
                     ks[u-1] = u;
-                PersonalizedPageRankAlgorithm grank = new BoundaryRestrictedPageRank(g, 100, 0.85, 0.001, tol, pr.getNodes());
+                PersonalizedPageRankAlgorithm grank = new BoundaryRestrictedPageRank(g, 100, 0.85, tol, 0.001, pr.getNodes());
                 data.addAll(new ArrayList<>
                     (Arrays.asList(AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks))));
                 System.out.println(i);
                 IOclass.writeCsv("threshold.csv", data.toArray(new ComparisonData[0]));
                 tol += 0.0004;
             }
-            /*
-            ArrayList<NodesComparisonData> data2 = new ArrayList<>();
-            for(int i = 1; i <= 1000; i++)
-            {
-                int[] ks = new int[i];
-                for(int u = 1; u <= i; u++ )
-                    ks[u-1] = u;
-                PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, i, i, 50, 0.85, 0.0001);
-                data2.addAll(new ArrayList<>
-                    (Arrays.asList(AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), ks))));
-                System.out.println(i);
-                IOclass.writeCsv("data.csv", data2.toArray(new NodesComparisonData[0]));
-            }
             */
-            //NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(res1, res2, res2.getNodes(), ks);
+            
+            int[] ks = {50};
+            PersonalizedPageRankAlgorithm grank = new BoundaryRestrictedPageRank(g, 100, 0.85, 0.001, 0.001);
+            NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
+            IOclass.writeCsv("K50tr0_001fr0_001.csv", originData);
+            
+            System.out.println("done first");
+            
+            grank = new BoundaryRestrictedPageRank(g, 100, 0.85, 0.005, 0.005);
+            originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
+            IOclass.writeCsv("K50tr0_005fr0_005.csv", originData);
         }
 
         
