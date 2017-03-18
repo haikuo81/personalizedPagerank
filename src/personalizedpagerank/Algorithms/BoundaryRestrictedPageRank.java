@@ -310,9 +310,9 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
         double totalFrontier = 0;
         for(Int2DoubleMap.Entry entry: active.int2DoubleEntrySet())
             {
+                double value = scores.get(entry.getIntKey()) * active.get(entry.getIntKey());
                 for(int successor: successors.get(entry.getIntKey()))
                 {
-                    double value = scores.get(entry.getIntKey()) * active.get(entry.getIntKey());
                     nextScores.addTo(successor, value);
                     //if its not part of the active set its part of the frontier
                     if(active.get(successor) == 0)
@@ -365,9 +365,9 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
                         successors.put(entries[index].getIntKey(), computeSuccessors(entries[index].getIntKey()));
                     index++;
                 }
-                //&& index < frontier.size() needed because of roundings error might
-                //set totalFrontier > parameters.getFrontierThreshold() if
-                //the threshold is low enough
+                //&& index < frontier.size() needed because of rounding errors that might
+                //set totalFrontier > parameters.getFrontierThreshold() 
+                //(might happen only if the frontierThreshold is low enough)
                 while(totalFrontier > parameters.getFrontierThreshold() && index < frontier.size());
             } 
     }
