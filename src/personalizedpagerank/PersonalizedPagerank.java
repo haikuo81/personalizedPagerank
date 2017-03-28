@@ -42,8 +42,8 @@ import personalizedpagerank.Utility.NodesComparisonData;
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
             //generateUndirectedBipartite(g,200, 200, 1000);
-            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
-            //importGraphFromCsv(g, "p2p-Gnutella04.csv");
+            importBipartiteUndirectedFromCsv(g, "collab.csv");
+            //importGraphFromCsv(g, "collab.csv");
             //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
             
@@ -68,15 +68,16 @@ import personalizedpagerank.Utility.NodesComparisonData;
             */
             
             int[] ks = {50};
-            PersonalizedPageRankAlgorithm grank = new BoundaryRestrictedPageRank(g, 100, 0.85, 0.001, 0.001);
+            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
+            System.out.println("done br1");
             NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
-            IOclass.writeCsv("K50tr0_001fr0_001.csv", originData);
+            IOclass.writeCsv("K50_collab.csv", originData);
             
             System.out.println("done first");
             
-            grank = new BoundaryRestrictedPageRank(g, 100, 0.85, 0.005, 0.005);
+            ks[0] = 100;
             originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
-            IOclass.writeCsv("K50tr0_005fr0_005.csv", originData);
+            IOclass.writeCsv("K100_collab.csv", originData);
         }
 
         
