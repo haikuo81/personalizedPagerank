@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
+import personalizedpagerank.Algorithms.GuerrieriRankV2;
+import personalizedpagerank.Algorithms.MCCompletePathPageRank;
 
 public class IOclass 
 {
@@ -153,10 +155,13 @@ public class IOclass
     private static void getHeaderNames(final StringBuilder header, final Parameters parameters, final String append)
     {
         header.append("iterations,damping,tolerance");
-        if(parameters instanceof GuerrieriRank.GuerrieriParameters)
+        if(parameters instanceof GuerrieriRank.GuerrieriParameters || 
+                parameters instanceof GuerrieriRankV2.GuerrieriParameters)
             header.append(",smallTop,largeTop,topRatio");
-        if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
+        else if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
             header.append(",frontierThreshold");
+        else if(parameters instanceof MCCompletePathPageRank.MCCompletePathParameters)
+            header.append(",smallTop");
         header.append(append);
     }
     
@@ -181,13 +186,29 @@ public class IOclass
             content.append(p.getLargetTop()).append(",");
             content.append( ((double)p.getLargetTop()) / p.getSmallTop());
         }
-        if (parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
+        else if(parameters instanceof GuerrieriRankV2.GuerrieriParameters)
+        {
+            GuerrieriRankV2.GuerrieriParameters p = (GuerrieriRankV2.GuerrieriParameters) parameters;
+            content.append(",");
+            content.append(p.getSmallTop()).append(",");
+            content.append(p.getLargetTop()).append(",");
+            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+        }
+        else if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
         {
             BoundaryRestrictedPageRank.BoundaryRestrictedParameters p =
                     (BoundaryRestrictedPageRank.BoundaryRestrictedParameters) parameters;
             content.append(",");
             content.append(p.getFrontierThreshold());
         }
+        else if(parameters instanceof MCCompletePathPageRank.MCCompletePathParameters)
+        {
+            MCCompletePathPageRank.MCCompletePathParameters p = 
+                    (MCCompletePathPageRank.MCCompletePathParameters) parameters;
+            content.append(",");
+            content.append(p.getSmallTop());
+        }
+        
         content.append(append);
     }
 
