@@ -315,12 +315,19 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
     private Int2IntOpenHashMap calculateBudgets(int min, int average)
     {
         Int2IntOpenHashMap budgets = new Int2IntOpenHashMap(g.vertexSet().size());
-        
-        double spendible = (average - min) * g.vertexSet().size();
         double totalEdges = g.edgeSet().size();
+        if(totalEdges == 0)
+        {
+            for(int node: g.vertexSet())
+                budgets.put(node, average);
+        }
+        else
+        {
+            double spendible = (average - min) * g.vertexSet().size();
         
-        for(int node: g.vertexSet())
-            budgets.put(node, (int) (min + spendible * g.outDegreeOf(node)/totalEdges));
+            for(int node: g.vertexSet())
+                budgets.put(node, (int) (min + spendible * g.outDegreeOf(node)/totalEdges));
+        }
         return budgets;    
     }
 }
