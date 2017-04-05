@@ -85,6 +85,9 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
         this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
         scores.defaultReturnValue(null);
         
+        if(smallTop <= 0)
+            throw new IllegalArgumentException("Top k entries to keep must be positive");
+        
         if(iterations <= 0) 
             throw new IllegalArgumentException("Maximum iterations must be positive");
         
