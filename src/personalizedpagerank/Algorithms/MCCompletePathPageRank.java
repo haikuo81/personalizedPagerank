@@ -11,13 +11,25 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.Parameters;
 import personalizedpagerank.Utility.PartialSorter;
 
+
+/**
+ * Runs an instance of MCCompletePath from 
+ * "Quick Detection of Top-k Personalized PageRank Lists"
+ * Given a number of runs (the iterations parameter), for each node do that number
+ * of runs as random walks starting from that node, at each step calculate if
+ * the walk ends (teleport) or the walk goes on.
+ * For each node Y traversed during a random walk starting from the node X increment
+ * scores(X, Y).
+ * After the random walks are done an approximation of the top K personalized
+ * pagerank scorers for node X can be obtained by keeping the top K values
+ * from scores(X).
+ */
 public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
 {
     /*
@@ -60,11 +72,14 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
     /**
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
-     *
+     * @param g the input graph
+     * @param smallTop How many max entries to keep in the final results.
+     * @param iterations Number of runs to do for each node.
+     * @param dampingFactor Damping factor (chance of following an edge instead
+     * of teleporting)
      */
     public MCCompletePathPageRank(final DirectedGraph<Integer, DefaultEdge> g, 
-            final int smallTop, final int iterations, final double dampingFactor,
-            Set<Integer> nodes)
+            final int smallTop, final int iterations, final double dampingFactor)
     {
         this.g = g;
         this.scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
@@ -73,8 +88,8 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
         if(iterations <= 0) 
             throw new IllegalArgumentException("Maximum iterations must be positive");
         
-        if(dampingFactor < 0 || dampingFactor > 1)
-            throw new IllegalArgumentException("Damping factor must be [0,1]");
+        if(dampingFactor < 0 || dampingFactor >= 1)
+            throw new IllegalArgumentException("Damping factor must be [0,1)");
         
         parameters = new MCCompletePathParameters(g.vertexSet().size(), g.edgeSet().size(), 
                 smallTop, iterations, dampingFactor);
@@ -83,7 +98,7 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
         //more than necessary
         Int2ObjectOpenHashMap<int[]> successors = new Int2ObjectOpenHashMap<>();
         successors.defaultReturnValue(null);
-        for(int node: nodes)
+        for(int node: g.vertexSet())
             scores.put(node, run(node, successors));
     }
     
@@ -150,34 +165,43 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
         Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap();
         map.defaultReturnValue(0d);
         
-        //every random walk starts at this node
-        map.addTo(node, this.parameters.getIterations());
+        //each walk begins at node, so scores(node, node) will at least have a
+        //value equal to the number of runs
+        map.put(node, this.parameters.getIterations());
         
         //do a number of random walks equal to iterations
         for(int i = 0 ; i < this.parameters.getIterations(); i++)
         {
-            double teleported = 0d;
             int currentNode = node;
             
+            //decide if the walk actually starts or if a teleport happens
+            double teleported = random.nextDouble();
+            
+            /*
+            random walk which stops if a teleport happens (teleported > damping)
+            or if it gets into a node without out going edges
+            */
             while(teleported <= this.parameters.getDamping())
             {
-                //add 1 to the current node
-                map.addTo(currentNode, 1d);
-                
-                //pick 1 random successor as the next node
+                //get successors of the current node
                 int[] next = successors.get(currentNode);
                 if(next == null)
                 {
                     next = computeSuccessors(currentNode);
                     successors.put(currentNode, next);
                 }
-                if(next.length == 0)
-                    teleported = 1.1d;
-                else
-                    currentNode = next[random.nextInt(next.length)];
                 
-                //decide if the walk goes on or if we teleport back (walk is over)
-                teleported = random.nextDouble();
+                //if the current node has no edges the walk ends here
+                if(next.length == 0)
+                    teleported = 1d;
+                else
+                {
+                    //get to a random successor 
+                    currentNode = next[random.nextInt(next.length)];
+                    map.addTo(currentNode, 1d);
+                    //decide if the walk ends here or not
+                    teleported = random.nextDouble();
+                }
             }
         }
         
