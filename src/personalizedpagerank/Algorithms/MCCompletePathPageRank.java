@@ -120,7 +120,7 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
     @Override
     public Parameters getParameters() 
     {
-        return new Parameters(this.parameters);
+        return new MCCompletePathParameters(this.parameters);
     }
     
     /**
