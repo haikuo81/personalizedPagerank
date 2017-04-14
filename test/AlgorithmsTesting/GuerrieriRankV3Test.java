@@ -240,11 +240,11 @@ public class GuerrieriRankV3Test extends TestCase
         g.addEdge(0, 0);
         res = new GuerrieriRankV3(g, 10, 10, 10, 0.8, 0.0001);
         
-        assertEquals(res.getRank(0, 0), 1, 0.01);
+        assertEquals(res.getRank(0, 0), 0.2 + 0.8 * 0.2, 0.01);
         for(int i = 1; i < 6; i++)
         {
             assertEquals(res.getRank(0, i), 0d, 0d);
-            assertEquals(res.getRank(i, 0), 0.8, 0.01);
+            assertEquals(res.getRank(i, 0), 0.8 * (0.2 + 0.8 * 0.2), 0.01);
         }
     }
     

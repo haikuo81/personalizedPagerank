@@ -198,7 +198,6 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         Set<Integer> p1 = new HashSet<>(g.vertexSet().size()/2);
         Set<Integer> p2 = new HashSet<>(g.vertexSet().size()/2);
         findPartitions(p1, p2);
-        System.out.println("size: " + (p1.size()+p2.size() - g.vertexSet().size()));
         int iterations = this.parameters.getIterations();
         double maxDiff = this.parameters.getTolerance();
         
@@ -327,39 +326,38 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
     private Int2IntOpenHashMap calculateBudgets(int min, int average)
     {
         Int2IntOpenHashMap budgets = new Int2IntOpenHashMap(g.vertexSet().size());
-        double totalEdges = g.edgeSet().size();
-        if(totalEdges == 0)
+        double spendible = (average - min) * g.vertexSet().size();
+        double total = 0;
+        double den = 0;
+        for(int node: g.vertexSet())
+        {
+            int lim;
+            if(g.outDegreeOf(node) == 0)
+            {
+                lim = 0;
+                spendible += this.parameters.smallTop - 1;
+            }
+            else if(g.inDegreeOf(node) == 0)
+                lim = 0;
+            else
+                lim = g.outDegreeOf(node) + g.inDegreeOf(node);
+            budgets.put(node, lim);
+            den += lim;
+        }
+        if(den == 0)
         {
             for(int node: g.vertexSet())
-                budgets.put(node, average);
+            budgets.put(node, average);
         }
         else
         {
-            double spendible = (average - min) * g.vertexSet().size();
-            double total =0;
-            double den = 0;
-            for(int node: g.vertexSet())
-            {
-                int lim;
-                if(g.outDegreeOf(node) == 0)
-                {
-                    lim = 0;
-                    spendible += this.parameters.smallTop - 1;
-                }
-                else if(g.inDegreeOf(node) == 0)
-                    lim = 0;
-                else
-                    lim = g.outDegreeOf(node) + g.inDegreeOf(node);
-                budgets.put(node, lim);
-                den += lim;
-            }
             for(int node: g.vertexSet())
             {
                 budgets.put(node, (int) (((g.outDegreeOf(node) == 0)? 1 : min) + spendible * budgets.get(node)/den));
                 total += budgets.get(node);
             }
-            System.out.println((g.vertexSet().size() * average) - total );
         }
+        System.out.println((g.vertexSet().size() * average) - total );
         return budgets;    
     }
     
