@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -24,6 +25,10 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
+import personalizedpagerank.Algorithms.GuerrieriRankV2;
+import personalizedpagerank.Algorithms.GuerrieriRankV3;
+import personalizedpagerank.Algorithms.GuerrieriRankV3;
+import personalizedpagerank.Algorithms.MCCompletePathPageRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedOnlinePageRank;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
@@ -41,46 +46,47 @@ import personalizedpagerank.Utility.NodesComparisonData;
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            //generateUndirectedBipartite(g,200, 200, 1000);
-            importBipartiteUndirectedFromCsv(g, "collab.csv");
-            //importGraphFromCsv(g, "collab.csv");
+            //generateUndirectedBipartite(g,100, 100, 5000);
+            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
+            //importGraphFromCsv(g, "wikiElec.csv");
             //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
-            
-            WrappedOnlinePageRank pr = new WrappedOnlinePageRank(g, 100, 0.85, 0.0001);
-            System.out.println("done prank");
-            
+           
             /*
-            ArrayList<ComparisonData> data = new ArrayList<>();
-            double tol = 0.001;
-            for(int i = 1; i <= 250; i++)
+            while(true)
             {
-                int[] ks = new int[250];
-                for(int u = 1; u <= 250; u++ )
-                    ks[u-1] = u;
-                PersonalizedPageRankAlgorithm grank = new BoundaryRestrictedPageRank(g, 100, 0.85, tol, 0.001, pr.getNodes());
-                data.addAll(new ArrayList<>
-                    (Arrays.asList(AlgorithmComparator.compare(grank, pr, pr.getNodes(), ks))));
-                System.out.println(i);
-                IOclass.writeCsv("threshold.csv", data.toArray(new ComparisonData[0]));
-                tol += 0.0004;
+                            System.out.println("-----------");
+
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 200);
+                System.out.println("done pr");
+            int[] ks = {100};
+          
+            
+            
+            PersonalizedPageRankAlgorithm mcrank4 = new GuerrieriRankV3(g, 100, 200, 30, 0.85, 0.0001);
+            
+            ComparisonData[] data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+            System.out.println(data4[0].getJaccard().getAverage());
+            System.out.println(data4[0].getJaccard().getMin());
+            System.out.println(data4[0].getJaccard().getStd());
+            System.out.println(data4[0].getKendall().getAverage());
+            
+            mcrank4 = new GuerrieriRankV2(g, 100, 200, 30, 0.85, 0.0001);
+            data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+            System.out.println(data4[0].getJaccard().getAverage());
+            System.out.println(data4[0].getJaccard().getMin());
+            System.out.println(data4[0].getJaccard().getStd());
+            System.out.println(data4[0].getKendall().getAverage());
             }
             */
-            
-            int[] ks = {50};
-            PersonalizedPageRankAlgorithm grank = new GuerrieriRank(g, 100, 100, 50, 0.85, 0.0001);
-            System.out.println("done br1");
-            NodesComparisonData[] originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
-            IOclass.writeCsv("K50_collab.csv", originData);
-            
-            System.out.println("done first");
-            
-            ks[0] = 100;
-            originData = AlgorithmComparator.compareOrigins(grank, pr, g.vertexSet(), ks);
-            IOclass.writeCsv("K100_collab.csv", originData);
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, g.vertexSet().size());
+            int[] differentKs = {50};
+            PersonalizedPageRankAlgorithm grank = new GuerrieriRankV3(g, 50, 100, 100, 0.85, 0.0001);
+            NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), differentKs);
+            IOclass.writeCsv("wikiEleckNodesGV3.csv", data);
         }
-
         
+       
         ////////////////
         //////////the code written below here is just some stuff written hastily to try out stuff
         ///not part of the project, not commented, not tested
@@ -201,10 +207,9 @@ import personalizedpagerank.Utility.NodesComparisonData;
 
         public static void generateUndirectedBipartite(DirectedGraph<Integer, DefaultEdge> g, int n1, int n2, int m)
         {
-           GnmRandomBipartiteGraphGenerator<Integer, DefaultEdge> gen = new GnmRandomBipartiteGraphGenerator<>(n1, n2, m); 
-
-           //make it  undirected
-           gen.generateGraph(g, new factory(), null);
+            GnmRandomBipartiteGraphGenerator<Integer, DefaultEdge> gen = new GnmRandomBipartiteGraphGenerator<>(n1, n2, m); 
+            gen.generateGraph(g, new factory(), null);
+            //make it  undirected
             for(Integer i: g.vertexSet())
                for(DefaultEdge e: g.outgoingEdgesOf(i))
                    g.addEdge(Graphs.getOppositeVertex(g, e, i), i);

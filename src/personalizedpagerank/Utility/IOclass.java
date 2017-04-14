@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.GuerrieriRankV2;
+import personalizedpagerank.Algorithms.GuerrieriRankV3;
 import personalizedpagerank.Algorithms.MCCompletePathPageRank;
 
 public class IOclass 
@@ -156,7 +157,8 @@ public class IOclass
     {
         header.append("iterations,damping,tolerance");
         if(parameters instanceof GuerrieriRank.GuerrieriParameters || 
-                parameters instanceof GuerrieriRankV2.GuerrieriParameters)
+                parameters instanceof GuerrieriRankV2.GuerrieriParameters
+            || parameters instanceof GuerrieriRankV3.GuerrieriParameters)
             header.append(",smallTop,largeTop,topRatio");
         else if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
             header.append(",frontierThreshold");
@@ -189,6 +191,14 @@ public class IOclass
         else if(parameters instanceof GuerrieriRankV2.GuerrieriParameters)
         {
             GuerrieriRankV2.GuerrieriParameters p = (GuerrieriRankV2.GuerrieriParameters) parameters;
+            content.append(",");
+            content.append(p.getSmallTop()).append(",");
+            content.append(p.getLargetTop()).append(",");
+            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+        }
+        else if(parameters instanceof GuerrieriRankV3.GuerrieriParameters)
+        {
+            GuerrieriRankV3.GuerrieriParameters p = (GuerrieriRankV3.GuerrieriParameters) parameters;
             content.append(",");
             content.append(p.getSmallTop()).append(",");
             content.append(p.getLargetTop()).append(",");
