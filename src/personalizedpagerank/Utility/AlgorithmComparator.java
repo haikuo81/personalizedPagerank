@@ -205,7 +205,7 @@ public class AlgorithmComparator
         //pagerank value (not personalized pagerank)
         Map<Integer, Double> pagerank = (new PageRank<>(g, alg1.getParameters().getDamping(), 
                 alg1.getParameters().getIterations(), 
-                alg1.getParameters().getTolerance()).getScores());
+                alg1.getParameters().getTolerance() <= 0? 0.85 : alg1.getParameters().getTolerance()).getScores());
         NodesComparisonData[] res = new NodesComparisonData[differentKs.length];
         
         //(k, nodes.size(), alg1.getParameters(), alg2.getParameters());
