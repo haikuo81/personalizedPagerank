@@ -1,15 +1,12 @@
-
 package personalizedpagerank.Algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
+import personalizedpagerank.Utility.Graphs;
+import personalizedpagerank.Utility.NodeScores;
 import personalizedpagerank.Utility.Parameters;
 
 public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
@@ -42,20 +39,22 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
     
     
     private final DirectedGraph<Integer, DefaultEdge> g;
-    private Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> scores;
+    private Int2ObjectOpenHashMap<NodeScores> scores;
     private final BoundaryRestrictedParameters parameters;
     
     //Private class to store running parameters
     public static class BoundaryRestrictedParameters extends Parameters
     {
         private final double frontierThreshold;
+        private final int smallTop;
         
         private BoundaryRestrictedParameters(final int vertices, final int edges, 
-                final double frontierThreshold, final int iterations,
+                final int smallTop, final double frontierThreshold, final int iterations,
                 final double damping, final double tolerance)
         {
             super(vertices, edges, iterations, damping, tolerance);
             this.frontierThreshold = frontierThreshold;
+            this.smallTop = smallTop;
         }
 
         private BoundaryRestrictedParameters(BoundaryRestrictedParameters input)
@@ -63,6 +62,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
             super(input.getVertices(), input.getEdges(), input.getIterations(), 
                     input.getDamping(), input.getTolerance());
              this.frontierThreshold = input.getFrontierThreshold();
+             this.smallTop = input.smallTop;
         }
 
         public double getFrontierThreshold() {
@@ -79,6 +79,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      *
      * @param g the input graph
      * computation.
+     * @param smallTop How many max entries for each vertex to keep in the final results.
      * @param iterations the number of iterations to perform
      * @param dampingFactor the damping factor
      * @param tolerance Stop if the difference of scores between iterations is
@@ -89,52 +90,27 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * set L the highest value (pagerank) node until the frontier is below this
      * value.
      */
-    public BoundaryRestrictedPageRank(final DirectedGraph<Integer, DefaultEdge> g, 
-            final int iterations, final double dampingFactor, final double tolerance,
+    public BoundaryRestrictedPageRank(final DirectedGraph<Integer, DefaultEdge> g,
+            final int smallTop, final int iterations, final double dampingFactor, final double tolerance,
             final double frontierThreshold)
     {
         this.g = g;
         scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
+        
+        if(smallTop <= 0)
+            throw new IllegalArgumentException("SmallTop k entries to keep must be positive");
+        
         if(iterations <= 0) 
             throw new IllegalArgumentException("Maximum iterations must be positive");
         
         if(dampingFactor < 0 || dampingFactor > 1)
             throw new IllegalArgumentException("Damping factor must be [0,1]");
         
-        
-        parameters = new BoundaryRestrictedParameters(g.vertexSet().size(),
+        parameters = new BoundaryRestrictedParameters(g.vertexSet().size(), smallTop,
                 g.edgeSet().size(), frontierThreshold, iterations, dampingFactor, 
         tolerance);
-        //saving successors list to avoid calling Graphs.successorListOf(g, scores)
-        //more than necessary
-        Int2ObjectOpenHashMap<int[]> successors = new Int2ObjectOpenHashMap<>();
-        successors.defaultReturnValue(null);
-        for(int node: g.vertexSet())
-            scores.put(node, run(node, successors));
-    }
-    
-    public BoundaryRestrictedPageRank(final DirectedGraph<Integer, DefaultEdge> g, 
-            final int iterations, final double dampingFactor, final double tolerance,
-            final double frontierThreshold, Set<Integer> nodes)
-    {
-        this.g = g;
-        scores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
-        if(iterations <= 0) 
-            throw new IllegalArgumentException("Maximum iterations must be positive");
         
-        if(dampingFactor < 0 || dampingFactor > 1)
-            throw new IllegalArgumentException("Damping factor must be [0,1]");
-        
-        
-        parameters = new BoundaryRestrictedParameters(g.vertexSet().size(),
-                g.edgeSet().size(), frontierThreshold, iterations, dampingFactor, 
-        tolerance);
-        //saving successors list to avoid calling Graphs.successorListOf(g, scores)
-        //more than necessary
-        Int2ObjectOpenHashMap<int[]> successors = new Int2ObjectOpenHashMap<>();
-        successors.defaultReturnValue(null);
-        for(int node: nodes)
-            scores.put(node, run(node, successors));
+        run();
     }
     
     //GETTERS
@@ -162,7 +138,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
-    public Int2DoubleOpenHashMap getMap(final int origin)
+    public NodeScores getMap(final int origin)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
@@ -173,7 +149,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
-    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps()
+    public Int2ObjectOpenHashMap<NodeScores> getMaps()
     {
         return scores;
     }
@@ -194,67 +170,69 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
     //methods (no getters)
     ////////////////////
     
-    private Int2DoubleOpenHashMap run(int node, Int2ObjectOpenHashMap<int[]> successors)
+    private void run()
     {
-        /*
-        init phase, initialize stuff and set the starting node score
-        to 1
-        */
-        //set of active nodes, each active node is mapped to the product of
-        //dampingfactor / outgoing edges
-        Int2DoubleOpenHashMap active = new Int2DoubleOpenHashMap();
-        Int2DoubleOpenHashMap scores = new Int2DoubleOpenHashMap();
-        Int2DoubleOpenHashMap nextScores = new Int2DoubleOpenHashMap();
-        
-        //frontier, the nodes that are reached but not part of the active set
-        Int2DoubleOpenHashMap frontier = new Int2DoubleOpenHashMap();
-        scores.defaultReturnValue(0d);
-        nextScores.defaultReturnValue(0d);
-        frontier.defaultReturnValue(0d);
-        //total value of the frontier
-        double totalFrontier;
-        
-        active.put(node, parameters.getDamping() / g.outDegreeOf(node));
-        scores.put(node, 1d);
-        successors.put(node, computeSuccessors(node));
-        
-        double diff = Double.MAX_VALUE;
-        int iterations = parameters.getIterations();
-        while(diff > parameters.getTolerance() && iterations > 0)
+        for(int node: g.vertexSet())
         {
-            //do a pagerank iteration in which the frontier and its total value
-            //are calculated
-            totalFrontier = pageRankIteration(active, frontier, scores, nextScores, successors);
-            
-            //add score back to "node" so that the sum of the scores is 1
-            nextScores.addTo(node, missingScore(nextScores));
-            
-            //unpack the frontier
-            unpackFrontier(totalFrontier, active, frontier, successors);
-            
-            //check difference
-            diff = difference(scores, nextScores);
-            
-            //swap scores
-            Int2DoubleOpenHashMap tmp = scores;
-            scores = nextScores;
-            nextScores = tmp;
-            
-            iterations --;
+            /*
+            init phase, initialize stuff and set the starting node score
+            to 1
+            */
+            //set of active nodes, each active node is mapped to the product of
+            //dampingfactor / outgoing edges
+            NodeScores active = new NodeScores();
+            active.put(node, parameters.getDamping() / g.outDegreeOf(node));
+
+            NodeScores nodeScores = new NodeScores();
+            nodeScores.put(node, 1d);
+
+            NodeScores nextNodeScores = new NodeScores();
+
+            //frontier, the nodes that are reached but not part of the active set
+            NodeScores frontier = new NodeScores();
+
+            //successors for each node, to avoid calling Graphs.successorListOf which is slow
+            Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
+
+            double diff = Double.MAX_VALUE;
+            int iterations = parameters.getIterations();
+            while(iterations > 0 && diff > parameters.getTolerance())
+            {
+                //do a pagerank iteration in which the frontier and its total value
+                //are calculated
+                double totalFrontier = pageRankIteration(active, frontier, nodeScores, nextNodeScores, successors);
+
+                //add score back to "node" so that the sum of the scores is 1
+                nextNodeScores.addTo(node, missingScore(nextNodeScores));
+
+                //unpack the frontier
+                unpackFrontier(totalFrontier, active, frontier, successors);
+
+                //check difference
+                diff = difference(nodeScores, nextNodeScores);
+
+                //swap scores
+                NodeScores tmp = nodeScores;
+                nodeScores = nextNodeScores;
+                nextNodeScores = tmp;
+
+                iterations --;
+            }
+            nodeScores.keepTop(this.parameters.smallTop);
+            scores.put(node, nodeScores);
         }
-        return scores;
     }
     
     /**
      * Return the total difference in mapped values of the two maps.
      * For every key mapped to either m1 or m2 add to the result the absolute
      * difference between the value mapped to it in m1 and in m2. If a key is not
-     * mapped in one of the maps it's value is the defaultReturnValue of the map.
+     * mapped in one of the maps it's value is the defaultReturnValue of the map (0).
      * @param m1 First map.
      * @param m2 Second map.
      * @return Total difference of mapped values between the two maps.
      */
-    private double difference(Int2DoubleOpenHashMap m1, Int2DoubleOpenHashMap m2)
+    private double difference(NodeScores m1, NodeScores m2)
     {
         double res = 0;
         for(Int2DoubleMap.Entry entry: m1.int2DoubleEntrySet())
@@ -272,7 +250,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * @param map Map for which to sum the values.
      * @return Absolute difference between 1 and the sum of the values of the map.
      */
-    private double missingScore(Int2DoubleOpenHashMap map)
+    private double missingScore(NodeScores map)
     {
         double missing = 0;
         for (Int2DoubleMap.Entry entry : map.int2DoubleEntrySet())
@@ -300,9 +278,9 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * @return The sum of the pagerank value of the nodes that are part of the
      * frontier.
      */
-    private double pageRankIteration(Int2DoubleOpenHashMap active,
-            Int2DoubleOpenHashMap frontier, Int2DoubleOpenHashMap scores,
-            Int2DoubleOpenHashMap nextScores, Int2ObjectOpenHashMap<int[]> successors)
+    private double pageRankIteration(NodeScores active,
+            NodeScores frontier, NodeScores scores,
+            NodeScores nextScores, Int2ObjectOpenHashMap<int[]> successors)
     {
         nextScores.clear();
         frontier.clear();
@@ -337,8 +315,8 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
      * and its successors (value) when the node is newly added to the active set.
      * @param frontier Map mapping every frontier node to its current pagerank value. 
      */
-    private void unpackFrontier(double totalFrontier, Int2DoubleOpenHashMap active, 
-            Int2DoubleOpenHashMap frontier, Int2ObjectOpenHashMap<int[]> successors)
+    private void unpackFrontier(double totalFrontier, NodeScores active, 
+            NodeScores frontier, Int2ObjectOpenHashMap<int[]> successors)
     {
        if(totalFrontier > parameters.getFrontierThreshold())
             {
@@ -360,33 +338,12 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
                     active.put(entries[index].getIntKey(),
                             parameters.getDamping() / g.outDegreeOf(entries[index].getIntKey()));
                     totalFrontier -= entries[index].getDoubleValue();
-                    //if successors haven't already been computed do it
-                    if(!successors.containsKey(entries[index].getIntKey()))
-                        successors.put(entries[index].getIntKey(), computeSuccessors(entries[index].getIntKey()));
                     index++;
                 }
                 //&& index < frontier.size() needed because of rounding errors that might
                 //set totalFrontier > parameters.getFrontierThreshold() 
-                //(might happen only if the frontierThreshold is low enough)
+                //(might happen only if the frontierThreshold is really low)
                 while(totalFrontier > parameters.getFrontierThreshold() && index < frontier.size());
             } 
-    }
-    
-    /**
-     * Given a node returns its successors as an array of ints.
-     * @param node Node for which to find the successors.
-     * @return Array of successor nodes.
-     */
-    private int[] computeSuccessors(int node)
-    {
-        List<Integer> s = Graphs.successorListOf(g, node);
-        int[] res = new int[s.size()];
-        int index = 0;
-        for(int successor: s)
-        {
-            res[index] = successor;
-            index++;
-        }
-        return res;
     }
 }
