@@ -11,6 +11,7 @@ import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import org.jgrapht.DirectedGraph;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Utility.NodeScores;
 
 
 public class MCCompletePathTest extends TestCase
@@ -94,7 +95,7 @@ public class MCCompletePathTest extends TestCase
         catch (IllegalArgumentException e) {}
         
         Int2DoubleOpenHashMap map1 = res.getMap(1);
-        Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> map2 = res.getMaps();
+        Int2ObjectOpenHashMap<NodeScores> map2 = res.getMaps();
         
         assertEquals(map1.size(), 1, 0);
         assertEquals(map2.size(), 1, 0);
