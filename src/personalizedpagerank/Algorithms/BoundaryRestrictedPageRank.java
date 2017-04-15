@@ -106,8 +106,8 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
         if(dampingFactor < 0 || dampingFactor > 1)
             throw new IllegalArgumentException("Damping factor must be [0,1]");
         
-        parameters = new BoundaryRestrictedParameters(g.vertexSet().size(), smallTop,
-                g.edgeSet().size(), frontierThreshold, iterations, dampingFactor, 
+        parameters = new BoundaryRestrictedParameters(g.vertexSet().size(),
+                g.edgeSet().size(), smallTop, frontierThreshold, iterations, dampingFactor, 
         tolerance);
         
         run();
