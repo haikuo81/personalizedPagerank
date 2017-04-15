@@ -79,7 +79,7 @@ import personalizedpagerank.Utility.NodesComparisonData;
             System.out.println(data4[0].getKendall().getAverage());
             }
             */
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, g.vertexSet().size());
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85, 0.0001, g.vertexSet().size());
             int[] differentKs = {50};
             PersonalizedPageRankAlgorithm grank = new GuerrieriRankV3(g, 50, 100, 100, 0.85, 0.0001);
             NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), differentKs);
