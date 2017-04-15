@@ -1,10 +1,9 @@
 package personalizedpagerank.Algorithms;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
+import personalizedpagerank.Utility.NodeScores;
 import personalizedpagerank.Utility.Parameters;
 
 /**
@@ -22,7 +21,7 @@ public interface PersonalizedPageRankAlgorithm
      * @return A map where key values are nodes from the graph and are mapped
      * to personalized pagerank scores.
      */
-    public Int2DoubleOpenHashMap getMap(final int origin);
+    public NodeScores getMap(final int origin);
     
     /**
      * Retrieves a map where keys are nodes of the graph used to run the algorithm,
@@ -33,7 +32,7 @@ public interface PersonalizedPageRankAlgorithm
      * being the origin node (the only node in the starting and the teleport set).
      * @return Map of maps containing personalized pagerank scores.
      */
-    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps();
+    public Int2ObjectOpenHashMap<NodeScores> getMaps();
     
     /**
      * Given an origin node and a target node get the personalized pagerank score

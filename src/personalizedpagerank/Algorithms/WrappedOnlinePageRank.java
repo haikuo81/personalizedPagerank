@@ -1,11 +1,11 @@
 package personalizedpagerank.Algorithms;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
+import personalizedpagerank.Utility.NodeScores;
 import personalizedpagerank.Utility.Parameters;
 
 /**
@@ -44,13 +44,12 @@ public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
      * mapping to each node of the graph its value.
      * @param node 
      */
-    private Int2DoubleOpenHashMap calculateNode(int node)
+    private NodeScores calculateNode(int node)
     {
         VertexScoringAlgorithm<Integer, Double> pr = new PageRank<>(g, parameters.getDamping(), 
                         parameters.getIterations(), parameters.getTolerance(), node);
         Map<Integer, Double> pprScores = pr.getScores();
-        Int2DoubleOpenHashMap map = new Int2DoubleOpenHashMap(pprScores);
-        map.defaultReturnValue(0d);
+        NodeScores map = new NodeScores(pprScores);
         return map;
     }
     
@@ -79,7 +78,7 @@ public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
-    public Int2DoubleOpenHashMap getMap(final int origin)
+    public NodeScores getMap(final int origin)
     {
         if(!g.containsVertex(origin))
             throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
@@ -90,7 +89,7 @@ public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
-    public Int2ObjectOpenHashMap<Int2DoubleOpenHashMap> getMaps()
+    public Int2ObjectOpenHashMap<NodeScores> getMaps()
     {
         return new Int2ObjectOpenHashMap<>();
     }
