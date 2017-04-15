@@ -58,11 +58,14 @@ public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
         for(int i = 0; i < samples; i++)
             {
                 pickedNodes.add(nodes.get(i));
+                /*
                 VertexScoringAlgorithm<Integer, Double> pr = new PageRank<>(g, parameters.getDamping(), 
                         parameters.getIterations(), parameters.getTolerance(), nodes.get(i));
                 Map<Integer, Double> pprScores = pr.getScores();
                 //"translate" this map into a NodeScores to satisty the interface
                 NodeScores map = new NodeScores(pprScores);
+                */
+                NodeScores map = PersonalizedPageRank.getScores(g, dampingFactor, iterations, tolerance, nodes.get(i));
                 map.keepTop(smallTop);
                 scores.put(nodes.get(i).intValue(), map);
             }
