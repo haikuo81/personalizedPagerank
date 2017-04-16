@@ -261,8 +261,8 @@ public class BoundaryRestrictedPageRankTest extends TestCase
             for(int i = 0; i < edges; i++)
                 g.addEdge(random.nextInt(nodes), random.nextInt(nodes));
 
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85d, 0.0001, nodes);
-            PersonalizedPageRankAlgorithm b = new BoundaryRestrictedPageRank(g, 100,  100, 0.85d, 0d, 0d);
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85d, 1e-20, nodes);
+            PersonalizedPageRankAlgorithm b = new BoundaryRestrictedPageRank(g, 100,  100, 0.85d, 1e-20, 1e-20);
             for(int node : g.vertexSet())
             {
                 //get maps and sort entries
