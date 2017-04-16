@@ -46,44 +46,93 @@ import personalizedpagerank.Utility.NodesComparisonData;
         public static void main(String[] args) 
         {
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            //generateUndirectedBipartite(g,100, 100, 5000);
+            //generateUndirectedBipartite(g, 500, 500, 0);
             importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
             //importGraphFromCsv(g, "wikiElec.csv");
             //printGraph(g, "g1.csv");
+            //for(int node1: g.vertexSet())
+              //  for(int node2: g.vertexSet())
+                //    g.addEdge(node1, node2);
             System.out.println("finished importing ");
            
-            /*
             while(true)
             {
-                            System.out.println("-----------");
+                System.out.println("----------------------");
+                PersonalizedPageRankAlgorithm mcrank4;
+                ComparisonData[] data4;
+                long time = System.currentTimeMillis();
+                WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85, 0.0001, 100);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done pr in " + time);
+                int[] ks = {50};
 
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 200);
-                System.out.println("done pr");
-            int[] ks = {100};
-          
-            
-            
-            PersonalizedPageRankAlgorithm mcrank4 = new GuerrieriRankV3(g, 100, 200, 30, 0.85, 0.0001);
-            
-            ComparisonData[] data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-            System.out.println(data4[0].getJaccard().getAverage());
-            System.out.println(data4[0].getJaccard().getMin());
-            System.out.println(data4[0].getJaccard().getStd());
-            System.out.println(data4[0].getKendall().getAverage());
-            
-            mcrank4 = new GuerrieriRankV2(g, 100, 200, 30, 0.85, 0.0001);
-            data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-            System.out.println(data4[0].getJaccard().getAverage());
-            System.out.println(data4[0].getJaccard().getMin());
-            System.out.println(data4[0].getJaccard().getStd());
-            System.out.println(data4[0].getKendall().getAverage());
+                //grank
+                time = System.currentTimeMillis();
+                mcrank4 = new GuerrieriRank(g, 100, 300, 30, 0.85, 0.0001);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done gv in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+                
+                //grankV2
+                time = System.currentTimeMillis();
+                mcrank4 = new GuerrieriRankV2(g, 100, 200, 30, 0.85, 0.0001);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done gv2 in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+
+                //grankV3
+                time = System.currentTimeMillis();
+                mcrank4 = new GuerrieriRankV3(g, 100, 200, 30, 0.85, 0.0001);
+                time = System.currentTimeMillis() - time; 
+                System.out.println("done gv3 in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+                
+                //grankMC
+                time = System.currentTimeMillis();
+                mcrank4 = new MCCompletePathPageRank(g, 100, 40000, 0.85);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done mc in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+                
+                //boundary
+                time = System.currentTimeMillis();
+                mcrank4 = new BoundaryRestrictedPageRank(g, 100, 100, 0.85, 0.05, 0.001);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done mc in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
             }
-            */
+            /*
             WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85, 0.0001, g.vertexSet().size());
             int[] differentKs = {50};
             PersonalizedPageRankAlgorithm grank = new GuerrieriRankV3(g, 50, 100, 100, 0.85, 0.0001);
             NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), differentKs);
             IOclass.writeCsv("wikiEleckNodesGV3.csv", data);
+            */
         }
         
        
