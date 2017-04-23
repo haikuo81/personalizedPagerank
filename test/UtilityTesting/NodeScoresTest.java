@@ -93,4 +93,73 @@ public class NodeScoresTest extends TestCase
             }
         }
     }
+    
+    public void testAddEmpty()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        scores.add(new NodeScores());
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), (double) i);
+    }
+    
+    public void testAddItself()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        scores.add(scores);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i * 2d);
+    }
+    
+    public void testAddDifferent()
+    {
+        NodeScores scores1 = new NodeScores();
+        NodeScores scores2 = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores1.put(i, i);
+        for(int i = 0; i < 100; i++)
+            scores2.put(i, i * i);
+        scores1.add(scores2);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores1.get(i), (double)i + i * i);
+    }
+    
+    public void testAddEmptyWithFactor()
+    {
+        double factor = 0.5;
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        scores.add(new NodeScores(), factor);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i),(double) i);
+    }
+    
+    public void testAddItselfWithFactor()
+    {
+        double factor = 0.5;
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        scores.add(scores, factor);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i + (i * factor));
+    }
+    
+    public void testAddDifferentWithFactor()
+    {
+        double factor = 0.5;
+        NodeScores scores1 = new NodeScores();
+        NodeScores scores2 = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores1.put(i, i);
+        for(int i = 0; i < 100; i++)
+            scores2.put(i, i * i);
+        scores1.add(scores2, factor);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores1.get(i), i + (i * i * factor));
+    }
 }
