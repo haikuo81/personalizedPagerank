@@ -8,6 +8,7 @@ package personalizedpagerank.Utility;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.Map;
 
 public class NodeScores extends Int2DoubleOpenHashMap 
@@ -45,6 +46,17 @@ public class NodeScores extends Int2DoubleOpenHashMap
                         e1.getDoubleValue() == e2.getDoubleValue()?
                         (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;  
             });
+            /*
+            for(int i = topL; i < array.length; i++)
+                array[i].setValue(-1);
+            ObjectIterator<Entry> it = this.int2DoubleEntrySet().fastIterator();
+            while(it.hasNext())
+            {
+                if(it.next().getDoubleValue() == -1)
+                    it.remove(); 
+            }
+            */
+            
             //if too many to remove just clear and add the first topL
             //else just remove the non topL
             if(array.length > topL * 2)
@@ -65,6 +77,34 @@ public class NodeScores extends Int2DoubleOpenHashMap
                 for(int i = 0; i < toRemove.length; i++)
                     this.remove(toRemove[i]);
             }
+            
+           
         }
+    }
+    
+    /**
+     * Given an input map adds all the entries of that map to this map.
+     * Equivalent to doing addTo(key, value) for each entry of the input map.
+     * The input map is not modified.
+     * @param from Input map which entries will be added.
+     */
+    public void add(NodeScores from)
+    {
+        for(Int2DoubleMap.Entry entry: from.int2DoubleEntrySet())
+            this.addTo(entry.getIntKey(), entry.getDoubleValue());
+    }
+    
+    /**
+     * Given an input map adds all the entries of that map to this map, correcting
+     * the values of the input entries with a factor (doing a product).
+     * Equivalent to doing addTo(key, value * factor) for each entry of the input map.
+     * The input map is not modified.
+     * @param from Input map which entries will be added.
+     * @param factor Value used to multiply the input entries values before adding them.
+     */
+    public void add(NodeScores from, double factor)
+    {
+        for(Int2DoubleMap.Entry entry: from.int2DoubleEntrySet())
+            this.addTo(entry.getIntKey(), entry.getDoubleValue() * factor);
     }
 }

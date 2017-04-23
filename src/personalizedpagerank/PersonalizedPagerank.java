@@ -1,7 +1,5 @@
 package personalizedpagerank;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,10 +7,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -21,21 +19,19 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.VertexFactory;
 import org.jgrapht.generate.GnmRandomBipartiteGraphGenerator;
+import org.jgrapht.generate.GnpRandomGraphGenerator;
+import org.jgrapht.generate.GraphGenerator;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
 import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.GuerrieriRankV2;
-import personalizedpagerank.Algorithms.GuerrieriRankV3;
 import personalizedpagerank.Algorithms.GuerrieriRankV3;
 import personalizedpagerank.Algorithms.MCCompletePathPageRank;
+import personalizedpagerank.Algorithms.MCCompletePathPageRankV2;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedOnlinePageRank;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
 import personalizedpagerank.Utility.AlgorithmComparator;
 import personalizedpagerank.Utility.ComparisonData;
-import personalizedpagerank.Utility.IOclass;
-import personalizedpagerank.Utility.NodesComparisonData;
+import personalizedpagerank.Utility.NodeScores;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
     //su quali nodi (ogni altro nodo come origine) si accumula + errore?
@@ -45,45 +41,91 @@ import personalizedpagerank.Utility.NodesComparisonData;
 
         public static void main(String[] args) 
         {
+            Random random = new Random();
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            //generateUndirectedBipartite(g,100, 100, 5000);
             importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
-            //importGraphFromCsv(g, "wikiElec.csv");
-            //printGraph(g, "g1.csv");
             System.out.println("finished importing ");
-           
-            /*
+            
+            
+            PersonalizedPageRankAlgorithm mcrank4;
+            ComparisonData[] data4;
+                
             while(true)
             {
-                            System.out.println("-----------");
-
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 0.85, 0.0001, 200);
-                System.out.println("done pr");
-            int[] ks = {100};
-          
-            
-            
-            PersonalizedPageRankAlgorithm mcrank4 = new GuerrieriRankV3(g, 100, 200, 30, 0.85, 0.0001);
-            
-            ComparisonData[] data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-            System.out.println(data4[0].getJaccard().getAverage());
-            System.out.println(data4[0].getJaccard().getMin());
-            System.out.println(data4[0].getJaccard().getStd());
-            System.out.println(data4[0].getKendall().getAverage());
-            
-            mcrank4 = new GuerrieriRankV2(g, 100, 200, 30, 0.85, 0.0001);
-            data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-            System.out.println(data4[0].getJaccard().getAverage());
-            System.out.println(data4[0].getJaccard().getMin());
-            System.out.println(data4[0].getJaccard().getStd());
-            System.out.println(data4[0].getKendall().getAverage());
+                System.out.println();
+                System.out.println("---------------------- " + g.vertexSet().size() 
+                        + " vertices and " + g.edgeSet().size() + " edges");
+                       //+ " with " + ((double)g.edgeSet().size())/g.vertexSet().size() + " e/v");
+           
+                long time = System.currentTimeMillis();
+                WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 50, 100, 0.85, 0.001, 400);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done pr in " + time);
+                int[] ks = {50};
+                
+                System.gc();
+                time = System.currentTimeMillis();
+                mcrank4 = new GuerrieriRank(g, 50, 800, 25, 0.85, 0.001);
+                time = System.currentTimeMillis() - time; 
+                System.out.println("done Gv in " + time + " ms");
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage() + " jaccard average");
+                System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
+                System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
+                System.out.println(data4[0].getKendall().getAverage() + " kendall average");
+                //grankV3
+                System.gc();
+                time = System.currentTimeMillis();
+                mcrank4 = new GuerrieriRankV3(g, 50, 800, 25, 0.85, 0.001);
+                time = System.currentTimeMillis() - time; 
+                System.out.println("done Gv3 in " + time + " ms");
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage() + " jaccard average");
+                System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
+                System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
+                System.out.println(data4[0].getKendall().getAverage() + " kendall average");
+               
+                /*
+                //MC<
+                //
+                time = System.currentTimeMillis();
+                mcrank4 = new MCCompletePathPageRank(g, 50, 4000, 0.85);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done mc in " + time);
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+                
+               */
+                
+                //MCv2
+                mcrank4 = null;
+                System.gc();
+                System.out.println("");
+                time = System.currentTimeMillis();
+                mcrank4 = new MCCompletePathPageRankV2(g, 8000, 12000, 0.85);
+                time = System.currentTimeMillis() - time;
+                System.out.println("done MCv2 in " + time + " ms");
+                
+                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+                System.out.println(data4[0].getJaccard().getAverage());
+                System.out.println(data4[0].getJaccard().getMin());
+                System.out.println(data4[0].getJaccard().getStd());
+                System.out.println(data4[0].getKendall().getAverage());
+                
             }
-            */
+            /*
             WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85, 0.0001, g.vertexSet().size());
             int[] differentKs = {50};
             PersonalizedPageRankAlgorithm grank = new GuerrieriRankV3(g, 50, 100, 100, 0.85, 0.0001);
             NodesComparisonData[] data = AlgorithmComparator.compareOrigins(grank, pr, pr.getNodes(), differentKs);
             IOclass.writeCsv("wikiEleckNodesGV3.csv", data);
+            */
         }
         
        
@@ -91,6 +133,11 @@ import personalizedpagerank.Utility.NodesComparisonData;
         //////////the code written below here is just some stuff written hastily to try out stuff
         ///not part of the project, not commented, not tested
         /////////////////////////////////////////////////////////////////////////////////////
+        
+        private static double formula(double i, double l, double r, double e, double v)
+        {
+            return (i * l * e)/(r * v);
+        }
         
         private static Set<Integer> nodesSubset(Graph<Integer, DefaultEdge> g, int k)
         {
@@ -214,6 +261,12 @@ import personalizedpagerank.Utility.NodesComparisonData;
                for(DefaultEdge e: g.outgoingEdgesOf(i))
                    g.addEdge(Graphs.getOppositeVertex(g, e, i), i);
         }
+        
+        public static void generateDirectedGraph(DirectedGraph<Integer, DefaultEdge> g, int n, double p)
+        {
+            GnpRandomGraphGenerator<Integer, DefaultEdge> gen = new GnpRandomGraphGenerator<>(n, p, new Random(), true);
+            gen.generateGraph(g, new factory(), null);
+        }
 
         public static class factory implements VertexFactory<Integer>
         {
@@ -223,6 +276,30 @@ import personalizedpagerank.Utility.NodesComparisonData;
                 return val++;
             }
         }
+        
+        public int getsTo(DirectedGraph<Integer, DefaultEdge> g, int node)
+        {
+            int res = 0;
+            List<Integer> queue = new ArrayList<>();
+            NodeScores visited = new NodeScores();
+            queue.add(node);
+            visited.put(node,1);
+            while(!queue.isEmpty())
+            {
+                int next = queue.remove(0);
+                for(int successor: Graphs.successorListOf(g, next))
+                    if(!visited.containsKey(successor))
+                    {
+                        queue.add(successor);
+                        visited.put(successor, 1);
+                        res++;
+                    }
+                
+                
+            }
+            return res;
+        }
+
 }
 
     
