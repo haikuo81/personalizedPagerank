@@ -4,6 +4,7 @@ import personalizedpagerank.Utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +80,7 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
             return smallTop;
         }
 
-        public int getLargetTop() {
+        public int getLargeTop() {
             return largetTop;
         }
     }
@@ -193,6 +194,8 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
      */
     private void run()
     {
+        double maxDiff = this.parameters.getTolerance();
+
         int iterations = this.parameters.getIterations();
         
         //2 partition of vertixes, keeping intra edges as low as possible for each partition
@@ -201,15 +204,10 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
         Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
         
-        //how much to allocate for each node, at least parameters.smallTop is allocated
-        //on average parameters.largetTop is allocated
-        Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(), 
-                this.parameters.smallTop, this.parameters.largetTop);
-        
         for(int v: g.vertexSet())
         {
             NodeScores scoresMap = new NodeScores(this.parameters.largetTop);
-            scoresMap.put(v, 1d);
+            scoresMap.put(v, 1 -  this.parameters.getDamping());
             double factor = this.parameters.getDamping() / g.outDegreeOf(v);
             for(int successor: successors.get(v))
                 scoresMap.addTo(successor, factor);
@@ -219,10 +217,17 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         
         int[] currentPartition = partitions[0];
         
-        while(iterations > 0)
+        while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
         {
+            //System.out.println(iterations + " " + maxDiff);
+            //reset the highest difference to 0 at the start of the run
+            maxDiff = 0;
+            
             Int2ObjectOpenHashMap nextScores = new Int2ObjectOpenHashMap(g.vertexSet().size());
             
+            double same = 0;
+            double total = 0;
+            double tmp;
             for(int v: currentPartition)
             {
                 //to avoid calculating it for each successor
@@ -232,27 +237,38 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
                 NodeScores currentMap = new NodeScores();
                 currentMap.put(v, 1 - this.parameters.getDamping());
                 
+                total += g.outDegreeOf(v);
+
                 //for each successor of v
                 for(int successor: successors.get(v))
                 {
+                    //for(int ayy: currentPartition)
+                        //if(ayy == successor)
+                            //same++;
                     /**
                      * for each value of personalized pagerank (max L values) saved 
                      * in the map  of a successor increment the personalized pagerank of v
                      * for that key of a fraction of it.
                      */
-                    for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
-                    {
-                        //increment value (or set it if key wasn't mapped)
-                        currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
-                    }
+                    currentMap.add(scores.get(successor), factor);
                 }
                 
                 //keep the top L values only, where L is the allocated budget for the node
-                currentMap.keepTop(budgets.get(v));
-                
+                currentMap.keepTop(this.parameters.largetTop);
                 nextScores.put(v, currentMap);
+                //for(Int2DoubleMap.Entry entry: currentMap.int2DoubleEntrySet())
+                    //entry.setValue(new BigDecimal(entry.getDoubleValue()).setScale(8, BigDecimal.ROUND_HALF_UP).doubleValue());
+                //update maxDiff
+                tmp = 0;
+                    for(int key: currentMap.keySet())
+                        tmp += Math.abs(currentMap.get(key) - scores.get(v).get(key));
+                maxDiff = Math.max(tmp, maxDiff);
+                //for(int key: currentMap.keySet())
+                    //maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
+               
             }
             
+            //System.out.println(same/total + " of internal edges for partition " + (currentPartition == partitions[0]? 0 : 1));
             currentPartition = currentPartition == partitions[0]? partitions[1] : partitions[0];
             for(int node: currentPartition)
                 nextScores.put(node, scores.get(node));
@@ -261,6 +277,7 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
             iterations--;            
         }
         
+        System.out.println("gv3 iterations: " + iterations);
         //keep smalltop only
         for(int v: scores.keySet())
         {
@@ -269,10 +286,8 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         }
     }
     
-    
-    
     /**
-     * Tries to divide the vertices to 2 partitions by two coloring it.
+     * Tries to divide the vertices in 2 partitions by two coloring it.
      * If the graph is not bipartite the two partitions will be approximated as
      * best as possible.
      * @return An array containing 2 jagged arrays of integers, representing two
@@ -310,6 +325,8 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
                         else
                             p1.add(successor);
                     }
+                    //else if(p1.contains(next) && p1.contains(successor) || p2.contains(successor) && p2.contains(next))
+                        //System.out.println("not bipartite");
                 for(int successor: org.jgrapht.Graphs.predecessorListOf(g, next))
                     if(!visited.contains(successor))
                     {
@@ -320,8 +337,11 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
                         else
                             p1.add(successor);
                     }
+                    //else if(p1.contains(next) && p1.contains(successor) || p2.contains(successor) && p2.contains(next))
+                        //System.out.println("not bipartite");
             }
         }
+        
         //convert the 2 sets into arrays of integers
         int[][] res = new int[2][0];
         res[0] = new int[p1.size()];

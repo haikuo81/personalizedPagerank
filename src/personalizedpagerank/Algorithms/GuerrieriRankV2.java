@@ -4,7 +4,11 @@ import personalizedpagerank.Utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Set;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.Budgets;
 import personalizedpagerank.Utility.Graphs;
@@ -75,7 +79,7 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
             return smallTop;
         }
 
-        public int getLargetTop() {
+        public int getLargeTop() {
             return largetTop;
         }
     }
@@ -189,11 +193,13 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
      */
     private void run()
     {
+        double maxDiff = this.parameters.getTolerance();
+        
         int iterations = this.parameters.getIterations();
         
         //how much to allocate for each node, at least parameters.smallTop is allocated
         //on average parameters.largetTop is allocated
-        Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(), 
+        Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(),
                 this.parameters.smallTop, this.parameters.largetTop);
         
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
@@ -213,6 +219,9 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
         
         while(iterations > 0)
         {
+            //reset the highest difference to 0 at the start of the run
+            maxDiff = 0;
+            
             for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
@@ -239,6 +248,13 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
                 }
                 //keep the top L values only, where L is the allocated budget for the node
                 currentMap.keepTop(budgets.get(v));
+                
+                //for(Int2DoubleMap.Entry entry: currentMap.int2DoubleEntrySet())
+                    //entry.setValue(new BigDecimal(entry.getDoubleValue()).setScale(8, BigDecimal.ROUND_HALF_UP).doubleValue());
+                
+                //update maxDiff
+                for(int key: currentMap.keySet())
+                    maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
             }
             // swap scores
             Int2ObjectOpenHashMap<NodeScores> tmp = scores;

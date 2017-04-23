@@ -193,16 +193,16 @@ public class IOclass
             GuerrieriRankV2.GuerrieriParameters p = (GuerrieriRankV2.GuerrieriParameters) parameters;
             content.append(",");
             content.append(p.getSmallTop()).append(",");
-            content.append(p.getLargetTop()).append(",");
-            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+            content.append(p.getLargeTop()).append(",");
+            content.append( ((double)p.getLargeTop()) / p.getSmallTop());
         }
         else if(parameters instanceof GuerrieriRankV3.GuerrieriParameters)
         {
             GuerrieriRankV3.GuerrieriParameters p = (GuerrieriRankV3.GuerrieriParameters) parameters;
             content.append(",");
             content.append(p.getSmallTop()).append(",");
-            content.append(p.getLargetTop()).append(",");
-            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+            content.append(p.getLargeTop()).append(",");
+            content.append( ((double)p.getLargeTop()) / p.getSmallTop());
         }
         else if(parameters instanceof BoundaryRestrictedPageRank.BoundaryRestrictedParameters)
         {
