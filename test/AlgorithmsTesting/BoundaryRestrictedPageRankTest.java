@@ -246,49 +246,4 @@ public class BoundaryRestrictedPageRankTest extends TestCase
                 assertTrue(res.getRank(i, u%100) > res.getRank(i, (u +1)%100));
             }
     }
-    
-    //test that with no tolerance or threshold it orders in the same way as pagerank
-    public void testRandomGraph()
-    {
-        for(int t = 0; t < 500; t++)
-        {
-            int nodes = 100;
-            int edges = 50;
-            Random random = new Random();
-            DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            for(int i = 0; i < nodes; i++)
-                g.addVertex(i);
-            for(int i = 0; i < edges; i++)
-                g.addEdge(random.nextInt(nodes), random.nextInt(nodes));
-
-            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85d, 1e-20, nodes);
-            PersonalizedPageRankAlgorithm b = new BoundaryRestrictedPageRank(g, 100,  100, 0.85d, 1e-20, 1e-20);
-            for(int node : g.vertexSet())
-            {
-                //get maps and sort entries
-                Int2DoubleOpenHashMap map1 = pr.getMap(node);
-                Int2DoubleOpenHashMap map2 = b.getMap(node);
-
-                Int2DoubleMap.Entry[] m1 = map1.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-                Int2DoubleMap.Entry[] m2 = map2.entrySet().toArray(new Int2DoubleMap.Entry[0]);
-
-                //sort entries by values, descending
-                Arrays.sort(m1, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                        -> {
-                    return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                            : e1.getDoubleValue() == e2.getDoubleValue() ?
-                            (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-                });
-                Arrays.sort(m2, (Int2DoubleMap.Entry e1, Int2DoubleMap.Entry e2)
-                        -> {
-                    return e1.getDoubleValue() < e2.getDoubleValue() ? 1
-                            : e1.getDoubleValue() == e2.getDoubleValue() ?
-                            (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;         
-                });
-                for(int i = 0; i < m2.length && m1[i].getDoubleValue() > 0d; i++)
-                    assertEquals(m1[i].getIntKey(), m2[i].getIntKey());
-            }
-        }
-    }
-    
 }

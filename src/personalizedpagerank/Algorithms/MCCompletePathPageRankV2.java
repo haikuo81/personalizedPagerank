@@ -171,6 +171,18 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
             {
                 double factor = this.parameters.getDamping() / g.outDegreeOf(node);
 
+                /*
+                every walk starts from the node, this can't be added later otherwise
+                keepTop might remove a small score for node and then adding 1 to the node
+                will cause the map to have a size of smallTop + 1
+                division by the damping factor is needed to take into consideration
+                the map.multiplyAll(factor), which averages by outdegree and
+                scales down values using the damping factor; since
+                the score for the node itself must not be scaled down the division
+                is performed
+                */
+                map.addTo(node, g.outDegreeOf(node) / this.parameters.getDamping());
+                
                 for(int successor: successors.get(node))
                 {
                     if(scores.get(successor) != null)
@@ -186,20 +198,23 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
                         map.add(tmp);
                     }
                 }
-
+                
                 map.keepTop(this.parameters.smallTop);
 
                 //multiply each value in the map for the factor
                 map.multiplyAll(factor);
             }
-            //each walk begins at node, so the average for the node will at least be 1
-            map.addTo(node, 1d);
+            else//if no outgoing edges just put 1 as value for itself
+                map.addTo(node, 1d);
             scores.put(node, map);
             walksMap.remove(node);
         }
+        
         //trim to avoid wasting space
         for(int v: scores.keySet())
+        {
             scores.get(v).trim();
+        }
     }
   
     /**
