@@ -3,7 +3,7 @@ package UtilityTesting;
 import java.util.Comparator;
 import java.util.Random;
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.Levenstein;
+import benchmarking.Levenstein;
 
 public class LevensteinTest extends TestCase
 {

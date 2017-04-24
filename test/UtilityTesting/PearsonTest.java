@@ -1,7 +1,7 @@
 package UtilityTesting;
 
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.Pearson;
+import benchmarking.Pearson;
 
 public class PearsonTest extends TestCase
 {

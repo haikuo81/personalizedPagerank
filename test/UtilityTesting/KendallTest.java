@@ -1,11 +1,9 @@
 package UtilityTesting;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.stream.Collectors;
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.Kendall;
+import benchmarking.Kendall;
 
 public class KendallTest extends TestCase
 {

@@ -232,7 +232,10 @@ public class WrappedStoringPageRankTest extends TestCase
                 wr.getParameters().getIterations(), 
                 wr.getParameters().getTolerance(), i)).getScores();
             for(int node: map1.keySet())
-                assertEquals(map1.get(node), map2.get(node));
+            {
+                assertEquals(map1.get(node), map2.get(node), 0.0001);
+            }
+            
         }
     }
     

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.Jaccard;
+import benchmarking.Jaccard;
 
 public class JaccardTest extends TestCase
 {

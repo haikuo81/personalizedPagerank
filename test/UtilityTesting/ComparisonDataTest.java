@@ -2,9 +2,9 @@ package UtilityTesting;
 
 import junit.framework.TestCase;
 import static junit.framework.TestCase.assertEquals;
-import personalizedpagerank.Utility.ComparisonData;
+import benchmarking.ComparisonData;
 import personalizedpagerank.Utility.Parameters;
-import personalizedpagerank.Utility.Result;
+import benchmarking.Result;
 
 public class ComparisonDataTest extends TestCase
 {

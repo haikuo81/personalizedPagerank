@@ -1,7 +1,7 @@
 package UtilityTesting;
 
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.NodesComparisonData;
+import benchmarking.NodesComparisonData;
 import personalizedpagerank.Utility.Parameters;
 
 public class NodesComparisonDataTest extends TestCase

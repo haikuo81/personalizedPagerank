@@ -162,4 +162,108 @@ public class NodeScoresTest extends TestCase
         for(int i = 0; i < 100; i++)
             assertEquals(scores1.get(i), i + (i * i * factor));
     }
+    
+    public void testAddToAllToEmpty()
+    {
+        NodeScores scores = new NodeScores();
+        scores.addToAll(0d);
+        assertEquals(scores.size(), 0);
+        scores.addToAll(Double.MAX_VALUE);
+        assertEquals(scores.size(), 0);
+        assertEquals(scores.get(1), 0d);
+    }
+    
+    public void testAdd0ToAll()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.addToAll(0);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), (double) i);
+    }
+    
+    public void testAddToAllPositive()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.addToAll(0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i + 0.25);
+        scores.clear();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , -i);
+        scores.addToAll(0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), -i + 0.25);
+    }
+    
+    public void testAddToAllNegative()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.addToAll(- 0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i - 0.25);
+        scores.clear();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , -i);
+        scores.addToAll(- 0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), - i - 0.25);
+    }
+    
+    public void testMultiplyToAllToEmpty()
+    {
+        NodeScores scores = new NodeScores();
+        scores.multiplyAll(0d);
+        assertEquals(scores.size(), 0);
+        scores.multiplyAll(Double.MAX_VALUE);
+        assertEquals(scores.size(), 0);
+        assertEquals(scores.get(1), 0d);
+    }
+    
+    public void testMultiply0ToAll()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.multiplyAll(0);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), 0d);
+    }
+    
+    public void testMultiplyToAllPositive()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.multiplyAll(0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i * 0.25);
+        scores.clear();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , -i);
+        scores.multiplyAll(0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), -i * 0.25);
+    }
+    
+    public void testMultiplyToAllNegative()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , i);
+        scores.multiplyAll(- 0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), i *  (- 0.25));
+        scores.clear();
+        for(int i = 0; i < 100; i++)
+            scores.put(i , -i);
+        scores.multiplyAll(- 0.25);
+        for(int i = 0; i < 100; i++)
+            assertEquals(scores.get(i), - i * (- 0.25));
+    }
 }

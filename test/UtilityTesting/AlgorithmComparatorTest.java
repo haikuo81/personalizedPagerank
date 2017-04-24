@@ -12,9 +12,9 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.PageRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
-import personalizedpagerank.Utility.ComparisonData;
-import personalizedpagerank.Utility.AlgorithmComparator;
-import personalizedpagerank.Utility.NodesComparisonData;
+import benchmarking.ComparisonData;
+import benchmarking.AlgorithmComparator;
+import benchmarking.NodesComparisonData;
 
 
 
