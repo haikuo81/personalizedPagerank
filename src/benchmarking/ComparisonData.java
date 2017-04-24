@@ -1,6 +1,7 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
 import java.util.Objects;
+import personalizedpagerank.Utility.Parameters;
 
 /**
  * Class which stores the results of the comparison and the running

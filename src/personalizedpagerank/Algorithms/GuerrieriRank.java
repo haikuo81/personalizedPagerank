@@ -1,7 +1,6 @@
 package personalizedpagerank.Algorithms;
 
 import personalizedpagerank.Utility.Parameters;
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -69,7 +68,7 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             return smallTop;
         }
 
-        public int getLargetTop() {
+        public int getLargeTop() {
             return largetTop;
         }
     }
@@ -180,7 +179,6 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
      */
     private void run()
     {
-        int iterations = this.parameters.getIterations();
         double maxDiff = this.parameters.getTolerance();
         
         //init scores
@@ -191,14 +189,13 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
             scoresMap.put(v, 1d);
             scores.put(v, scoresMap);
 
-            NodeScores nextScoresMap = new NodeScores(this.parameters.largetTop);
-            nextScores.put(v, nextScoresMap);
+            nextScores.put(v, new NodeScores());
         }
         
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
         Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
         
-        while(iterations > 0 && maxDiff >= this.parameters.getTolerance())
+        for(int i = 0; i < parameters.getIterations() && maxDiff >= this.parameters.getTolerance(); i++)
         {
             //reset the highest difference to 0 at the start of the run
             maxDiff = 0;
@@ -220,32 +217,26 @@ public class GuerrieriRank implements PersonalizedPageRankAlgorithm
                      * in the map  of a successor increment the personalized pagerank of v
                      * for that key of a fraction of it.
                      */
-                    for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
-                    {
-                        //increment value (or set if key wasn't mapped)
-                        currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
-                    }
+                    currentMap.add(scores.get(successor), factor);
                 }
-                
                 //keep the top L values only
                 currentMap.keepTop(this.parameters.largetTop);
                 
-                //update maxDiff
-                for(int key: currentMap.keySet())
-                    maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
+                //check if the norm1 of the difference is greater than the maxDiff
+                maxDiff = Math.max(currentMap.norm1(scores.get(v)), maxDiff);
             }
+            
             // swap scores
             Int2ObjectOpenHashMap<NodeScores> tmp = scores;
             scores = nextScores;
             nextScores = tmp;
-            iterations--;            
         }
-        
-        //keep smalltop only
+        //trim to avoid wasting space
         for(int v: scores.keySet())
         {
             scores.get(v).keepTop(this.parameters.smallTop);
             scores.get(v).trim();
         }
     }
+    
 }

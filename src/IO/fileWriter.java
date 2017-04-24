@@ -1,5 +1,7 @@
-package personalizedpagerank.Utility;
+package IO;
 
+import benchmarking.NodesComparisonData;
+import benchmarking.ComparisonData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -8,10 +10,11 @@ import personalizedpagerank.Algorithms.GuerrieriRank;
 import personalizedpagerank.Algorithms.GuerrieriRankV2;
 import personalizedpagerank.Algorithms.GuerrieriRankV3;
 import personalizedpagerank.Algorithms.MCCompletePathPageRank;
+import personalizedpagerank.Utility.Parameters;
 
-public class IOclass 
+public class fileWriter 
 {
-    private IOclass(){}
+    private fileWriter(){}
     
     /**
      * Writes the comparison results in a csv file.
@@ -185,8 +188,8 @@ public class IOclass
             GuerrieriRank.GuerrieriParameters p = (GuerrieriRank.GuerrieriParameters) parameters;
             content.append(",");
             content.append(p.getSmallTop()).append(",");
-            content.append(p.getLargetTop()).append(",");
-            content.append( ((double)p.getLargetTop()) / p.getSmallTop());
+            content.append(p.getLargeTop()).append(",");
+            content.append( ((double)p.getLargeTop()) / p.getSmallTop());
         }
         else if(parameters instanceof GuerrieriRankV2.GuerrieriParameters)
         {

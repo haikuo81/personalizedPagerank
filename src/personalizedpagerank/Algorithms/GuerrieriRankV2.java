@@ -4,11 +4,7 @@ import personalizedpagerank.Utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Set;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.Budgets;
 import personalizedpagerank.Utility.Graphs;
@@ -195,8 +191,6 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
     {
         double maxDiff = this.parameters.getTolerance();
         
-        int iterations = this.parameters.getIterations();
-        
         //how much to allocate for each node, at least parameters.smallTop is allocated
         //on average parameters.largetTop is allocated
         Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(),
@@ -213,11 +207,10 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
             scoresMap.put(v, 1d);
             scores.put(v, scoresMap);
 
-            NodeScores nextScoresMap = new NodeScores(this.parameters.largetTop);
-            nextScores.put(v, nextScoresMap);
+            nextScores.put(v, new NodeScores());
         }
         
-        while(iterations > 0)
+        for(int i = 0; i < parameters.getIterations() && maxDiff >= this.parameters.getTolerance(); i++)
         {
             //reset the highest difference to 0 at the start of the run
             maxDiff = 0;
@@ -242,28 +235,24 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
                      */
                     for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
                     {
-                        //increment value (or set if key wasn't mapped)
+                        //increment value (or set it if key wasn't mapped)
                         currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
                     }
                 }
+                
                 //keep the top L values only, where L is the allocated budget for the node
                 currentMap.keepTop(budgets.get(v));
                 
-                //for(Int2DoubleMap.Entry entry: currentMap.int2DoubleEntrySet())
-                    //entry.setValue(new BigDecimal(entry.getDoubleValue()).setScale(8, BigDecimal.ROUND_HALF_UP).doubleValue());
-                
-                //update maxDiff
-                for(int key: currentMap.keySet())
-                    maxDiff = Math.max(maxDiff, Math.abs(currentMap.get(key) - scores.get(v).get(key)));
+                //check if the norm1 of the difference is greater than the maxDiff
+                maxDiff = Math.max(currentMap.norm1(scores.get(v)), maxDiff);
             }
+            
             // swap scores
             Int2ObjectOpenHashMap<NodeScores> tmp = scores;
             scores = nextScores;
             nextScores = tmp;
-            iterations--;            
         }
-        
-        //keep smalltop only
+        //trim to avoid wasting space
         for(int v: scores.keySet())
         {
             scores.get(v).keepTop(this.parameters.smallTop);

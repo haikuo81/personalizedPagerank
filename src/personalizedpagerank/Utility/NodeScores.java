@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package personalizedpagerank.Utility;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.Map;
 
 public class NodeScores extends Int2DoubleOpenHashMap 
@@ -48,15 +41,9 @@ public class NodeScores extends Int2DoubleOpenHashMap
             });
             /*
             for(int i = topL; i < array.length; i++)
-                array[i].setValue(-1);
-            ObjectIterator<Entry> it = this.int2DoubleEntrySet().fastIterator();
-            while(it.hasNext())
-            {
-                if(it.next().getDoubleValue() == -1)
-                    it.remove(); 
-            }
+                array[i].setValue(-1d);
+            Iterator
             */
-            
             //if too many to remove just clear and add the first topL
             //else just remove the non topL
             if(array.length > topL * 2)
@@ -77,8 +64,6 @@ public class NodeScores extends Int2DoubleOpenHashMap
                 for(int i = 0; i < toRemove.length; i++)
                     this.remove(toRemove[i]);
             }
-            
-           
         }
     }
     
@@ -106,5 +91,44 @@ public class NodeScores extends Int2DoubleOpenHashMap
     {
         for(Int2DoubleMap.Entry entry: from.int2DoubleEntrySet())
             this.addTo(entry.getIntKey(), entry.getDoubleValue() * factor);
+    }
+    
+    /**
+     * Add a value to all the values in the map.
+     * @param increment Value used to increment all other values.
+     */
+    public void addToAll(double increment)
+    {
+        for(int i = 0; i < this.value.length; i++)
+            this.value[i] += increment;
+    }
+  
+    /**
+     * Multiply all values in the map for a multiplier.
+     * @param multiplier Value used to multiply all other values.
+     */
+    public void multiplyAll(double multiplier)
+    {
+        for(int i = 0; i < this.value.length; i++)
+            this.value[i] *= multiplier;
+    }
+    
+    /**
+     * Calculates the norm1 between this map and another one, if a value isn't part
+     * of a map while it's part of the other it's value in the first map is the
+     * defeaultReturnValue of that map (by default 0).
+     * @param other 
+     * @return 
+     */
+    public double norm1(NodeScores other)
+    {
+        double res = 0;
+        for(int k: key)
+            res += Math.abs(get(k) - other.get(k));
+        //need to check for keys that aren't part of this map
+        for(int k: other.key)
+            if(!this.containsKey(k))
+                res += other.get(k);
+        return res;
     }
 }

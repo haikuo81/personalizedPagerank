@@ -4,10 +4,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Utility.NodeScores;
 import personalizedpagerank.Utility.Parameters;
@@ -67,6 +65,7 @@ public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
                 */
                 NodeScores map = PersonalizedPageRank.getScores(g, dampingFactor, iterations, tolerance, nodes.get(i));
                 map.keepTop(smallTop);
+                map.trim();
                 scores.put(nodes.get(i).intValue(), map);
             }
     }

@@ -153,6 +153,14 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
         Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
         
+        /*
+        a part of the walks is wasted because a teleport happens before traversing
+        the first edge, so we account for those walks here (lowering the total walks)
+        but make it so that the first edge is always traversed
+        */
+        int walks = (int) (this.parameters.getIterations() * this.parameters.getDamping());
+        double teleported;
+        
         for(int node: g.vertexSet())
         {
             NodeScores map = new NodeScores();
@@ -160,20 +168,16 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
             //each walk begins at node, so scores(node, node) will at least have a
             //value equal to the number of runs
             map.put(node, this.parameters.getIterations());
-
             //do a number of random walks equal to iterations
-            for(int i = 0 ; i < this.parameters.getIterations(); i++)
+            for(int i = 0 ; i < walks; i++)
             {
                 int currentNode = node;
-
-                //decide if the walk actually starts or if a teleport happens
-                double teleported = random.nextDouble();
 
                 /*
                 random walk which stops if a teleport happens (teleported > damping)
                 or if it gets into a node without out going edges
                 */
-                while(teleported <= this.parameters.getDamping())
+                do
                 {
                     //get successors of the current node
                     int[] next = successors.get(currentNode);
@@ -189,10 +193,13 @@ public class MCCompletePathPageRank implements PersonalizedPageRankAlgorithm
                         //decide if the walk ends here or not
                         teleported = random.nextDouble();
                     }
-                }
+                }while(teleported <= this.parameters.getDamping());
             }
             map.keepTop(this.parameters.smallTop);
             scores.put(node, map);
         }
+        //trim to avoid wasting space
+        for(int v: scores.keySet())
+            scores.get(v).trim();
     }
 }
