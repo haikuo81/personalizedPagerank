@@ -1,12 +1,10 @@
 package personalizedpagerank.Algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.jgrapht.DirectedGraph;
@@ -169,34 +167,39 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
         for(int node: order)
         {
             NodeScores map = new NodeScores();
-            
-            int walks = (int) ((this.parameters.getDamping() * this.parameters.getIterations()) / g.outDegreeOf(node));
-            
-            map.addTo(node, this.parameters.getIterations());
-            
-            for(int successor: successors.get(node))
+            if(g.outDegreeOf(node) > 0)
             {
-                if(scores.get(successor) != null)
-                    map.add(scores.get(successor), walks);
-                else
+                double factor = this.parameters.getDamping() / g.outDegreeOf(node);
+
+                for(int successor: successors.get(node))
                 {
-                    if(walksMap.get(successor) == null)
-                        walksMap.put(successor, this.doWalksForNode(successors, indexes, random, successor));
-                    map.add(walksMap.get(successor), walks);
+                    if(scores.get(successor) != null)
+                        map.add(scores.get(successor));
+                    else
+                    {
+                        NodeScores tmp = walksMap.get(successor);
+                        if(tmp == null)
+                        {
+                            tmp = this.doWalksForNode(successors, indexes, random, successor);
+                            walksMap.put(successor, tmp);
+                        }
+                        map.add(tmp);
+                    }
                 }
-                
+
+                map.keepTop(this.parameters.smallTop);
+
+                //multiply each value in the map for the factor
+                map.multiplyAll(factor);
             }
-            
-            map.keepTop(this.parameters.smallTop);
-            
-            for(Int2DoubleOpenHashMap.Entry entry: map.int2DoubleEntrySet())
-                entry.setValue(entry.getDoubleValue()/this.parameters.getIterations());
-            
-            if(node == 0)
-                System.out.println(map.get(node));
+            //each walk begins at node, so the average for the node will at least be 1
+            map.addTo(node, 1d);
             scores.put(node, map);
             walksMap.remove(node);
         }
+        //trim to avoid wasting space
+        for(int v: scores.keySet())
+            scores.get(v).trim();
     }
   
     /**
@@ -319,22 +322,31 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
         NodeScores map = new NodeScores(this.parameters.smallTop);
         if(successors.get(node).length > 0)
         {
-            double teleported;
-            int currentNode;
-            int[] next;
-            int index;
+            double teleported;//tells if a teleport happens
+            int currentNode;//keeps the current node
+            int[] next;//successors of the current node
+            int index;//index telling which successor to take when going from 
+            //the currentNode to a successor
+            
+            /*
+            a part of the walks is wasted because a teleport happens before traversing
+            the first edge, so we account for those walks here (lowering the total walks)
+            but make it so that the first edge is always traversed
+            */
+            int walks = (int) (this.parameters.getIterations() * this.parameters.getDamping());
+            
             //each walk will surely start from the origin node
             map.addTo(node, this.parameters.getIterations());
             
-            for(int i = 0 ; i < this.parameters.getIterations(); i++)
+            for(int i = 0 ; i < walks; i++)
             {
                 currentNode = node;
-                teleported = random.nextDouble();
+                
                 /*
                 random walk which stops if a teleport happens (teleported > damping)
                 or if it gets into a node without out going edges
                 */
-                while(teleported <= this.parameters.getDamping())
+                do
                 {
                     //get successors of the current node
                     next = successors.get(currentNode);
@@ -355,7 +367,7 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
                         //decide if the walk ends here or not
                         teleported = random.nextDouble();
                     }
-                }
+                }while(teleported <= this.parameters.getDamping());
             }
             
             //divide by the number of walks done to obtain the mean

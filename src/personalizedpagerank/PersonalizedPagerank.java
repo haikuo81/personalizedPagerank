@@ -29,8 +29,8 @@ import personalizedpagerank.Algorithms.MCCompletePathPageRank;
 import personalizedpagerank.Algorithms.MCCompletePathPageRankV2;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
 import personalizedpagerank.Algorithms.WrappedStoringPageRank;
-import personalizedpagerank.Utility.AlgorithmComparator;
-import personalizedpagerank.Utility.ComparisonData;
+import benchmarking.AlgorithmComparator;
+import benchmarking.ComparisonData;
 import personalizedpagerank.Utility.NodeScores;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
@@ -43,7 +43,7 @@ import personalizedpagerank.Utility.NodeScores;
         {
             Random random = new Random();
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-            importBipartiteUndirectedFromCsv(g, "wikiElec.csv");
+            importBipartiteUndirectedFromCsv(g, "collab.csv");
             System.out.println("finished importing ");
             
             
@@ -58,11 +58,11 @@ import personalizedpagerank.Utility.NodeScores;
                        //+ " with " + ((double)g.edgeSet().size())/g.vertexSet().size() + " e/v");
            
                 long time = System.currentTimeMillis();
-                WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 50, 100, 0.85, 0.001, 400);
+                WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 50, 100, 0.85, 0.0001, 800);
                 time = System.currentTimeMillis() - time;
                 System.out.println("done pr in " + time);
                 int[] ks = {50};
-                
+                /*
                 System.gc();
                 time = System.currentTimeMillis();
                 mcrank4 = new GuerrieriRank(g, 50, 800, 25, 0.85, 0.001);
@@ -74,6 +74,7 @@ import personalizedpagerank.Utility.NodeScores;
                 System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
                 System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
                 System.out.println(data4[0].getKendall().getAverage() + " kendall average");
+                
                 //grankV3
                 System.gc();
                 time = System.currentTimeMillis();
@@ -86,12 +87,12 @@ import personalizedpagerank.Utility.NodeScores;
                 System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
                 System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
                 System.out.println(data4[0].getKendall().getAverage() + " kendall average");
-               
-                /*
+               */
+               /*
                 //MC<
                 //
                 time = System.currentTimeMillis();
-                mcrank4 = new MCCompletePathPageRank(g, 50, 4000, 0.85);
+                mcrank4 = new MCCompletePathPageRank(g, 50, 3400, 0.85);
                 time = System.currentTimeMillis() - time;
                 System.out.println("done mc in " + time);
                 
@@ -100,15 +101,15 @@ import personalizedpagerank.Utility.NodeScores;
                 System.out.println(data4[0].getJaccard().getMin());
                 System.out.println(data4[0].getJaccard().getStd());
                 System.out.println(data4[0].getKendall().getAverage());
-                
-               */
-                
+                */
+               
+               
                 //MCv2
                 mcrank4 = null;
                 System.gc();
                 System.out.println("");
                 time = System.currentTimeMillis();
-                mcrank4 = new MCCompletePathPageRankV2(g, 8000, 12000, 0.85);
+                mcrank4 = new MCCompletePathPageRankV2(g, 6000, 2000, 0.85);
                 time = System.currentTimeMillis() - time;
                 System.out.println("done MCv2 in " + time + " ms");
                 

@@ -52,22 +52,22 @@ public class PersonalizedPageRank
     
     private static NodeScores run(DirectedGraph<Integer, DefaultEdge> g, double dampingFactor, int maxIterations, double tolerance, int origin)
     {
+        //successors for each node, to avoid calling Graphs.successorListOf which is slow
+        Int2ObjectOpenHashMap<int[]> successors = personalizedpagerank.Utility.Graphs.getSuccessors(g);
+        
+        double maxDiff = tolerance;
+
         NodeScores scores = new NodeScores();
         //init every non origin score to 0 and origin to 1
         for (int node: g.vertexSet()) 
             scores.put(node, 0d);
         scores.put(origin, 1d);
         
-        //run PageRank
         NodeScores nextScores = new NodeScores();
-        double maxChange = tolerance;
         
-        //successors for each node, to avoid calling Graphs.successorListOf which is slow
-        Int2ObjectOpenHashMap<int[]> successors = personalizedpagerank.Utility.Graphs.getSuccessors(g);
-        
-        while (maxIterations > 0 && maxChange >= tolerance) 
+        for(int i = 0; i < maxIterations && maxDiff >= tolerance; i++)
         {
-            maxChange = 0d;
+            maxDiff = 0;
             nextScores.clear();
             nextScores.addTo(origin, 1 - dampingFactor);
 
@@ -82,20 +82,16 @@ public class PersonalizedPageRank
                     nextScores.addTo(successor, value * factor);
             }
             
-            //check the highest change in scores
-            for(Int2DoubleOpenHashMap.Entry entry: nextScores.int2DoubleEntrySet())
-            {
-                maxChange = Math.max(maxChange, Math.abs(entry.getDoubleValue() -
-                        scores.get(entry.getIntKey())));
-            }
+            //check if the norm1 of the difference is greater than the maxDiff
+                maxDiff = Math.max(nextScores.norm1(scores), maxDiff);
             
             //swap scores
             NodeScores tmp = scores;
             scores = nextScores;
             nextScores = tmp;
-
-            maxIterations--;
         }
+        //trim to avoid wasting space
+        scores.trim();
         return scores;
     }
 }

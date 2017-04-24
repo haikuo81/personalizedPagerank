@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package personalizedpagerank.Utility;
 
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -81,44 +75,4 @@ public final class Budgets
         }
         return budgets;    
     }
-    
-    public static Int2IntOpenHashMap mapBasedBudget(DirectedGraph<Integer, DefaultEdge> g, Int2IntOpenHashMap input, int min, int average)
-    {
-        if(min < 0)
-            throw new IllegalArgumentException("Min budget must not be negative");
-        if(min > average)
-            throw new IllegalArgumentException("Min greater than average");
-        Int2IntOpenHashMap budgets = new Int2IntOpenHashMap(g.vertexSet().size());
-        
-        //this is the total budget that can be distributed freely, after accounting
-        //for the min budget
-        double spendible = (average - min) * input.size();
-        
-        //total value for each input node, will be used to decide the share of 
-        //"spendible" each node will receive
-        double total = 0;
-        for(int node: input.keySet())
-        {
-            //if a node outdegree is 0 it will receive 1 as its budget
-            //if a node indegree is 0 it will receive "min" as its budget
-            //if a node indegree and outdegree are != 0 it will receive a share
-            //of spendible + "min" a its budget
-            total += input.get(node);
-        }
-        
-        //if no edges or each node either has no indegree or no outdegree just
-        //share equally the spendible
-        if(total == 0)
-        {
-            for(int node: input.keySet())
-                budgets.put(node, average);
-        }
-        else
-        {
-            for(int node: input.keySet())
-                budgets.put(node, (int) (((g.outDegreeOf(node) == 0)? 1 : min) + spendible * input.get(node)/total));
-        }
-        return budgets;    
-    }
-
 }
