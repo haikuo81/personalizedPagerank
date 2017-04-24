@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
 /**
  * Class which stores results from comparisons in ResultComparator.

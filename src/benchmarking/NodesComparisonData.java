@@ -1,7 +1,8 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
 import java.util.Arrays;
 import java.util.Objects;
+import personalizedpagerank.Utility.Parameters;
 
 /**
  * Class to hold comparison data regarding the origin nodes of personalized

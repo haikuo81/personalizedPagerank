@@ -1,5 +1,7 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
+import benchmarking.Kendall;
+import benchmarking.Jaccard;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -13,6 +15,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import personalizedpagerank.Algorithms.PageRank;
 import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
+import personalizedpagerank.Utility.PartialSorter;
 
 //class to do result comparison of the different algorithms, it assumes that the passed objects refer to the same graph
 public class AlgorithmComparator

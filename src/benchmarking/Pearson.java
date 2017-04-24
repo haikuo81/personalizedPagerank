@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
 /**
  * Class which calculates the pearson correlation coefficient between 2 variables,

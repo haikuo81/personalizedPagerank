@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package benchmarking;
 
 import java.util.HashSet;
 import java.util.Set;
