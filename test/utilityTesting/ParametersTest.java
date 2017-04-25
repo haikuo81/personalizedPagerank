@@ -1,7 +1,7 @@
-package UtilityTesting;
+package utilityTesting;
 
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.Parameters;
+import algorithms.PersonalizedPageRankAlgorithm.Parameters;
 
 public class ParametersTest extends TestCase
 {

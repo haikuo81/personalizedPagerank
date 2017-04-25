@@ -1,10 +1,10 @@
-package UtilityTesting;
+package utilityTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.util.Random;
 import junit.framework.TestCase;
-import personalizedpagerank.Utility.PartialSorter;
+import utility.PartialSorter;
 
 public class SorterTest extends TestCase
 {

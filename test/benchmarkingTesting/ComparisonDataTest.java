@@ -1,9 +1,9 @@
-package UtilityTesting;
+package benchmarkingTesting;
 
 import junit.framework.TestCase;
 import static junit.framework.TestCase.assertEquals;
 import benchmarking.ComparisonData;
-import personalizedpagerank.Utility.Parameters;
+import algorithms.PersonalizedPageRankAlgorithm.Parameters;
 import benchmarking.Result;
 
 public class ComparisonDataTest extends TestCase

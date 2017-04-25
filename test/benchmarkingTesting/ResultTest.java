@@ -1,4 +1,4 @@
-package UtilityTesting;
+package benchmarkingTesting;
 
 import junit.framework.TestCase;
 import static junit.framework.TestCase.assertEquals;

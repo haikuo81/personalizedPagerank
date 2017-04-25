@@ -1,4 +1,4 @@
-package AlgorithmsTesting;
+package algorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -11,10 +11,10 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import personalizedpagerank.Algorithms.PageRank;
-import personalizedpagerank.Algorithms.WrappedStoringPageRank;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Utility.NodeScores;
+import algorithms.PageRank;
+import algorithms.WrappedStoringPageRank;
+import algorithms.PersonalizedPageRankAlgorithm;
+import utility.NodeScores;
 
 public class WrappedStoringPageRankTest extends TestCase
 {

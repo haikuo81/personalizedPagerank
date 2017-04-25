@@ -1,4 +1,4 @@
-package UtilityTesting;
+package benchmarkingTesting;
 
 import java.util.Comparator;
 import java.util.Random;

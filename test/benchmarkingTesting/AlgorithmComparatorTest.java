@@ -1,4 +1,4 @@
-package UtilityTesting;
+package benchmarkingTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import java.util.Map;
@@ -8,10 +8,10 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.PageRank;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedStoringPageRank;
+import algorithms.GuerrieriRank;
+import algorithms.PageRank;
+import algorithms.PersonalizedPageRankAlgorithm;
+import algorithms.WrappedStoringPageRank;
 import benchmarking.ComparisonData;
 import benchmarking.AlgorithmComparator;
 import benchmarking.NodesComparisonData;

@@ -1,20 +1,20 @@
-package AlgorithmsTesting;
+package algorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.graph.*;
-import personalizedpagerank.Algorithms.*;
+import algorithms.*;
 
 import junit.framework.*;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import org.jgrapht.DirectedGraph;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Utility.NodeScores;
+import algorithms.PersonalizedPageRankAlgorithm;
+import utility.NodeScores;
 
 
-public class GuerrieriRankV2Test extends TestCase
+public class GuerrieriRankV3Test extends TestCase
 {
     public void testBadConstructorsParameters()
     {
@@ -23,7 +23,7 @@ public class GuerrieriRankV2Test extends TestCase
         //smallTop = 0
         try 
         {
-            new GuerrieriRankV2(g, 0, 10, 100, 0.8, 0.001);
+            new GuerrieriRankV3(g, 0, 10, 100, 0.8, 0.001);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -31,7 +31,7 @@ public class GuerrieriRankV2Test extends TestCase
         //smallTop > largeTop
         try 
         {
-            new GuerrieriRankV2(g, 10, 5, 100, 0.8, 0.001);
+            new GuerrieriRankV3(g, 10, 5, 100, 0.8, 0.001);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -39,7 +39,7 @@ public class GuerrieriRankV2Test extends TestCase
         //0 iterations
         try 
         {
-            new GuerrieriRankV2(g, 10, 5, 0, 0.8, 0.001);
+            new GuerrieriRankV3(g, 10, 5, 0, 0.8, 0.001);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -47,7 +47,7 @@ public class GuerrieriRankV2Test extends TestCase
         //negative damping factor
         try 
         {
-            new GuerrieriRankV2(g, 10, 5, 0, -0.1, 0.001);
+            new GuerrieriRankV3(g, 10, 5, 0, -0.1, 0.001);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -55,7 +55,7 @@ public class GuerrieriRankV2Test extends TestCase
         //damping factor over 1
         try 
         {
-            new GuerrieriRankV2(g, 10, 5, 0, 1.1, 0.001);
+            new GuerrieriRankV3(g, 10, 5, 0, 1.1, 0.001);
             fail("this line shouldn't be reached");
         } 
         catch (IllegalArgumentException e) {}
@@ -68,7 +68,7 @@ public class GuerrieriRankV2Test extends TestCase
         
         g.addVertex(1);
         
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 30, 100, 0.85, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 30, 100, 0.85, 0.0001);
         
         //node doesn't exist
         try 
@@ -109,7 +109,7 @@ public class GuerrieriRankV2Test extends TestCase
     {
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 30, 100, 0.85, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 30, 100, 0.85, 0.0001);
         
         assertEquals(res.getMaps().size(), 0, 0);
     }
@@ -119,7 +119,7 @@ public class GuerrieriRankV2Test extends TestCase
         DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
         g.addVertex(1);
         g.addVertex(2);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 3, 3, 100, 0.85, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 3, 3, 100, 0.85, 0.0001);
         assertEquals(res.getRank(1, 2), 0d, 0d);
         assertEquals(res.getRank(2, 1), 0d, 0d);
         assertEquals(res.getMap(1).get(2), 0d, 0d);
@@ -138,7 +138,7 @@ public class GuerrieriRankV2Test extends TestCase
             g.addEdge((int)(Math.random() * 30), (int)(Math.random() * 30));
         for(int i = 1; i < 30; i++)
         {
-            res = new GuerrieriRankV2(g, i, i, 100, 0.85, 0.0001);
+            res = new GuerrieriRankV3(g, i, i, 100, 0.85, 0.0001);
             for(int u = 0; u < 30; u++)
                 assertTrue(res.getMap(u).size() <= i);
         }
@@ -149,7 +149,7 @@ public class GuerrieriRankV2Test extends TestCase
         
         //1 node no edges
         g.addVertex(1);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 10, 10, 0.5, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 10, 10, 0.5, 0.0001);
         assertEquals(res.getMaps().size(), 1, 0);
         assertEquals(res.getMap(1).size(), 1, 0);
         //expected is not 1 because as of now nodes without edges don't always teleport
@@ -157,10 +157,11 @@ public class GuerrieriRankV2Test extends TestCase
         
         //1 node 1 edge to himself
         g.addEdge(1, 1);
-        res = new GuerrieriRankV2(g, 10, 30, 100, 0.85, 0.0001);
+        res = new GuerrieriRankV3(g, 10, 30, 100, 0.85, 0.0001);
         assertEquals(res.getMaps().size(), 1, 0);
         assertEquals(res.getMap(1).size(), 1, 0);
-        assertEquals((Double) res.getRank(1, 1), 1, 0);
+        //0.2775 because of start score of (1-damping) + score from successors(himself) * damping
+        assertEquals((Double) res.getRank(1, 1), 1, 0.001);
     }
     
     public void testTwoNodesGraph()
@@ -171,7 +172,7 @@ public class GuerrieriRankV2Test extends TestCase
         g.addVertex(2);
         
         //no edges first
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 
                 100, 100, 0.85, 0.0001);
         
         assertEquals(res.getRank(1, 2), 0, 0);
@@ -181,7 +182,7 @@ public class GuerrieriRankV2Test extends TestCase
         g.addEdge(1, 2);
         g.addEdge(2, 1);
         
-        res = new GuerrieriRankV2(g, 10, 10000, 100, 0.85, 0.0001);
+        res = new GuerrieriRankV3(g, 10, 10000, 100, 0.85, 0.0001);
         assertEquals(res.getMaps().size(), 2, 0);
         assertEquals(res.getMap(1).size(), 2, 0);
         assertEquals(res.getMap(2).size(), 2, 0);
@@ -204,7 +205,7 @@ public class GuerrieriRankV2Test extends TestCase
         g.addEdge(4, 5);
         g.addEdge(5, 0);
         
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 100, 100, 0.85, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 100, 100, 0.85, 0.0001);
 
         //for each node check that the PPR of a node after is always lower
         for(int i = 0; i <= 5; i++)
@@ -222,20 +223,18 @@ public class GuerrieriRankV2Test extends TestCase
         for(int i = 1; i < 6; i++)
             g.addEdge(i, 0);
        
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, 10, 10, 10, 0.8, 0.0001);
-
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, 10, 10, 10, 0.8, 0.0001);
         assertEquals(res.getRank(0, 0), 0.2, 0.01);
+        
         for(int i = 1; i < 6; i++)
         {
             assertEquals(res.getRank(0, i), 0d, 0d);
-            //0.2 because 0 has no edges, 0.2 * 0.8 because dampingfactor is taken into consideration
-            //when doing contribution from one node to another
-            assertEquals(res.getRank(i, 0), 0.2 * 0.8, 0.01);
+            assertEquals(res.getRank(i, 0),  0.8, 0.01);
         }
 
         //connect the center to itself
         g.addEdge(0, 0);
-        res = new GuerrieriRankV2(g, 10, 10, 10, 0.8, 0.0001);
+        res = new GuerrieriRankV3(g, 10, 10, 400, 0.8, 0.0001);
         
         assertEquals(res.getRank(0, 0), 1, 0.01);
         for(int i = 1; i < 6; i++)
@@ -255,7 +254,7 @@ public class GuerrieriRankV2Test extends TestCase
         for(int i = 0; i < 99; i++)
             g.addEdge(i, i + 1);
         g.addEdge(99, 0);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, K, 10, 100, 0.8, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, K, 10, 100, 0.8, 0.0001);
         
         for(int i = 0; i < 100; i++)
             assertTrue( res.getMap(i).size() == K);
@@ -282,7 +281,7 @@ public class GuerrieriRankV2Test extends TestCase
         for(int i = 0; i < 99; i++)
             g.addEdge(i, i + 1);
         g.addEdge(99, 0);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, K, 50, 100, 0.8, 0.0001);
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, K, 50, 100, 0.8, 0.0001);
         
         for(int i = 0; i < 100; i++)
             assertTrue( res.getMap(i).size() == K);
@@ -309,7 +308,7 @@ public class GuerrieriRankV2Test extends TestCase
         for(int i = 0; i < 99; i++)
             g.addEdge(i, i + 1);
         g.addEdge(99, 0);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, K, g.vertexSet().size()
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, K, g.vertexSet().size()
                 , 100, 0.8, 0.0001);
         
         for(int i = 0; i < 100; i++)
@@ -337,7 +336,7 @@ public class GuerrieriRankV2Test extends TestCase
         for(int i = 0; i < 99; i++)
             g.addEdge(i, i + 1);
         g.addEdge(99, 0);
-        PersonalizedPageRankAlgorithm res = new GuerrieriRankV2(g, K, g.vertexSet().size() * 2
+        PersonalizedPageRankAlgorithm res = new GuerrieriRankV3(g, K, g.vertexSet().size() * 2
                 , 100, 0.8, 0.0001);
         g.addVertex(1000);
         for(int i = 0; i < 100; i++)

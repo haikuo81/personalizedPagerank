@@ -4,13 +4,13 @@
  * and open the template in the editor.
  */
 
-package UtilityTesting;
+package utilityTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import junit.framework.TestCase;
 import static junit.framework.TestCase.assertEquals;
-import personalizedpagerank.Utility.NodeScores;
+import utility.NodeScores;
 
 public class NodeScoresTest extends TestCase
 {

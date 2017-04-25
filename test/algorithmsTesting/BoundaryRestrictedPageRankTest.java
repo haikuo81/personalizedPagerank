@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package AlgorithmsTesting;
+package algorithmsTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
@@ -19,10 +19,10 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedStoringPageRank;
-import personalizedpagerank.Utility.NodeScores;
+import algorithms.BoundaryRestrictedPageRank;
+import algorithms.PersonalizedPageRankAlgorithm;
+import algorithms.WrappedStoringPageRank;
+import utility.NodeScores;
 
 public class BoundaryRestrictedPageRankTest extends TestCase
 {

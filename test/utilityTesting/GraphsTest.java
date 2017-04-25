@@ -1,11 +1,11 @@
-package UtilityTesting;
+package utilityTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import personalizedpagerank.Utility.Graphs;
+import utility.Graphs;
 
 public class GraphsTest extends TestCase 
 {

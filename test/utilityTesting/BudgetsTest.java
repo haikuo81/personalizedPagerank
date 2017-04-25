@@ -4,14 +4,14 @@
  * and open the template in the editor.
  */
 
-package UtilityTesting;
+package utilityTesting;
 
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import personalizedpagerank.Utility.Budgets;
+import utility.Budgets;
 
 public class BudgetsTest extends TestCase
 {
