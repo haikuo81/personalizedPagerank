@@ -1,15 +1,14 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.Graphs;
-import personalizedpagerank.Utility.NodeScores;
-import personalizedpagerank.Utility.Parameters;
+import utility.Graphs;
+import utility.NodeScores;
 
-public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
+public class BoundaryRestrictedPageRank extends PersonalizedPageRankAlgorithm
 {
     /*
     Default number of max iterations, the algorithm will be stopped
@@ -37,9 +36,6 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
     */
     public static final double DEFAULT_FRONTIER_THRESHOLD = 0.001;
     
-    
-    private final DirectedGraph<Integer, DefaultEdge> g;
-    private Int2ObjectOpenHashMap<NodeScores> scores;
     private final BoundaryRestrictedParameters parameters;
     
     //Private class to store running parameters
@@ -113,58 +109,14 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
         run();
     }
     
-    //GETTERS
-    ////////////////////
-    
+    //getters
     /**
      * @inheritDoc
      */
     @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    public BoundaryRestrictedPageRank.BoundaryRestrictedParameters getParameters()
     {
-        return g;
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Parameters getParameters() 
-    {
-        return new BoundaryRestrictedPageRank.BoundaryRestrictedParameters(this.parameters);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public NodeScores getMap(final int origin)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return scores.get(origin);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Int2ObjectOpenHashMap<NodeScores> getMaps()
-    {
-        return scores;
-    }
-        
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public double getRank(final int origin,final int target)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(target))
-            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
+        return parameters;
     }
     
     //methods (no getters)
@@ -218,7 +170,7 @@ public class BoundaryRestrictedPageRank implements PersonalizedPageRankAlgorithm
 
                 iterations --;
             }
-            nodeScores.keepTop(this.parameters.smallTop);
+            nodeScores.keepTop(parameters.smallTop);
             scores.put(node, nodeScores);
         }
     }

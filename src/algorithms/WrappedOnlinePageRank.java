@@ -1,12 +1,11 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.NodeScores;
-import personalizedpagerank.Utility.Parameters;
+import utility.NodeScores;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to run personalized pagerank.
@@ -14,11 +13,10 @@ import personalizedpagerank.Utility.Parameters;
  * pagerank of the origin node; no results are stored.
  * 
  */
-public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
+public class WrappedOnlinePageRank extends PersonalizedPageRankAlgorithm
 {
-    private final DirectedGraph<Integer, DefaultEdge> g;
     private final Parameters parameters;
-
+    
     //CONSTRUCTORS
     ////////////////////
     
@@ -60,15 +58,6 @@ public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
      * @inheritDoc
      */
     @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
-    {
-        return g;
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
     public Parameters getParameters() 
     {
         return parameters;
@@ -106,5 +95,4 @@ public class WrappedOnlinePageRank implements PersonalizedPageRankAlgorithm
             throw new IllegalArgumentException("Target vertex isn't part of the graph.");
         return calculateNode(origin).get(target);
     }
-    
 }

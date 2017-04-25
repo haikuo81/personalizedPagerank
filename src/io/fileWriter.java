@@ -1,16 +1,16 @@
-package IO;
+package io;
 
 import benchmarking.NodesComparisonData;
 import benchmarking.ComparisonData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import personalizedpagerank.Algorithms.BoundaryRestrictedPageRank;
-import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.GuerrieriRankV2;
-import personalizedpagerank.Algorithms.GuerrieriRankV3;
-import personalizedpagerank.Algorithms.MCCompletePathPageRank;
-import personalizedpagerank.Utility.Parameters;
+import algorithms.BoundaryRestrictedPageRank;
+import algorithms.GuerrieriRank;
+import algorithms.GuerrieriRankV2;
+import algorithms.GuerrieriRankV3;
+import algorithms.MCCompletePathPageRank;
+import algorithms.PersonalizedPageRankAlgorithm.Parameters;
 
 public class fileWriter 
 {

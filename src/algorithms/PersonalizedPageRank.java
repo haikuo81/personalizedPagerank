@@ -1,10 +1,10 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.NodeScores;
+import utility.NodeScores;
 
 public class PersonalizedPageRank 
 {
@@ -53,7 +53,7 @@ public class PersonalizedPageRank
     private static NodeScores run(DirectedGraph<Integer, DefaultEdge> g, double dampingFactor, int maxIterations, double tolerance, int origin)
     {
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
-        Int2ObjectOpenHashMap<int[]> successors = personalizedpagerank.Utility.Graphs.getSuccessors(g);
+        Int2ObjectOpenHashMap<int[]> successors = utility.Graphs.getSuccessors(g);
         
         double maxDiff = tolerance;
 

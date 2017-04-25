@@ -1,4 +1,4 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
@@ -7,20 +7,16 @@ import java.util.HashSet;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.NodeScores;
-import personalizedpagerank.Utility.Parameters;
+import utility.NodeScores;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to store results from
  * multiple runs of the algorithm from different origin nodes.
  */
-public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
+public class WrappedStoringPageRank extends PersonalizedPageRankAlgorithm
 {
-    private final DirectedGraph<Integer, DefaultEdge> g;
-    private final Parameters parameters;
-    private final Int2ObjectOpenHashMap<NodeScores> scores;
     private final Set<Integer> pickedNodes;
-
+    private final Parameters parameters;
     //CONSTRUCTORS
     ////////////////////
     
@@ -70,22 +66,6 @@ public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
             }
     }
     
-    //GETTERS
-    ////////////////////
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
-    {
-        return g;
-    }
-    
-    public Set<Integer> getNodes() {
-        return pickedNodes;
-    }
-    
     /**
      * @inheritDoc
      */
@@ -96,36 +76,11 @@ public class WrappedStoringPageRank implements PersonalizedPageRankAlgorithm
     }
     
     /**
-     * @inheritDoc
+     * Returns the nodes for which the personalized pagerank has been calculated.
+     * @return 
      */
-    @Override
-    public NodeScores getMap(final int origin)
+    public Set<Integer> getNodes() 
     {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return scores.get(origin);
+        return pickedNodes;
     }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Int2ObjectOpenHashMap<NodeScores> getMaps()
-    {
-        return scores;
-    }
-        
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public double getRank(final int origin,final int target)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(target))
-            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
-    }
-    
 }

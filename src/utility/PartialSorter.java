@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package utility;
 
 import java.util.Comparator;
 

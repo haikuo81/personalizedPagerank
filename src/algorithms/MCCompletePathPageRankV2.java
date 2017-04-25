@@ -1,6 +1,5 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
@@ -10,9 +9,8 @@ import java.util.Random;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.util.Pair;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.Graphs;
-import personalizedpagerank.Utility.NodeScores;
-import personalizedpagerank.Utility.Parameters;
+import utility.Graphs;
+import utility.NodeScores;
 
 
 /**
@@ -22,15 +20,12 @@ import personalizedpagerank.Utility.Parameters;
  * fashion each node is mapped to an index telling where to go next which is
  * incremented every time it's used.
  */
-public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
+public class MCCompletePathPageRankV2 extends PersonalizedPageRankAlgorithm
 {
     /*
     Default damping factor for pagerank iterations.
     */
     public static final double DEFAULT_DAMPING_FACTOR = 0.85;
-    
-    private final DirectedGraph<Integer, DefaultEdge> g;
-    private Int2ObjectOpenHashMap<NodeScores> scores;
     private final MCCompletePathParameters parameters;
     
     //Private class to store running parameters
@@ -90,58 +85,14 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
         run();
     }
     
-    //GETTERS
-    ////////////////////
-    
+    //getters
     /**
      * @inheritDoc
      */
     @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    public MCCompletePathParameters getParameters()
     {
-        return g;
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Parameters getParameters() 
-    {
-        return new MCCompletePathParameters(this.parameters);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public NodeScores getMap(final int origin)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return scores.get(origin);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Int2ObjectOpenHashMap<NodeScores> getMaps()
-    {
-        return scores;
-    }
-        
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public double getRank(final int origin,final int target)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(target))
-            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
+        return parameters;
     }
     
     //methods (no getters)
@@ -169,7 +120,7 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
             NodeScores map = new NodeScores();
             if(g.outDegreeOf(node) > 0)
             {
-                double factor = this.parameters.getDamping() / g.outDegreeOf(node);
+                double factor = parameters.getDamping() / g.outDegreeOf(node);
 
                 /*
                 every walk starts from the node, this can't be added later otherwise
@@ -181,7 +132,7 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
                 the score for the node itself must not be scaled down the division
                 is performed
                 */
-                map.addTo(node, g.outDegreeOf(node) / this.parameters.getDamping());
+                map.addTo(node, g.outDegreeOf(node) / parameters.getDamping());
                 
                 for(int successor: successors.get(node))
                 {
@@ -199,7 +150,7 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
                     }
                 }
                 
-                map.keepTop(this.parameters.smallTop);
+                map.keepTop(parameters.smallTop);
 
                 //multiply each value in the map for the factor
                 map.multiplyAll(factor);
@@ -334,7 +285,7 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
     private NodeScores doWalksForNode(Int2ObjectOpenHashMap<int[]> successors, Int2IntOpenHashMap indexes,
            Random random, int node)
     {
-        NodeScores map = new NodeScores(this.parameters.smallTop);
+        NodeScores map = new NodeScores(parameters.smallTop);
         if(successors.get(node).length > 0)
         {
             double teleported;//tells if a teleport happens
@@ -348,10 +299,10 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
             the first edge, so we account for those walks here (lowering the total walks)
             but make it so that the first edge is always traversed
             */
-            int walks = (int) (this.parameters.getIterations() * this.parameters.getDamping());
+            int walks = (int) (parameters.getIterations() * parameters.getDamping());
             
             //each walk will surely start from the origin node
-            map.addTo(node, this.parameters.getIterations());
+            map.addTo(node, parameters.getIterations());
             
             for(int i = 0 ; i < walks; i++)
             {
@@ -377,17 +328,16 @@ public class MCCompletePathPageRankV2 implements PersonalizedPageRankAlgorithm
                         currentNode = next[index];
                         
                         //increment node only if it won't make the map size greater than what's allowed
-                        if(map.size() < this.parameters.smallTop || map.containsKey(currentNode))
+                        if(map.size() < parameters.smallTop || map.containsKey(currentNode))
                             map.addTo(currentNode, 1d);
                         //decide if the walk ends here or not
                         teleported = random.nextDouble();
                     }
-                }while(teleported <= this.parameters.getDamping());
+                }while(teleported <= parameters.getDamping());
             }
             
             //divide by the number of walks done to obtain the mean
-            for(Int2DoubleMap.Entry results: map.int2DoubleEntrySet())
-                results.setValue(results.getDoubleValue()/this.parameters.getIterations());
+            map.multiplyAll(1d/parameters.getIterations());
             
         }
         else

@@ -1,21 +1,19 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
-import personalizedpagerank.Utility.Parameters;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.Graphs;
-import personalizedpagerank.Utility.NodeScores;
+import utility.Budgets;
+import utility.Graphs;
+import utility.NodeScores;
 
  /**
 + * Runs an instance of GuerrieriRank, which runs an approximation of pagerank
 + * for each node in the graph, obtaining personalized pagerank scores for each node.
 + * For I iterations (or until convergence) for each edge pagerank score is passed
-+ * from a child node to it's parent. For each node only the top L scores of 
++ * from a child node to an ancestor. For each node only the top L scores of 
 + * personalized pagerank (as if that node was the origin and only node of the
 + * teleport set) are kept, while the rest is pruned.
 * * The L for each node is decided based on a budget given by the smallTop
@@ -24,7 +22,7 @@ import personalizedpagerank.Utility.NodeScores;
 * * distributed proportionally based on the number of out going edges a node has.
 + * The complexity is O(I *|Edges| * L).
   */
-public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
+public class GuerrieriRankV2 extends PersonalizedPageRankAlgorithm
 {
     //Default number of scores to return for each node, after doing calculations with
     //the LARGE_TOP only the small top will be kept as a valid result.
@@ -45,8 +43,6 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
     //than this the algorithm will stop.
     public static final double DEFAULT_TOLERANCE = 0.0001;
     
-    private final DirectedGraph<Integer, DefaultEdge> g;
-    private Int2ObjectOpenHashMap<NodeScores> scores;
     private final GuerrieriParameters parameters;
 
     
@@ -81,7 +77,6 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         }
     }
     
-    
     //CONSTRUCTOR
     ////////////////////
     
@@ -99,7 +94,7 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * Negative values are allowed to specify that tolerance must be ignored.
      */
-    public GuerrieriRankV3(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, 
+    public GuerrieriRankV2(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, 
             final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
     {
         this.g = g;
@@ -126,61 +121,15 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         run();
     }
     
-    
-    //GETTERS
-    ////////////////////
-    
+    //getters
     /**
      * @inheritDoc
      */
     @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    public GuerrieriRankV2.GuerrieriParameters getParameters()
     {
-        return g;
+        return parameters;
     }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Parameters getParameters() 
-    {
-        return new GuerrieriParameters(this.parameters);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public NodeScores getMap(final int origin)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return scores.get(origin);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Int2ObjectOpenHashMap<NodeScores> getMaps()
-    {
-        return scores;
-    }
-        
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public double getRank(final int origin,final int target)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(target))
-            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
-    }
-    
     
     //methods (no getters)
     ////////////////////
@@ -190,49 +139,41 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
      */
     private void run()
     {
-        Int2ObjectOpenHashMap<NodeScores> nextScores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
-        double maxDiff = this.parameters.getTolerance();
-
-        //2 partition of vertixes, keeping intra edges as low as possible for each partition
-        int[][] partitions = getPartitions();
+        double maxDiff = parameters.getTolerance();
+        
+        //how much to allocate for each node, at least parameters.smallTop is allocated
+        //on average parameters.largetTop is allocated
+        Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(),
+                parameters.smallTop, parameters.largetTop);
         
         //successors for each node, to avoid calling Graphs.successorListOf which is slow
         Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
         
-        /*
-        for  each vertex init its map with a score for itself and its neighbours
-        */
+        //init scores
+        Int2ObjectOpenHashMap<NodeScores> nextScores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
         for(int v: g.vertexSet())
         {
-            NodeScores scoresMap = new NodeScores();
-            scoresMap.put(v, 1 -  this.parameters.getDamping());
-            double factor = this.parameters.getDamping() / g.outDegreeOf(v);
-            for(int successor: successors.get(v))
-                scoresMap.addTo(successor, factor);
-            scoresMap.keepTop(this.parameters.largetTop);
+            NodeScores scoresMap = new NodeScores(parameters.largetTop);
+            scoresMap.put(v, 1d);
             scores.put(v, scoresMap);
-            
+
             nextScores.put(v, new NodeScores());
         }
         
-        int[] currentPartition = partitions[0];
-        for(int i = 0; i < parameters.getIterations() && maxDiff >= this.parameters.getTolerance(); i++)
+        for(int i = 0; i < parameters.getIterations() && maxDiff >= parameters.getTolerance(); i++)
         {
-            //System.out.println(iterations + " " + maxDiff);
             //reset the highest difference to 0 at the start of the run
             maxDiff = 0;
             
-            
-            
-            for(int v: currentPartition)
+            for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
-                double factor = this.parameters.getDamping() / g.outDegreeOf(v);
+                double factor = parameters.getDamping() / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
                 NodeScores currentMap = nextScores.get(v);
                 currentMap.clear();
-                currentMap.put(v, 1 - this.parameters.getDamping());
+                currentMap.put(v, 1 - parameters.getDamping());
                 
                 //for each successor of v
                 for(int successor: successors.get(v))
@@ -242,27 +183,18 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
                      * in the map  of a successor increment the personalized pagerank of v
                      * for that key of a fraction of it.
                      */
-                    currentMap.add(scores.get(successor), factor);
+                    for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
+                    {
+                        //increment value (or set it if key wasn't mapped)
+                        currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
+                    }
                 }
                 
                 //keep the top L values only, where L is the allocated budget for the node
-                currentMap.keepTop(this.parameters.largetTop);
+                currentMap.keepTop(budgets.get(v));
                 
-                //assign the map to the new scores
-                nextScores.put(v, currentMap);
-
                 //check if the norm1 of the difference is greater than the maxDiff
                 maxDiff = Math.max(currentMap.norm1(scores.get(v)), maxDiff);
-            }
-            
-            //System.out.println(same/total + " of internal edges for partition " + (currentPartition == partitions[0]? 0 : 1));
-            currentPartition = currentPartition == partitions[0]? partitions[1] : partitions[0];
-            
-            //this copy could be avoided but it's needed to produce way less garbage
-            for(int node: currentPartition)
-            {
-                nextScores.get(node).clear();
-                nextScores.get(node).add(scores.get(node));
             }
             
             // swap scores
@@ -273,79 +205,8 @@ public class GuerrieriRankV3 implements PersonalizedPageRankAlgorithm
         //trim to avoid wasting space
         for(int v: scores.keySet())
         {
-            scores.get(v).keepTop(this.parameters.smallTop);
+            scores.get(v).keepTop(parameters.smallTop);
             scores.get(v).trim();
         }
-    }
-    
-    /**
-     * Tries to divide the vertices in 2 partitions by two coloring it.
-     * If the graph is not bipartite the two partitions will be approximated as
-     * best as possible.
-     * @return An array containing 2 jagged arrays of integers, representing two
-     * different partition of vertices.
-     */
-    private int[][] getPartitions()
-    {
-        //will contain the 2 partitions during the execution of the method
-        Set<Integer> p1 = new HashSet<>(), p2 = new HashSet<>();
-
-        //queue for going breadth first
-        List<Integer> queue = new ArrayList<>();
-        //keep track of visited nodes
-        Set<Integer> visited = new HashSet<>(g.vertexSet().size());
-        
-        for(int node: g.vertexSet())
-        {
-            if(!visited.contains(node))
-            {
-                visited.add(node);
-                queue.add(node);
-                p1.add(node);
-            }
-            
-            while(!queue.isEmpty())
-            {
-                int next = queue.remove(0);
-                for(int successor: org.jgrapht.Graphs.successorListOf(g, next))
-                    if(!visited.contains(successor))
-                    {
-                        visited.add(successor);
-                        queue.add(successor);
-                        if(p1.contains(next))
-                            p2.add(successor);
-                        else
-                            p1.add(successor);
-                    }
-                for(int successor: org.jgrapht.Graphs.predecessorListOf(g, next))
-                    if(!visited.contains(successor))
-                    {
-                        visited.add(successor);
-                        queue.add(successor);
-                        if(p1.contains(next))
-                            p2.add(successor);
-                        else
-                            p1.add(successor);
-                    }
-            }
-        }
-        
-        //convert the 2 sets into arrays of integers
-        int[][] res = new int[2][0];
-        res[0] = new int[p1.size()];
-        res[1] = new int[p2.size()];
-        int index = 0;
-        for(int node: p1)
-        {
-            res[0][index] = node;
-            index++;
-        }
-        index = 0;
-        for(int node: p2)
-        {
-            res[1][index] = node;
-            index++;
-        }
-        return res;
     }
 }
