@@ -119,9 +119,10 @@ public class NodeScoresTest extends TestCase
         NodeScores scores1 = new NodeScores();
         NodeScores scores2 = new NodeScores();
         for(int i = 0; i < 100; i++)
+        {
             scores1.put(i, i);
-        for(int i = 0; i < 100; i++)
             scores2.put(i, i * i);
+        }
         scores1.add(scores2);
         for(int i = 0; i < 100; i++)
             assertEquals(scores1.get(i), (double)i + i * i);
@@ -155,9 +156,10 @@ public class NodeScoresTest extends TestCase
         NodeScores scores1 = new NodeScores();
         NodeScores scores2 = new NodeScores();
         for(int i = 0; i < 100; i++)
+        {
             scores1.put(i, i);
-        for(int i = 0; i < 100; i++)
             scores2.put(i, i * i);
+        }
         scores1.add(scores2, factor);
         for(int i = 0; i < 100; i++)
             assertEquals(scores1.get(i), i + (i * i * factor));
@@ -265,5 +267,70 @@ public class NodeScoresTest extends TestCase
         scores.multiplyAll(- 0.25);
         for(int i = 0; i < 100; i++)
             assertEquals(scores.get(i), - i * (- 0.25));
+    }
+    
+    public void testNormEmptyEmpty()
+    {
+        NodeScores scores = new NodeScores();
+        scores.add(new NodeScores());
+        assertEquals(scores.norm1(new NodeScores()), 0d);
+    }
+    
+    public void testNormWithEmpty()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        assertEquals(scores.norm1(new NodeScores()), 4950d);
+    }
+    
+    public void testNormWithSelf()
+    {
+        NodeScores scores = new NodeScores();
+        for(int i = 0; i < 100; i++)
+            scores.put(i, i);
+        assertEquals(scores.norm1(scores), 0d);
+    }
+    
+    public void testNormWithDifferentSameKeys()
+    {
+        NodeScores scores1 = new NodeScores();
+        NodeScores scores2 = new NodeScores();
+        for(int i = 0; i < 100; i++)
+        {
+            scores1.put(i, i);
+            scores2.put(i, i * i);
+        }
+        scores1.add(scores2);
+        double totalDiff = 0;
+        for(int i = 0; i < 100; i++)
+            totalDiff += Math.abs(scores1.get(i) - scores2.get(i));
+        assertEquals(scores1.norm1(scores2), totalDiff);
+    }
+    
+    public void testNormWithDifferentDifferentKeys1()
+    {
+        NodeScores scores1 = new NodeScores();
+        NodeScores scores2 = new NodeScores();
+        for(int i = 0; i < 100; i++)
+        {
+            scores1.put(i, i);
+            scores2.put(i + 1000, i);
+        }
+        assertEquals(scores1.norm1(scores2), 9900d);
+    }
+    
+    public void testNormWithDifferentKeys2()
+    {
+        NodeScores scores1 = new NodeScores();
+        NodeScores scores2 = new NodeScores();
+        for(int i = 0; i < 100; i++)
+        {
+            scores1.put(i, i);
+            scores1.put(-i, -i);
+            scores2.put(i + 1000, i);
+            scores2.put(-i, -i);
+        }
+        assertEquals(scores1.norm1(scores2), 9900d);
     }
 }
