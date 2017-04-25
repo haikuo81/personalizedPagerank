@@ -8,7 +8,6 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import utility.NodeScores;
-import utility.Parameters;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to store results from

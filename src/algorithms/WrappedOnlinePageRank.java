@@ -6,7 +6,6 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
 import utility.NodeScores;
-import utility.Parameters;
 
 /**
  * Wrapper of the PageRank class from jgrapht library to run personalized pagerank.

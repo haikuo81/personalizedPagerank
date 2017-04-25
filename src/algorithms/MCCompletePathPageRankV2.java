@@ -1,6 +1,5 @@
 package algorithms;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import org.jgrapht.alg.util.Pair;
 import org.jgrapht.graph.DefaultEdge;
 import utility.Graphs;
 import utility.NodeScores;
-import utility.Parameters;
 
 
 /**

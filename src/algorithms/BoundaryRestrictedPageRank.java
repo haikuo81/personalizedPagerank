@@ -7,7 +7,6 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import utility.Graphs;
 import utility.NodeScores;
-import utility.Parameters;
 
 public class BoundaryRestrictedPageRank extends PersonalizedPageRankAlgorithm
 {

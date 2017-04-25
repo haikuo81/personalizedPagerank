@@ -10,7 +10,7 @@ import algorithms.GuerrieriRank;
 import algorithms.GuerrieriRankV2;
 import algorithms.GuerrieriRankV3;
 import algorithms.MCCompletePathPageRank;
-import utility.Parameters;
+import algorithms.PersonalizedPageRankAlgorithm.Parameters;
 
 public class fileWriter 
 {
