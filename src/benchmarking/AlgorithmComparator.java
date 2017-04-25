@@ -13,9 +13,9 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Algorithms.PageRank;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Utility.PartialSorter;
+import algorithms.PageRank;
+import algorithms.PersonalizedPageRankAlgorithm;
+import utility.PartialSorter;
 
 //class to do result comparison of the different algorithms, it assumes that the passed objects refer to the same graph
 public class AlgorithmComparator

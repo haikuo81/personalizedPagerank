@@ -1,14 +1,11 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
-import personalizedpagerank.Utility.Parameters;
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import utility.Parameters;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.Budgets;
-import personalizedpagerank.Utility.Graphs;
-import personalizedpagerank.Utility.NodeScores;
+import utility.Graphs;
+import utility.NodeScores;
 
  /**
 + * Runs an instance of GuerrieriRank, which runs an approximation of pagerank
@@ -17,13 +14,9 @@ import personalizedpagerank.Utility.NodeScores;
 + * from a child node to an ancestor. For each node only the top L scores of 
 + * personalized pagerank (as if that node was the origin and only node of the
 + * teleport set) are kept, while the rest is pruned.
-* * The L for each node is decided based on a budget given by the smallTop
-* * and largeTop parameters, each node will have at least a budget of "smallTop", 
-* * and on average each node will have a  budget of "largeTop", the budget is 
-* * distributed proportionally based on the number of out going edges a node has.
 + * The complexity is O(I *|Edges| * L).
   */
-public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
+public class GuerrieriRank extends PersonalizedPageRankAlgorithm
 {
     //Default number of scores to return for each node, after doing calculations with
     //the LARGE_TOP only the small top will be kept as a valid result.
@@ -44,11 +37,8 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
     //than this the algorithm will stop.
     public static final double DEFAULT_TOLERANCE = 0.0001;
     
-    private final DirectedGraph<Integer, DefaultEdge> g;
-    private Int2ObjectOpenHashMap<NodeScores> scores;
     private final GuerrieriParameters parameters;
 
-    
     //Private class to store running parameters
     public static class GuerrieriParameters extends Parameters
     {
@@ -80,7 +70,6 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
         }
     }
     
-    
     //CONSTRUCTOR
     ////////////////////
     
@@ -88,17 +77,14 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
      * Create object and run the algorithm, results of the personalized pagerank
      * are stored in the object.
      * @param g the input graph
-     * @param smallTop How many max entries to keep in the final results, it will
-     * also be used as a minimum for how much space to allocate for each node.
-     * @param largeTop How many max entries on average to keep for each vertex during computation,
-     * this value will be used as an average for how much space to allocate for each
-     * node while calculating the budget for each node.
+     * @param smallTop How many max entries for each vertex to keep in the final results.
+     * @param largeTop How many max entries to keep for each vertex during computation.
      * @param iterations the number of iterations to perform
      * @param dampingFactor the damping factor
      * @param tolerance Stop if the difference of scores between iterations is lower than tolerance. 
      * Negative values are allowed to specify that tolerance must be ignored.
      */
-    public GuerrieriRankV2(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, 
+    public GuerrieriRank(final DirectedGraph<Integer, DefaultEdge> g, final int smallTop, 
             final int largeTop, final int iterations, final double dampingFactor, final double tolerance)
     {
         this.g = g;
@@ -125,61 +111,15 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
         run();
     }
     
-    
-    //GETTERS
-    ////////////////////
-    
+    //getters
     /**
      * @inheritDoc
      */
     @Override
-    public DirectedGraph<Integer, DefaultEdge> getGraph() 
+    public GuerrieriRank.GuerrieriParameters getParameters()
     {
-        return g;
+        return parameters;
     }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Parameters getParameters() 
-    {
-        return new GuerrieriParameters(this.parameters);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public NodeScores getMap(final int origin)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        return scores.get(origin);
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Int2ObjectOpenHashMap<NodeScores> getMaps()
-    {
-        return scores;
-    }
-        
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public double getRank(final int origin,final int target)
-    {
-        if(!g.containsVertex(origin))
-            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
-        if(!g.containsVertex(target))
-            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
-        return scores.get(origin).get(target);
-    }
-    
     
     //methods (no getters)
     ////////////////////
@@ -189,41 +129,35 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
      */
     private void run()
     {
-        double maxDiff = this.parameters.getTolerance();
-        
-        //how much to allocate for each node, at least parameters.smallTop is allocated
-        //on average parameters.largetTop is allocated
-        Int2IntOpenHashMap budgets = Budgets.degreeBasedBudget(g, g.vertexSet(),
-                this.parameters.smallTop, this.parameters.largetTop);
-        
-        //successors for each node, to avoid calling Graphs.successorListOf which is slow
-        Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
+        double maxDiff = parameters.getTolerance();
         
         //init scores
         Int2ObjectOpenHashMap<NodeScores> nextScores = new Int2ObjectOpenHashMap<>(g.vertexSet().size());
         for(int v: g.vertexSet())
         {
-            NodeScores scoresMap = new NodeScores(this.parameters.largetTop);
+            NodeScores scoresMap = new NodeScores(parameters.largetTop);
             scoresMap.put(v, 1d);
             scores.put(v, scoresMap);
 
             nextScores.put(v, new NodeScores());
         }
         
-        for(int i = 0; i < parameters.getIterations() && maxDiff >= this.parameters.getTolerance(); i++)
+        //successors for each node, to avoid calling Graphs.successorListOf which is slow
+        Int2ObjectOpenHashMap<int[]> successors = Graphs.getSuccessors(g);
+        
+        for(int i = 0; i < parameters.getIterations() && maxDiff >= parameters.getTolerance(); i++)
         {
             //reset the highest difference to 0 at the start of the run
             maxDiff = 0;
-            
             for(int v: g.vertexSet())
             {
                 //to avoid calculating it for each successor
-                double factor = this.parameters.getDamping() / g.outDegreeOf(v);
+                double factor = parameters.getDamping() / g.outDegreeOf(v);
                                 
                 //every node starts with a rank of (1 - dampingFactor) in it's own map
                 NodeScores currentMap = nextScores.get(v);
                 currentMap.clear();
-                currentMap.put(v, 1 - this.parameters.getDamping());
+                currentMap.put(v, 1 - parameters.getDamping());
                 
                 //for each successor of v
                 for(int successor: successors.get(v))
@@ -233,15 +167,10 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
                      * in the map  of a successor increment the personalized pagerank of v
                      * for that key of a fraction of it.
                      */
-                    for(Int2DoubleMap.Entry entry: scores.get(successor).int2DoubleEntrySet())
-                    {
-                        //increment value (or set it if key wasn't mapped)
-                        currentMap.addTo(entry.getIntKey(), factor * entry.getDoubleValue());
-                    }
+                    currentMap.add(scores.get(successor), factor);
                 }
-                
-                //keep the top L values only, where L is the allocated budget for the node
-                currentMap.keepTop(budgets.get(v));
+                //keep the top L values only
+                currentMap.keepTop(parameters.largetTop);
                 
                 //check if the norm1 of the difference is greater than the maxDiff
                 maxDiff = Math.max(currentMap.norm1(scores.get(v)), maxDiff);
@@ -255,8 +184,9 @@ public class GuerrieriRankV2 implements PersonalizedPageRankAlgorithm
         //trim to avoid wasting space
         for(int v: scores.keySet())
         {
-            scores.get(v).keepTop(this.parameters.smallTop);
+            scores.get(v).keepTop(parameters.smallTop);
             scores.get(v).trim();
         }
     }
+    
 }

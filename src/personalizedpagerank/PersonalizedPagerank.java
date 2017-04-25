@@ -23,15 +23,15 @@ import org.jgrapht.generate.GnpRandomGraphGenerator;
 import org.jgrapht.generate.GraphGenerator;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Algorithms.GuerrieriRank;
-import personalizedpagerank.Algorithms.GuerrieriRankV3;
-import personalizedpagerank.Algorithms.MCCompletePathPageRank;
-import personalizedpagerank.Algorithms.MCCompletePathPageRankV2;
-import personalizedpagerank.Algorithms.PersonalizedPageRankAlgorithm;
-import personalizedpagerank.Algorithms.WrappedStoringPageRank;
+import algorithms.GuerrieriRank;
+import algorithms.GuerrieriRankV3;
+import algorithms.MCCompletePathPageRank;
+import algorithms.MCCompletePathPageRankV2;
+import algorithms.PersonalizedPageRankAlgorithm;
+import algorithms.WrappedStoringPageRank;
 import benchmarking.AlgorithmComparator;
 import benchmarking.ComparisonData;
-import personalizedpagerank.Utility.NodeScores;
+import utility.NodeScores;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
     //su quali nodi (ogni altro nodo come origine) si accumula + errore?

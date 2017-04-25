@@ -1,7 +1,7 @@
 /*
  * Base class for parameters of the algorithms.
  */
-package personalizedpagerank.Utility;
+package utility;
 
 public class Parameters 
 {

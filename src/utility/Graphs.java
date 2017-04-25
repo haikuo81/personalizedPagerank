@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package utility;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;

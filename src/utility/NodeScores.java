@@ -1,4 +1,4 @@
-package personalizedpagerank.Utility;
+package utility;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;

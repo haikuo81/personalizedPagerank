@@ -1,17 +1,20 @@
-package personalizedpagerank.Algorithms;
+package algorithms;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import personalizedpagerank.Utility.NodeScores;
-import personalizedpagerank.Utility.Parameters;
+import utility.NodeScores;
+import utility.Parameters;
 
 /**
- * Interface for classes that will contain scores related to personalized
+ * Abstract class for classes that will contain scores related to personalized
  * pagerank.
  */
-public interface PersonalizedPageRankAlgorithm
+abstract public class PersonalizedPageRankAlgorithm
 {
+    protected DirectedGraph<Integer, DefaultEdge> g;
+    protected Int2ObjectOpenHashMap<NodeScores> scores;
+    
     /**
      * Retrieves a map containing the personalized pagerank scores for a node.
      * Given a node "origin" the map contains pagerank scores for (a number)
@@ -21,7 +24,12 @@ public interface PersonalizedPageRankAlgorithm
      * @return A map where key values are nodes from the graph and are mapped
      * to personalized pagerank scores.
      */
-    public NodeScores getMap(final int origin);
+    public NodeScores getMap(final int origin)
+    {
+        if(!g.containsVertex(origin))
+            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
+        return scores.get(origin);
+    }
     
     /**
      * Retrieves a map where keys are nodes of the graph used to run the algorithm,
@@ -32,8 +40,10 @@ public interface PersonalizedPageRankAlgorithm
      * being the origin node (the only node in the starting and the teleport set).
      * @return Map of maps containing personalized pagerank scores.
      */
-    public Int2ObjectOpenHashMap<NodeScores> getMaps();
-    
+    public Int2ObjectOpenHashMap<NodeScores> getMaps()
+    {
+        return scores;
+    }
     /**
      * Given an origin node and a target node get the personalized pagerank score
      * of the target node with origin node being the starting node and the only
@@ -42,17 +52,27 @@ public interface PersonalizedPageRankAlgorithm
      * @param target Node for which the pagerank score is returned.
      * @return Personalized pagerank score of target node.
      */
-    public double getRank(final int origin,final int target);
+    public double getRank(final int origin,final int target)
+    {
+        if(!g.containsVertex(origin))
+            throw new IllegalArgumentException("Origin vertex isn't part of the graph.");
+        if(!g.containsVertex(target))
+            throw new IllegalArgumentException("Target vertex isn't part of the graph.");
+        return scores.get(origin).get(target);
+    }
     
     /**
      * Returns the parameters used to run the algorithm.
      * @return An object containing the running parameters (may be a subclass).
      */
-    public Parameters getParameters();
+    abstract public Parameters getParameters();
     
     /**
      * Returns the graph for which the algorithm was run.
      * @return 
      */
-    public DirectedGraph<Integer, DefaultEdge> getGraph();
+    public DirectedGraph<Integer, DefaultEdge> getGraph()
+    {
+        return g;
+    }
 }
