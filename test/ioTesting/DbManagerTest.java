@@ -93,6 +93,7 @@ public class DbManagerTest extends TestCase
         db.insertGraph("testGraph", 10, 20, true, false);
         db.insertRun("testGraph", "testAlgorithm", "testCpu", 50, params, data, 1337);
         
+        //inserting 
         try (PreparedStatement st = db.getStatement("SELECT * FROM RUNS WHERE graph = ?"))
         {
             st.setString(1, "testGraph");
@@ -116,6 +117,42 @@ public class DbManagerTest extends TestCase
                     assertEquals(r1.getMin(), rs.getFloat("KendallMin"), 0.0001);
                     assertEquals(r1.getStd(), rs.getFloat("KendallStd"), 0.0001);
                     assertEquals(1337, rs.getInt("runTime"));
+                }
+                else
+                    fail();
+            }
+        }
+        catch (Exception e) 
+        {
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+        
+        //updating
+        db.insertRun("testGraph", "testAlgorithm", "testCpu", 50, params, data, 1336);
+        try (PreparedStatement st = db.getStatement("SELECT * FROM RUNS WHERE graph = ?"))
+        {
+            st.setString(1, "testGraph");
+            
+            try (ResultSet rs = st.executeQuery())
+            {
+                if(rs.next())
+                {
+                    assertEquals("testGraph", rs.getString("graph"));
+                    assertEquals("testAlgorithm", rs.getString("algorithm"));
+                    assertEquals("testCpu", rs.getString("cpu"));
+                    assertEquals(50, rs.getInt("sampleNodes"));
+                    assertEquals(10, rs.getInt("topK"));
+                    Double[] tmp = (Double[])(rs.getArray("params")).getArray();
+                    for(int i = 0; i < params.length; i++)
+                        assertEquals(tmp[i], params[i], 0.0001);
+                    assertEquals(50, rs.getInt("jaccardAverage"));
+                    assertEquals(r1.getMin(), rs.getFloat("jaccardMin"), 0.0001);
+                    assertEquals(r1.getStd(), rs.getFloat("jaccardStd"), 0.0001);
+                    assertEquals(r1.getAverage(), rs.getFloat("KendallAverage"), 0.0001);
+                    assertEquals(r1.getMin(), rs.getFloat("KendallMin"), 0.0001);
+                    assertEquals(r1.getStd(), rs.getFloat("KendallStd"), 0.0001);
+                    assertEquals(1336, rs.getInt("runTime"));
                 }
                 else
                     fail();
