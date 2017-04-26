@@ -128,7 +128,7 @@ public final class DbManager
                 for(int i = 0; i < params.length; i++)
                     tmp[i] = params[i];
                 st.setInt(1, sampleNodes);
-                st.setArray(2, con.createArrayOf("float4", tmp));
+                st.setArray(2, con.createArrayOf("float8", tmp));
                 st.setDouble(3, data.getJaccard().getMin());
                 st.setDouble(4, data.getJaccard().getStd());
                 st.setDouble(5, data.getKendall().getAverage());
@@ -163,7 +163,7 @@ public final class DbManager
                 st.setString(3, cpuName);
                 st.setInt(4, sampleNodes);
                 st.setInt(5, data.getMaxEntries());
-                st.setArray(6, con.createArrayOf("float4", tmp));
+                st.setArray(6, con.createArrayOf("float8", tmp));
                 st.setInt(7, newJac);
                 st.setDouble(8, data.getJaccard().getMin());
                 st.setDouble(9, data.getJaccard().getStd());
