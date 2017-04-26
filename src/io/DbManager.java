@@ -85,21 +85,24 @@ public final class DbManager
         we are looking to have 101 rows.
         */
         int newJac = (int) (data.getJaccard().getAverage() * 100); 
-        System.out.println(newJac);
+        int newKen = (int) (data.getKendall().getAverage() * 100);
+        
         int oldTime = -1;
         /*
         get the old runtime for a run with same
-        (algorithm, graph, cpu, topK, jaccardAverage)
+        (algorithm, graph, cpu, topK, jaccardAverage, kendallAverage)
         */
         try (PreparedStatement st = con.prepareStatement("SELECT runTime"
                 + " FROM RUNS WHERE graph = ? AND algorithm = ?"
-                + " AND cpu = ? AND topK = ? AND jaccardAverage = ?"))
+                + " AND cpu = ? AND topK = ? AND jaccardAverage = ?"
+                + " AND kendallAverage = ?"))
         {
             st.setString(1, graphName);
             st.setString(2, algName);
             st.setString(3, cpuName);
             st.setInt(4, data.getMaxEntries());
             st.setInt(5, newJac);
+            st.setInt(6, newKen);
             
             try (ResultSet rs = st.executeQuery())
             {
@@ -120,9 +123,9 @@ public final class DbManager
         {
             try (PreparedStatement st = con.prepareStatement("UPDATE RUNS SET"
                     + " sampleNodes = ?, params = ?, jaccardMin = ?"
-                    + " , jaccardStd = ?, kendallAverage = ?, kendallMin = ?,"
+                    + " , jaccardStd = ?, kendallMin = ?,"
                     + " kendallStd = ?, runTime = ? WHERE graph = ? AND algorithm = ?"
-                + " AND cpu = ? AND topK = ? AND jaccardAverage = ?" ))
+                + " AND cpu = ? AND topK = ? AND jaccardAverage = ? AND kendallAverage = ?"))
             {
                 Double[] tmp = new Double[params.length];
                 for(int i = 0; i < params.length; i++)
@@ -131,17 +134,17 @@ public final class DbManager
                 st.setArray(2, con.createArrayOf("float8", tmp));
                 st.setDouble(3, data.getJaccard().getMin());
                 st.setDouble(4, data.getJaccard().getStd());
-                st.setDouble(5, data.getKendall().getAverage());
-                st.setDouble(6, data.getKendall().getMin());
-                st.setDouble(7, data.getKendall().getStd());
-                st.setInt(8, runTime);
+                st.setDouble(5, data.getKendall().getMin());
+                st.setDouble(6, data.getKendall().getStd());
+                st.setInt(7, runTime);
                 
                 
-                st.setString(9, graphName);
-                st.setString(10, algName);
-                st.setString(11, cpuName);
-                st.setInt(12, data.getMaxEntries());
-                st.setInt(13, newJac);
+                st.setString(8, graphName);
+                st.setString(9, algName);
+                st.setString(10, cpuName);
+                st.setInt(11, data.getMaxEntries());
+                st.setInt(12, newJac);
+                st.setInt(13, newKen);
                 st.executeUpdate();
             }
             catch (Exception e) 
@@ -167,7 +170,7 @@ public final class DbManager
                 st.setInt(7, newJac);
                 st.setDouble(8, data.getJaccard().getMin());
                 st.setDouble(9, data.getJaccard().getStd());
-                st.setDouble(10, data.getKendall().getAverage());
+                st.setInt(10, newKen);
                 st.setDouble(11, data.getKendall().getMin());
                 st.setDouble(12, data.getKendall().getStd());
                 st.setInt(13, runTime);

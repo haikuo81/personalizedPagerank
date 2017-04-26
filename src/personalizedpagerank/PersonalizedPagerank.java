@@ -31,6 +31,7 @@ import algorithms.PersonalizedPageRankAlgorithm;
 import algorithms.WrappedStoringPageRank;
 import benchmarking.AlgorithmComparator;
 import benchmarking.ComparisonData;
+import io.DbManager;
 import utility.NodeScores;
 
     //indegree, outdegree, pagerankscore, neighbour out/in degree, neighbour pr
@@ -41,85 +42,120 @@ import utility.NodeScores;
 
         public static void main(String[] args) 
         {
-            Random random = new Random();
             DirectedGraph<Integer, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
             importBipartiteUndirectedFromCsv(g, "collab.csv");
             System.out.println("finished importing ");
+            System.out.println();
+            System.out.println("---------------------- " + g.vertexSet().size() 
+            + " vertices and " + g.edgeSet().size() + " edges");
             
+            PersonalizedPageRankAlgorithm alg;
+            ComparisonData[] data;
             
-            PersonalizedPageRankAlgorithm mcrank4;
-            ComparisonData[] data4;
+            long time = System.currentTimeMillis();
+            WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 50, 100, 0.85, 0.0001, 800);
+            time = System.currentTimeMillis() - time;
+            System.out.println("done pr in " + time);
+            int[] ks = {50};
+            
+            DbManager db = new DbManager();
+            db.insertAlgorithm("guerrierirank", 4);
+            db.insertGraph("collab", g.vertexSet().size(), g.edgeSet().size(), false, true);
+            
+            for(int l = 50; l < 800; l += 50)
+                for(int ite = 1; ite < 60; ite+= 5)
+                    for(double tole = 0.0001; tole < 0.05; tole += 0.0005)
+                    {
+                        data = null;
+                        alg = null;
+                        System.gc();
+                        time = System.currentTimeMillis();
+                        alg = new GuerrieriRank(g, 50, l, ite, 0.85, tole);
+                        time = System.currentTimeMillis() - time; 
+                        System.out.println("done Gv in " + time + " ms");
+                        data = AlgorithmComparator.compare(alg, pr, pr.getNodes(), ks);
+                        System.out.println(data[0].getJaccard().getAverage() + " jaccard average");
+                        System.out.println(data[0].getJaccard().getMin() + " jaccard min");
+                        System.out.println(data[0].getJaccard().getStd() + " jaccard std");
+                        System.out.println(data[0].getKendall().getAverage() + " kendall average");
+                        double[] params = new double[4];
+                        params[0] = l; params[1] = ite; params[2] = 0.85; params[3] = tole;
+                        db.insertRun("collab", "guerrierirank", "i5-4690", 800, params, data[0], (int) time);
+                    }
+            db.insertAlgorithm("guerrierirankV3", 4);
+            
+            for(int l = 50; l < 800; l += 50)
+                for(int ite = 1; ite < 60; ite+= 5)
+                    for(double tole = 0.0001; tole < 0.05; tole += 0.0005)
+                    {
+                        data = null;
+                        alg = null;
+                        System.gc();
+                        time = System.currentTimeMillis();
+                        alg = new GuerrieriRankV3(g, 50, l, ite, 0.85, tole);
+                        time = System.currentTimeMillis() - time; 
+                        System.out.println("done Gv in " + time + " ms");
+                        data = AlgorithmComparator.compare(alg, pr, pr.getNodes(), ks);
+                        System.out.println(data[0].getJaccard().getAverage() + " jaccard average");
+                        System.out.println(data[0].getJaccard().getMin() + " jaccard min");
+                        System.out.println(data[0].getJaccard().getStd() + " jaccard std");
+                        System.out.println(data[0].getKendall().getAverage() + " kendall average");
+                        double[] params = new double[4];
+                        params[0] = l; params[1] = ite; params[2] = 0.85; params[3] = tole;
+                        db.insertRun("collab", "guerrierirankV3", "i5-4690", 800, params, data[0], (int) time);
+                    }
+            
+            db.insertAlgorithm("mccompletepathV2", 3);
+            for(int l = 50; l < 5000; l += 50)
+                for(int ite = 1; ite < 5000; ite+= 50)
+                    {
+                        data = null;
+                        alg = null;
+                        System.gc();
+                        time = System.currentTimeMillis();
+                        alg = new MCCompletePathPageRankV2(g, l, ite, 0.85);
+                        time = System.currentTimeMillis() - time; 
+                        System.out.println("done Gv in " + time + " ms");
+                        data = AlgorithmComparator.compare(alg, pr, pr.getNodes(), ks);
+                        System.out.println(data[0].getJaccard().getAverage() + " jaccard average");
+                        System.out.println(data[0].getJaccard().getMin() + " jaccard min");
+                        System.out.println(data[0].getJaccard().getStd() + " jaccard std");
+                        System.out.println(data[0].getKendall().getAverage() + " kendall average");
+                        double[] params = new double[3];
+                        params[0] = l; params[1] = ite; params[2] = 0.85; 
+                        db.insertRun("collab", "mccompletepathV2", "i5-4690", 800, params, data[0], (int) time);
+                    }
+
+           /*
+            //MC<
+            //
+            time = System.currentTimeMillis();
+            mcrank4 = new MCCompletePathPageRank(g, 50, 3400, 0.85);
+            time = System.currentTimeMillis() - time;
+            System.out.println("done mc in " + time);
+
+            data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+            System.out.println(data4[0].getJaccard().getAverage());
+            System.out.println(data4[0].getJaccard().getMin());
+            System.out.println(data4[0].getJaccard().getStd());
+            System.out.println(data4[0].getKendall().getAverage());
+
+
+            //MCv2
+            mcrank4 = null;
+            System.gc();
+            System.out.println("");
+            time = System.currentTimeMillis();
+            mcrank4 = new MCCompletePathPageRankV2(g, 6000, 2000, 0.85);
+            time = System.currentTimeMillis() - time;
+            System.out.println("done MCv2 in " + time + " ms");
+
+            data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
+            System.out.println(data4[0].getJaccard().getAverage());
+            System.out.println(data4[0].getJaccard().getMin());
+            System.out.println(data4[0].getJaccard().getStd());
+            System.out.println(data4[0].getKendall().getAverage());
                 
-            while(true)
-            {
-                System.out.println();
-                System.out.println("---------------------- " + g.vertexSet().size() 
-                        + " vertices and " + g.edgeSet().size() + " edges");
-                       //+ " with " + ((double)g.edgeSet().size())/g.vertexSet().size() + " e/v");
-           
-                long time = System.currentTimeMillis();
-                WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 50, 100, 0.85, 0.0001, 800);
-                time = System.currentTimeMillis() - time;
-                System.out.println("done pr in " + time);
-                int[] ks = {50};
-                /*
-                System.gc();
-                time = System.currentTimeMillis();
-                mcrank4 = new GuerrieriRank(g, 50, 800, 25, 0.85, 0.001);
-                time = System.currentTimeMillis() - time; 
-                System.out.println("done Gv in " + time + " ms");
-                
-                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-                System.out.println(data4[0].getJaccard().getAverage() + " jaccard average");
-                System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
-                System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
-                System.out.println(data4[0].getKendall().getAverage() + " kendall average");
-                
-                //grankV3
-                System.gc();
-                time = System.currentTimeMillis();
-                mcrank4 = new GuerrieriRankV3(g, 50, 800, 25, 0.85, 0.001);
-                time = System.currentTimeMillis() - time; 
-                System.out.println("done Gv3 in " + time + " ms");
-                
-                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-                System.out.println(data4[0].getJaccard().getAverage() + " jaccard average");
-                System.out.println(data4[0].getJaccard().getMin() + " jaccard min");
-                System.out.println(data4[0].getJaccard().getStd() + " jaccard std");
-                System.out.println(data4[0].getKendall().getAverage() + " kendall average");
-               */
-               /*
-                //MC<
-                //
-                time = System.currentTimeMillis();
-                mcrank4 = new MCCompletePathPageRank(g, 50, 3400, 0.85);
-                time = System.currentTimeMillis() - time;
-                System.out.println("done mc in " + time);
-                
-                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-                System.out.println(data4[0].getJaccard().getAverage());
-                System.out.println(data4[0].getJaccard().getMin());
-                System.out.println(data4[0].getJaccard().getStd());
-                System.out.println(data4[0].getKendall().getAverage());
-                */
-               
-               
-                //MCv2
-                mcrank4 = null;
-                System.gc();
-                System.out.println("");
-                time = System.currentTimeMillis();
-                mcrank4 = new MCCompletePathPageRankV2(g, 6000, 2000, 0.85);
-                time = System.currentTimeMillis() - time;
-                System.out.println("done MCv2 in " + time + " ms");
-                
-                data4 = AlgorithmComparator.compare(mcrank4, pr, pr.getNodes(), ks);
-                System.out.println(data4[0].getJaccard().getAverage());
-                System.out.println(data4[0].getJaccard().getMin());
-                System.out.println(data4[0].getJaccard().getStd());
-                System.out.println(data4[0].getKendall().getAverage());
-                
-            }
             /*
             WrappedStoringPageRank pr = new WrappedStoringPageRank(g, 100, 100, 0.85, 0.0001, g.vertexSet().size());
             int[] differentKs = {50};
@@ -134,11 +170,6 @@ import utility.NodeScores;
         //////////the code written below here is just some stuff written hastily to try out stuff
         ///not part of the project, not commented, not tested
         /////////////////////////////////////////////////////////////////////////////////////
-        
-        private static double formula(double i, double l, double r, double e, double v)
-        {
-            return (i * l * e)/(r * v);
-        }
         
         private static Set<Integer> nodesSubset(Graph<Integer, DefaultEdge> g, int k)
         {

@@ -113,7 +113,7 @@ public class DbManagerTest extends TestCase
                     assertEquals(50, rs.getInt("jaccardAverage"));
                     assertEquals(r1.getMin(), rs.getFloat("jaccardMin"), 0.0001);
                     assertEquals(r1.getStd(), rs.getFloat("jaccardStd"), 0.0001);
-                    assertEquals(r1.getAverage(), rs.getFloat("KendallAverage"), 0.0001);
+                    assertEquals(50, rs.getInt("kendallAverage"), 0.0001);
                     assertEquals(r1.getMin(), rs.getFloat("KendallMin"), 0.0001);
                     assertEquals(r1.getStd(), rs.getFloat("KendallStd"), 0.0001);
                     assertEquals(1337, rs.getInt("runTime"));
@@ -149,9 +149,9 @@ public class DbManagerTest extends TestCase
                     assertEquals(50, rs.getInt("jaccardAverage"));
                     assertEquals(r1.getMin(), rs.getFloat("jaccardMin"), 0.0001);
                     assertEquals(r1.getStd(), rs.getFloat("jaccardStd"), 0.0001);
-                    assertEquals(r1.getAverage(), rs.getFloat("KendallAverage"), 0.0001);
+                    assertEquals(50, rs.getInt("kendallAverage"), 0.0001);
                     assertEquals(r1.getMin(), rs.getFloat("KendallMin"), 0.0001);
-                    assertEquals(r1.getStd(), rs.getFloat("KendallStd"), 0.0001);
+                    assertEquals(r1.getStd(), rs.getFloat("kendallStd"), 0.0001);
                     assertEquals(1336, rs.getInt("runTime"));
                 }
                 else
