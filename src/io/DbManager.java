@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public final class DbManager 
 {
@@ -178,5 +179,33 @@ public final class DbManager
                 System.exit(0);
             }
         }
+    }
+    
+    /**
+     * Simple method to allow querying directly (mostly used for testing).
+     * @param query Sql query.
+     */
+    public void query(String query)
+    {
+       try (PreparedStatement st = con.prepareStatement(query))
+            {
+                st.executeUpdate();
+            }
+            catch (Exception e) 
+            {
+                System.err.println("couldnt query: " + e.getClass().getName()+": "+e.getMessage());
+                System.exit(0);
+            }
+    }
+    
+    /**
+     * Simple method to allow getting a prepared statement from the db manager.
+     * @param query Sql query.
+     * @return
+     * @throws SQLException 
+     */
+    public PreparedStatement getStatement(String query) throws SQLException
+    {
+        return con.prepareStatement(query);
     }
 }
