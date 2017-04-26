@@ -26,7 +26,7 @@ CREATE TABLE RUNS
 	jaccardAverage smallInt CHECK (jaccardAverage >= 0 and jaccardAverage <= 100),
 	jaccardMin double precision CHECK (jaccardMin >= 0.0),
 	jaccardStd double precision CHECK (jaccardStd >= 0.0),
-	kendallAverage double precision,
+	kendallAverage smallInt,
 	kendallMin double precision,
 	kendallStd double precision,
 	runTime integer CHECK (runTime >= 0) NOT NULL,
