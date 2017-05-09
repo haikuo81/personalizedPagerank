@@ -8,7 +8,6 @@ CREATE TABLE GRAPHS
 );
 
 
-
 CREATE TABLE ALGORITHMS
 (
 	name VARCHAR(50) PRIMARY KEY,
@@ -17,6 +16,7 @@ CREATE TABLE ALGORITHMS
 
 CREATE TABLE RUNS
 (
+        id serial PRIMARY KEY,
 	graph VARCHAR(50) REFERENCES GRAPHS,
 	algorithm VARCHAR(50) REFERENCES ALGORITHMS,
 	cpu VARCHAR(50),
@@ -26,11 +26,10 @@ CREATE TABLE RUNS
 	jaccardAverage smallInt CHECK (jaccardAverage >= 0 and jaccardAverage <= 100),
 	jaccardMin double precision CHECK (jaccardMin >= 0.0),
 	jaccardStd double precision CHECK (jaccardStd >= 0.0),
-	kendallAverage smallInt,
-	kendallMin double precision,
-	kendallStd double precision,
-	runTime integer CHECK (runTime >= 0) NOT NULL,
-	PRIMARY KEY (graph, algorithm, cpu, topK, jaccardAverage)
+	kendallAverage smallInt CHECK (kendallAverage >= -100 and kendallAverage <= 100),
+	kendallMin double precision CHECK(kendallMin >= -1.0),
+	kendallStd double precision CHECK (kendallStd >= 0.0),
+	runTime integer CHECK (runTime >= 0) NOT NULL
 );
 
 CREATE INDEX ON RUNS(lower(graph));
@@ -49,16 +48,3 @@ END IF;
 END;
 $$
 LANGUAGE 'plpgsql';
-
-
-CREATE TRIGGER trigger_param_numbers 
-BEFORE INSERT ON RUNS
-FOR EACH ROW
-EXECUTE PROCEDURE checkParamNumbers();
-
-
-   
-
-
-
-

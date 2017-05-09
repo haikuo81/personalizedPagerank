@@ -5,7 +5,6 @@ import benchmarking.ComparisonData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public final class DbManager 
@@ -33,7 +32,7 @@ public final class DbManager
      * @param name Name of the algorithm (will be used as a key).
      * @param paramsNumber Number of parameters of the algorithm (will be used
      * for costraints and checks).
-     */
+    */
     public final void insertAlgorithm(String name, int paramsNumber)
     {
         try (PreparedStatement st = con.prepareStatement("INSERT INTO ALGORITHMS VALUES(?,?)"))
@@ -56,7 +55,7 @@ public final class DbManager
      * @param edges Total edges of the graph.
      * @param directed True if directed.
      * @param bipartite True if bipartite.
-     */
+    */
     public final void insertGraph(String name, int vertices, int edges, 
             boolean directed, boolean bipartite)
     {
@@ -80,114 +79,44 @@ public final class DbManager
             int sampleNodes, double[] params, ComparisonData data, int runTime)
     {
         /*
-        formatting jaccard value before inserting it into the db because the admitted
-        values will be 0 .. 100 since for each (algorithm, graph, cpu, topK)
-        we are looking to have 101 rows.
+        formatting jaccard and kendall value before inserting it into the db because the admitted
+        values will be 0 .. 100 for jaccard and -100 .. 100 for kendall 
         */
         int newJac = (int) (data.getJaccard().getAverage() * 100); 
         int newKen = (int) (data.getKendall().getAverage() * 100);
         
-        int oldTime = -1;
-        /*
-        get the old runtime for a run with same
-        (algorithm, graph, cpu, topK, jaccardAverage, kendallAverage)
-        */
-        try (PreparedStatement st = con.prepareStatement("SELECT runTime"
-                + " FROM RUNS WHERE graph = ? AND algorithm = ?"
-                + " AND cpu = ? AND topK = ? AND jaccardAverage = ?"
-                + " AND kendallAverage = ?"))
+        try (PreparedStatement st = con.prepareStatement("INSERT INTO RUNS"
+                + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"))
         {
+            Double[] tmp = new Double[params.length];
+            for(int i = 0; i < params.length; i++)
+                tmp[i] = params[i];
             st.setString(1, graphName);
             st.setString(2, algName);
             st.setString(3, cpuName);
-            st.setInt(4, data.getMaxEntries());
-            st.setInt(5, newJac);
-            st.setInt(6, newKen);
-            
-            try (ResultSet rs = st.executeQuery())
-            {
-                if(rs.next())
-                {
-                    oldTime = rs.getInt("runTime");
-                }
-            }
+            st.setInt(4, sampleNodes);
+            st.setInt(5, data.getMaxEntries());
+            st.setArray(6, con.createArrayOf("float8", tmp));
+            st.setInt(7, newJac);
+            st.setDouble(8, data.getJaccard().getMin());
+            st.setDouble(9, data.getJaccard().getStd());
+            st.setInt(10, newKen);
+            st.setDouble(11, data.getKendall().getMin());
+            st.setDouble(12, data.getKendall().getStd());
+            st.setInt(13, runTime);
+            st.executeUpdate();
         }
         catch (Exception e) 
         {
-            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.err.println("couldnt insert run: " + e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
-        }
-        
-        //if the new run time is better update the row with the new values
-        if(runTime < oldTime)
-        {
-            try (PreparedStatement st = con.prepareStatement("UPDATE RUNS SET"
-                    + " sampleNodes = ?, params = ?, jaccardMin = ?"
-                    + " , jaccardStd = ?, kendallMin = ?,"
-                    + " kendallStd = ?, runTime = ? WHERE graph = ? AND algorithm = ?"
-                + " AND cpu = ? AND topK = ? AND jaccardAverage = ? AND kendallAverage = ?"))
-            {
-                Double[] tmp = new Double[params.length];
-                for(int i = 0; i < params.length; i++)
-                    tmp[i] = params[i];
-                st.setInt(1, sampleNodes);
-                st.setArray(2, con.createArrayOf("float8", tmp));
-                st.setDouble(3, data.getJaccard().getMin());
-                st.setDouble(4, data.getJaccard().getStd());
-                st.setDouble(5, data.getKendall().getMin());
-                st.setDouble(6, data.getKendall().getStd());
-                st.setInt(7, runTime);
-                
-                
-                st.setString(8, graphName);
-                st.setString(9, algName);
-                st.setString(10, cpuName);
-                st.setInt(11, data.getMaxEntries());
-                st.setInt(12, newJac);
-                st.setInt(13, newKen);
-                st.executeUpdate();
-            }
-            catch (Exception e) 
-            {
-                System.err.println("couldnt update run: " + e.getClass().getName()+": "+e.getMessage());
-                System.exit(0);
-            }
-        }//if there wasn't a run with the same jaccard insert the data
-        else if(oldTime == -1)
-        {
-            try (PreparedStatement st = con.prepareStatement("INSERT INTO RUNS"
-                    + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"))
-            {
-                Double[] tmp = new Double[params.length];
-                for(int i = 0; i < params.length; i++)
-                    tmp[i] = params[i];
-                st.setString(1, graphName);
-                st.setString(2, algName);
-                st.setString(3, cpuName);
-                st.setInt(4, sampleNodes);
-                st.setInt(5, data.getMaxEntries());
-                st.setArray(6, con.createArrayOf("float8", tmp));
-                st.setInt(7, newJac);
-                st.setDouble(8, data.getJaccard().getMin());
-                st.setDouble(9, data.getJaccard().getStd());
-                st.setInt(10, newKen);
-                st.setDouble(11, data.getKendall().getMin());
-                st.setDouble(12, data.getKendall().getStd());
-                st.setInt(13, runTime);
-                st.executeUpdate();
-            }
-            catch (Exception e) 
-            {
-                System.err.println("couldnt insert run: " + e.getClass().getName()+": "+e.getMessage());
-                System.exit(0);
-            }
         }
     }
     
     /**
      * Simple method to allow querying directly (mostly used for testing).
      * @param query Sql query.
-     */
+    */
     public void query(String query)
     {
        try (PreparedStatement st = con.prepareStatement(query))
@@ -206,9 +135,10 @@ public final class DbManager
      * @param query Sql query.
      * @return
      * @throws SQLException 
-     */
+    */
     public PreparedStatement getStatement(String query) throws SQLException
     {
         return con.prepareStatement(query);
     }
 }
+
