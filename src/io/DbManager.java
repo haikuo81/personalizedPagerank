@@ -86,6 +86,8 @@ public final class DbManager
         int newKen = (int) (data.getKendall().getAverage() * 100);
         
         try (PreparedStatement st = con.prepareStatement("INSERT INTO RUNS"
+                + " (graph, algorithm, cpu, sampleNodes, topK, params, jaccardAverage, "
+                + " jaccardMin, jaccardStd, kendallAverage, kendallMin, kendallStd, runTime)"
                 + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"))
         {
             Double[] tmp = new Double[params.length];
