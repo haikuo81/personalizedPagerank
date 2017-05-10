@@ -11,7 +11,7 @@ CREATE TABLE GRAPHS
 CREATE TABLE ALGORITHMS
 (
 	name VARCHAR(50) PRIMARY KEY,
-	numberOfParameters smallint CHECK (numberOfParameters >= 0) NOT NULL
+	params varchar(500) NOT NULL
 );
 
 CREATE TABLE RUNS
@@ -22,12 +22,12 @@ CREATE TABLE RUNS
 	cpu VARCHAR(50),
 	sampleNodes integer CHECK (sampleNodes > 0),
 	topK integer CHECK (topK > 0),
-	params double precision[],
+	params varchar(200),
 	jaccardAverage smallInt CHECK (jaccardAverage >= 0 and jaccardAverage <= 100),
-	jaccardMin double precision CHECK (jaccardMin >= 0.0),
+	jaccardMin double precision CHECK (jaccardMin >= 0.0 and jaccardMin <= 1.0),
 	jaccardStd double precision CHECK (jaccardStd >= 0.0),
 	kendallAverage smallInt CHECK (kendallAverage >= -100 and kendallAverage <= 100),
-	kendallMin double precision CHECK(kendallMin >= -1.0),
+	kendallMin double precision CHECK(kendallMin >= -1.0 and kendallMin <= 1.0),
 	kendallStd double precision CHECK (kendallStd >= 0.0),
 	runTime integer CHECK (runTime >= 0) NOT NULL
 );
@@ -35,16 +35,4 @@ CREATE TABLE RUNS
 CREATE INDEX ON RUNS(lower(graph));
 CREATE INDEX ON RUNS(lower(algorithm));
 CREATE INDEX ON RUNS(lower(cpu));
-
-CREATE OR REPLACE FUNCTION checkParamNumbers()
-RETURNS trigger AS
-$$
-BEGIN
-IF array_length(new.params, 1) = (select numberOfParameters from ALGORITHMS where name = new.algorithm) THEN
- RETURN NEW;
-ELSE 
-  RAISE EXCEPTION 'parameters length not matching between input and algorithms table';
-END IF;
-END;
-$$
-LANGUAGE 'plpgsql';
+CREATE INDEX runTime_runs ON RUNS(runTime);
