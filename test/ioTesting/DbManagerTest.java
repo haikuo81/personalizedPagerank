@@ -173,7 +173,7 @@ public class DbManagerTest extends TestCase
     
     public void testMYSQLInsertAlgorithm()
     {
-        DbManager db = new DbManager("postgres", "ppr", "ppr", "ppr");
+        DbManager db = new DbManager("mysql", "ppr", "ppr", "ppr");
         JsonObject params = Json.createObjectBuilder()
                 .add("testP1", "description")
                 .add("testP2", "")
@@ -208,7 +208,7 @@ public class DbManagerTest extends TestCase
     
     public void testMYSQLInsertGraph()
     {
-        DbManager db = new DbManager("postgres", "ppr", "ppr", "ppr");
+        DbManager db = new DbManager("mysql", "ppr", "ppr", "ppr");
         db.query("DELETE FROM RUNS WHERE graph = 'testGraph'");
         db.query("DELETE FROM GRAPHS WHERE name = 'testGraph'");
         db.query("DELETE FROM ALGORITHMS WHERE name = 'testAlgorithm'");
@@ -243,7 +243,7 @@ public class DbManagerTest extends TestCase
     
     public void testMYSQLInsertRun()
     {
-        DbManager db = new DbManager("postgres", "ppr", "ppr", "ppr");
+        DbManager db = new DbManager("mysql", "ppr", "ppr", "ppr");
         JsonObject params = Json.createObjectBuilder()
                 .add("testP1", "description")
                 .add("testP2", "")
