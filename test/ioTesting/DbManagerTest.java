@@ -10,6 +10,14 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import junit.framework.TestCase;
 
+/*
+NOTE: to run these tests you need to either have the dabatase having name
+and psw "ppr" and connect to it as the "ppr" user or modify the constructors
+DbManager db = new DbManager("postgres", <user>, <dbname>, <psw>); 
+DbManager db = new DbManager("mysql", <user>, <dbname>, <psw>); 
+to reflect your connection infos, in the directory "db" of the project you
+can find the scripts to set up the database.
+*/
 public class DbManagerTest extends TestCase 
 {
     public void testConstructor()
@@ -25,7 +33,7 @@ public class DbManagerTest extends TestCase
         try
         {
             DbManager db1 = new DbManager("postgres", "ppr", "ppr", "ppr");
-            DbManager db2 = new DbManager("mysql", "t", "t", "t");
+            DbManager db2 = new DbManager("mysql", "ppr", "ppr", "ppr");
         }
         catch (IllegalArgumentException e)
         {
