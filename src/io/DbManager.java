@@ -6,23 +6,48 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import javax.json.JsonObject;
 
 public final class DbManager 
 {
     private Connection con;
-    public DbManager()
+    public DbManager(String dbms, String dbName, String user, String psw)
     {
-        String url = "jdbc:postgresql://localhost/ppr?user=ppr&password=ppr&ssl=true";
-        try 
+        if(dbms.equals("postgres"))
         {
-            Class.forName("org.postgresql.Driver");
-            con = DriverManager
-                .getConnection(url);
-        } 
-        catch (Exception e) 
+            String url = "jdbc:postgresql://localhost/" + dbName + 
+                    "?user=" + user + "&password=" + psw + "&ssl=true";
+            try 
+            {
+                Class.forName("org.postgresql.Driver");
+                con = DriverManager
+                    .getConnection(url);
+            } 
+            catch (Exception e) 
+            {
+                System.err.println(e.getClass().getName()+": "+e.getMessage());
+                System.exit(0);
+            }
+        }
+        else if(dbms.equals("mysql"))
         {
-            System.err.println(e.getClass().getName()+": "+e.getMessage());
-            System.exit(0);
+            String url = "jdbc:mysql://localhost/" + dbName + 
+                    "?user=" + user + "&password=" + psw + "&ssl=true";
+            try 
+            {
+                Class.forName("com.mysql.jdbc.Driver");
+                con = DriverManager
+                    .getConnection(url);
+            } 
+            catch (Exception e) 
+            {
+                System.err.println(e.getClass().getName()+": "+e.getMessage());
+                System.exit(0);
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException("I don't know that dbms");
         }
         System.out.println("established connection to database");
     }
@@ -30,15 +55,15 @@ public final class DbManager
     /**
      * Adds an algorithm to the database.
      * @param name Name of the algorithm (will be used as a key).
-     * @param paramsNumber Number of parameters of the algorithm (will be used
      * for costraints and checks).
+     * @param params Json describing the parameters of the algorithm
     */
-    public final void insertAlgorithm(String name, int paramsNumber)
+    public final void insertAlgorithm(String name, JsonObject params)
     {
         try (PreparedStatement st = con.prepareStatement("INSERT INTO ALGORITHMS VALUES(?,?)"))
         {
             st.setString(1, name);
-            st.setInt(2, paramsNumber);
+            st.setString(2, params.toString());
             st.executeUpdate();
         }
         catch (Exception e) 
@@ -75,8 +100,19 @@ public final class DbManager
         }
     }
     
+    /**
+     * Adds a run into the db.
+     * @param graphName The graph used in the run.
+     * @param algName Algorithm used in the run.
+     * @param cpuName Name of the cpu used for the run.
+     * @param sampleNodes Number of sample nodes used to compare results between
+     * the algorithm and the classic pagerank.
+     * @param params Json object containing the parameters.
+     * @param data Contains results of the comparison.
+     * @param runTime Time spent during this run.
+     */
     public final void insertRun(String graphName, String algName, String cpuName,
-            int sampleNodes, double[] params, ComparisonData data, int runTime)
+            int sampleNodes, JsonObject params, ComparisonData data, int runTime)
     {
         /*
         formatting jaccard and kendall value before inserting it into the db because the admitted
@@ -90,15 +126,12 @@ public final class DbManager
                 + " jaccardMin, jaccardStd, kendallAverage, kendallMin, kendallStd, runTime)"
                 + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"))
         {
-            Double[] tmp = new Double[params.length];
-            for(int i = 0; i < params.length; i++)
-                tmp[i] = params[i];
             st.setString(1, graphName);
             st.setString(2, algName);
             st.setString(3, cpuName);
             st.setInt(4, sampleNodes);
             st.setInt(5, data.getMaxEntries());
-            st.setArray(6, con.createArrayOf("float8", tmp));
+            st.setString(6, params.toString());
             st.setInt(7, newJac);
             st.setDouble(8, data.getJaccard().getMin());
             st.setDouble(9, data.getJaccard().getStd());
