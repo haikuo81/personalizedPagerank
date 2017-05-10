@@ -39,11 +39,7 @@ public class NodeScores extends Int2DoubleOpenHashMap
                         e1.getDoubleValue() == e2.getDoubleValue()?
                         (e1.getIntKey() < e2.getIntKey()? -1 : 1) : -1;  
             });
-            /*
-            for(int i = topL; i < array.length; i++)
-                array[i].setValue(-1d);
-            Iterator
-            */
+            
             //if too many to remove just clear and add the first topL
             //else just remove the non topL
             if(array.length > topL * 2)
@@ -99,8 +95,8 @@ public class NodeScores extends Int2DoubleOpenHashMap
      */
     public void addToAll(double increment)
     {
-        for(int i = 0; i < this.value.length; i++)
-            this.value[i] += increment;
+        for(Int2DoubleMap.Entry entry: this.int2DoubleEntrySet())
+            entry.setValue(entry.getDoubleValue() + increment);
     }
   
     /**
@@ -109,8 +105,8 @@ public class NodeScores extends Int2DoubleOpenHashMap
      */
     public void multiplyAll(double multiplier)
     {
-        for(int i = 0; i < this.value.length; i++)
-            this.value[i] *= multiplier;
+        for(Int2DoubleMap.Entry entry: this.int2DoubleEntrySet())
+            entry.setValue(entry.getDoubleValue() * multiplier);
     }
     
     /**
@@ -123,10 +119,10 @@ public class NodeScores extends Int2DoubleOpenHashMap
     public double norm1(NodeScores other)
     {
         double res = 0;
-        for(int k: key)
+        for(int k: this.keySet())
             res += Math.abs(get(k) - other.get(k));
         //need to check for keys that aren't part of this map
-        for(int k: other.key)
+        for(int k: other.keySet())
             if(!this.containsKey(k))
                 res += other.get(k);
         return res;
