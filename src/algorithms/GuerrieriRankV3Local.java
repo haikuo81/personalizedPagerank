@@ -225,14 +225,12 @@ public class GuerrieriRankV3Local extends PersonalizedPageRankAlgorithm
             scores = nextScores;
             nextScores = tmp;
         }
-        /*
         //trim to avoid wasting space
         for(int v: scores.keySet())
         {
             scores.get(v).keepTop(parameters.smallTop);
             scores.get(v).trim();
         }
-        */
     }
     
     /**
