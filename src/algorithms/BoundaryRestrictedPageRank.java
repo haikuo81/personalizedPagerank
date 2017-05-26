@@ -161,7 +161,7 @@ public class BoundaryRestrictedPageRank extends PersonalizedPageRankAlgorithm
                 unpackFrontier(totalFrontier, active, frontier, successors);
 
                 //check difference
-                diff = difference(nodeScores, nextNodeScores);
+                diff = nodeScores.norm1(nextNodeScores);
 
                 //swap scores
                 NodeScores tmp = nodeScores;
@@ -173,27 +173,6 @@ public class BoundaryRestrictedPageRank extends PersonalizedPageRankAlgorithm
             nodeScores.keepTop(parameters.smallTop);
             scores.put(node, nodeScores);
         }
-    }
-    
-    /**
-     * Return the total difference in mapped values of the two maps.
-     * For every key mapped to either m1 or m2 add to the result the absolute
-     * difference between the value mapped to it in m1 and in m2. If a key is not
-     * mapped in one of the maps it's value is the defaultReturnValue of the map (0).
-     * @param m1 First map.
-     * @param m2 Second map.
-     * @return Total difference of mapped values between the two maps.
-     */
-    private double difference(NodeScores m1, NodeScores m2)
-    {
-        double res = 0;
-        for(Int2DoubleMap.Entry entry: m1.int2DoubleEntrySet())
-            res += Math.abs(entry.getDoubleValue() - m2.get(entry.getIntKey()));
-        //some keys might be in m1 but not in m2 or viceversa
-        for(Int2DoubleMap.Entry entry: m2.int2DoubleEntrySet())
-            if(m1.get(entry.getIntKey()) == 0)
-                res += Math.abs(entry.getDoubleValue() - m1.get(entry.getIntKey()));
-        return res;
     }
     
     /**
@@ -240,7 +219,7 @@ public class BoundaryRestrictedPageRank extends PersonalizedPageRankAlgorithm
         double totalFrontier = 0;
         for(Int2DoubleMap.Entry entry: active.int2DoubleEntrySet())
             {
-                double value = scores.get(entry.getIntKey()) * active.get(entry.getIntKey());
+                double value = scores.get(entry.getIntKey()) * entry.getDoubleValue();
                 for(int successor: successors.get(entry.getIntKey()))
                 {
                     nextScores.addTo(successor, value);
